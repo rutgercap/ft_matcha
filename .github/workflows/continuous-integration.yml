@@ -1,0 +1,29 @@
+name: SvelteKit CI/CD
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: pnpm install
+      - name: Lint the project
+        run: pnpm lint
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run unit tests
+        run: pnpm test:unit
+      - name: Build the project
+        run: pnpm build

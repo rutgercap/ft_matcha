@@ -45,5 +45,8 @@
 		"fs": "0.0.1-security",
 		"sqlite3": "^5.1.7",
 		"svelte-hero-icons": "^5.2.0"
+	},
+	"engines": {
+		"node": ">=20.0.0"
 	}
 }

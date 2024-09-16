@@ -1,4 +1,5 @@
 import { Database } from 'sqlite3';
+import type User from './domain/user';
 
 class UserRepository {
 	constructor(private db: Database) {}
