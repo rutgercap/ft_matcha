@@ -2,18 +2,22 @@
 
 Web dev project for 42.
 
-
 ## How to run:
-
 
 First install dependencies:
 
 ```bash
-pnpm install 
+pnpm install
 ```
 
 Then run in dev mode with:
 
 ```bash
 pnpm run dev
+```
+
+To run the tests, you can run:
+
+```bash
+pnpm run test:unit
 ```
