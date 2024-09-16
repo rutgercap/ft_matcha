@@ -1,4 +1,8 @@
-name: SvelteKit CI/CD
+name: CI/CD
+
+on:
+  push:
+    branches: '*'
 
 jobs:
   lint:
