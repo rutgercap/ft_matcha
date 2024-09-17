@@ -8,9 +8,9 @@ import { type ProfileInfo } from '$lib/domain/user'
 describe('UserRepository', () => {
 	let userRepository: UserRepository;
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		const db = new sqlite3.Database(':memory:');
-		runMigrations(db);
+		await runMigrations(db);
 		userRepository = new UserRepository(db);
 	});
 
