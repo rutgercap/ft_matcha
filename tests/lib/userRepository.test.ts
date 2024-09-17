@@ -17,13 +17,13 @@ describe('UserRepository', () => {
 		const user = { id: faker.number.int(), email: faker.internet.email() };
 
 		await userRepository.createUser(user);
-		const found = await userRepository.getUserById(user.id);
+		const found = await userRepository.userById(user.id);
 
 		expect(found).toStrictEqual(user);
 	});
 
 	it('should return null if user does not exist', async () => {
-		const response = await userRepository.getUserById(10);
+		const response = await userRepository.userById(10);
 
 		expect(response).toBeNull();
 	});
