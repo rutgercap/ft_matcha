@@ -80,6 +80,10 @@ class UserRepository {
 
 	constructor(private db: Database) { }
 
+	public dbInstance() : Database {
+		return this.db
+	}
+
 	public userById(id: number): Promise<User | null> {
 		return new Promise((resolve, reject) => {
 			this.db.get<User>('SELECT * FROM users WHERE id = ?', [id], (err, row) => {

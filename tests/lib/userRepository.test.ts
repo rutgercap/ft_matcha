@@ -14,6 +14,32 @@ describe('UserRepository', () => {
 		userRepository = new UserRepository(db);
 	});
 
+	it('should check that all tables are created', async () => {
+		let request : string = `
+			SELECT name
+			FROM sqlite_master
+			WHERE type = 'table'
+			AND name = 'profiles';
+		`;
+	
+		const db = userRepository.dbInstance();
+	
+		const runQuery = (request : string) : Promise<unknown[]> => {
+			return new Promise((resolve, reject) => {
+				db.all(request, (err, rows) => {
+					if (err) {
+						return reject(err);  // Handle error by rejecting the promise
+					}
+					resolve(rows);  // Resolve with the rows if successful
+				});
+			});
+		};
+		const found = await runQuery(request)
+		expect(found.length > 0).toBe(true);
+
+	});
+	
+
 	it('should be able to create a new user', async () => {
 		const user = { id: faker.number.int(), email: faker.internet.email() };
 
