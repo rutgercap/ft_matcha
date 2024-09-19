@@ -22,7 +22,7 @@ describe('sqlite database', () => {
 		);
 		const db = Database(':memory:');
 		try {
-			const result = await runMigrations(db, tempDir);
+			await runMigrations(db, tempDir);
 			expect.unreachable();
 		} catch (error) {
 			expect(error).toBeInstanceOf(MigrationError);

@@ -3,9 +3,11 @@ import type User from './domain/user';
 import type { ProfileInfo } from './domain/user';
 
 class UserRepositoryError extends Error {
-	constructor(message: string) {
+	exception: unknown;
+	constructor(message: string, exception: unknown) {
 		super(message);
 		this.name = 'UserRepositoryError';
+		this.exception = exception;
 	}
 }
 
@@ -39,11 +41,13 @@ class UserRepository {
 				.get(id);
 			return result;
 		} catch (e) {
-			throw new UserRepositoryError('Something went wrong fetching user profile for id: ' + id);
+			throw new UserRepositoryError('Something went wrong fetching user profile for id: ' + id, e);
 		}
 	}
 
 	setProfile(id: number, profileTest: ProfileInfo) {
+		id += 1;
+		profileTest.biography += ' ';
 		throw new Error('Method not implemented.');
 	}
 
@@ -53,7 +57,7 @@ class UserRepository {
 				const result = this.db.prepare<number, User>('SELECT * FROM users WHERE id = ?').get(id);
 				resolve(result ? result : null);
 			} catch (e) {
-				reject(new UserRepositoryError('Something went wrong fetching user for id: ' + id));
+				reject(new UserRepositoryError('Something went wrong fetching user for id: ' + id, e));
 			}
 		});
 	}
@@ -66,7 +70,7 @@ class UserRepository {
 					.run(user.id, user.email);
 				resolve();
 			} catch (e) {
-				reject(new UserRepositoryError(`Something went wrong creating user: ${e}`));
+				reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));
 			}
 		});
 	}
