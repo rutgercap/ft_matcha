@@ -9,7 +9,7 @@ async function runMigrations(db: Database): Promise<void> {
 			migrationFiles.forEach(async (file) => {
 				const migrationPath = `${migrationsFolder}/${file}`;
 				const sql = fs.readFileSync(migrationPath, 'utf8');
-				db.run(sql, (err) => {
+				db.exec(sql, (err) => {
 					if (err) {
 						reject(err);
 					}

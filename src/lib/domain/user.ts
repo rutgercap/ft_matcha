@@ -11,4 +11,3 @@ export interface ProfileInfo {
 	tags: string[]
 	pictures:string[]
 };
-

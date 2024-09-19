@@ -55,16 +55,15 @@ describe('UserRepository', () => {
 		expect(response).toBeNull();
 	});
 	
-	it('should be able to set prefrences', async () => {
+	it('should be able to set preferences', async () => {
 		const user = { id: faker.number.int(), email: faker.internet.email() };
 		await userRepository.createUser(user);
 
-		const profileTest : ProfileInfo = {
+		const profileTest = {
 			gender: faker.animal.horse(),
 			sex_preference: faker.animal.horse(),
 			biography: faker.lorem.lines(),
 			tags: [faker.color.human()],
-			pictures: [faker.image.url()]
 		}
 
 		await userRepository.setProfile(user.id, profileTest)
@@ -72,6 +71,33 @@ describe('UserRepository', () => {
 		const found = await userRepository.userProfile(user.id);
 
 		expect(found).toStrictEqual(profileTest)
+	})
+
+	it('should be able to update gender', async () => {
+		const user = { id: faker.number.int(), email: faker.internet.email() };
+		
+		await userRepository.createUser(user);
+		
+		const profileTest : ProfileInfo = {
+			gender: faker.animal.horse(),
+			sex_preference: faker.animal.horse(),
+			biography: faker.lorem.lines(),
+			tags: [faker.color.human()],
+			pictures: [faker.image.url()]
+		}
+		
+		await userRepository.setProfile(user.id, profileTest)
+
+		const new_gender = faker.animal.horse()
+		
+		await userRepository.updateGender(user.id, new_gender)
+
+		const found = await userRepository.userProfile(user.id);
+		
+		profileTest.gender = new_gender
+		
+		expect(found).toStrictEqual(profileTest)
+		
 	})
 
 });
