@@ -1,23 +1,25 @@
-import type { Database } from 'sqlite3';
 import fs from 'fs';
+import Database from 'better-sqlite3';
 
-async function runMigrations(db: Database): Promise<void> {
-	const migrationsFolder = 'migrations';
-	const migrationFiles = fs.readdirSync(migrationsFolder).sort();
-	return new Promise((resolve, reject) => {
-		db.serialize(() => {
-			migrationFiles.forEach(async (file) => {
-				const migrationPath = `${migrationsFolder}/${file}`;
-				const sql = fs.readFileSync(migrationPath, 'utf8');
-				db.run(sql, (err) => {
-					if (err) {
-						reject(err);
-					}
-				});
-			});
-		});
-		resolve();
-	});
+export class MigrationError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'MigrationError';
+	}
+}
+
+export const MIGRATIONS_PATH = 'migrations';
+
+async function runMigrations(db: Database.Database, path: string): Promise<void> {
+	try {
+		const migrationFiles = fs.readdirSync(path).filter((file) => file.endsWith('.sql'));
+		for (const file of migrationFiles) {
+			const migration = fs.readFileSync(`${path}/${file}`, 'utf-8');
+			db.exec(migration);
+		}
+	} catch (e) {
+		throw new MigrationError('Migration failed: ' + String(e));
+	}
 }
 
 export default runMigrations;
