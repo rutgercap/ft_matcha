@@ -4,9 +4,11 @@ import fs from 'fs';
 import temp from 'temp';
 import path from 'path';
 import { itWithFixtures } from '../fixtures';
+import Database from 'better-sqlite3';
 
 describe('sqlite database', () => {
-	itWithFixtures('should throw error for invalid migration file', async ({ db }) => {
+	itWithFixtures('should throw error for invalid migration file', async () => {
+		const db = new Database(':memory:');
 		const tempDir = temp.mkdirSync('migration-test');
 		const migrationPath = path.join(tempDir, '100_invalid_sql.sql');
 		fs.writeFileSync(
@@ -30,7 +32,8 @@ describe('sqlite database', () => {
 		}
 	});
 
-	itWithFixtures('should run the current migrations without problem', async ({ db }) => {
+	itWithFixtures('should run the current migrations without problem', async () => {
+		const db = new Database(':memory:');
 		const path = MIGRATIONS_PATH;
 		await runMigrations(db, path);
 	});

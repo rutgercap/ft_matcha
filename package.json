@@ -24,6 +24,7 @@
 		"@types/eslint": "^9.6.1",
 		"@types/pg-pool": "^2.0.6",
 		"@types/temp": "^0.9.4",
+		"@types/uuid": "^10.0.0",
 		"autoprefixer": "^10.4.20",
 		"eslint": "^9.10.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -43,12 +44,14 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@auth/sveltekit": "^1.5.0",
+		"@lucia-auth/adapter-sqlite": "^3.0.2",
 		"@tailwindcss/forms": "^0.5.9",
 		"@types/pg": "^8.11.10",
 		"better-sqlite3": "^11.3.0",
 		"fs": "0.0.1-security",
-		"svelte-hero-icons": "^5.2.0"
+		"lucia": "^3.2.0",
+		"svelte-hero-icons": "^5.2.0",
+		"uuid": "^10.0.0"
 	},
 	"engines": {
 		"node": ">=20.0.0"

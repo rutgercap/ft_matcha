@@ -1,7 +1,8 @@
 export default interface User {
-	id: number;
+	id: string;
 	email: string;
 }
+
 
 export interface ProfileInfo {
 	gender: string;
