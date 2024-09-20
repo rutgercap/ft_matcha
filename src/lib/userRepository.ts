@@ -73,7 +73,7 @@ class UserRepository {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const id = uuidv4();
-				const result = await this.db
+				const result = this.db
 					.prepare<[string, string], User>('INSERT INTO users (id, email) VALUES (?, ?) RETURNING *;')
 					.get(id, user.email);
 				if (result !== undefined) {
