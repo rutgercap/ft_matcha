@@ -1,12 +1,12 @@
 import runMigrations, { MigrationError, MIGRATIONS_PATH } from '$lib/database';
-import { describe, expect, it } from 'vitest';
+import { describe, expect } from 'vitest';
 import fs from 'fs';
 import temp from 'temp';
 import path from 'path';
-import Database from 'better-sqlite3';
+import { itWithFixtures } from '../fixtures';
 
 describe('sqlite database', () => {
-	it('should throw error for invalid migration file', async () => {
+	itWithFixtures('should throw error for invalid migration file', async ({ db }) => {
 		const tempDir = temp.mkdirSync('migration-test');
 		const migrationPath = path.join(tempDir, '100_invalid_sql.sql');
 		fs.writeFileSync(
@@ -20,7 +20,6 @@ describe('sqlite database', () => {
 			);
 			`
 		);
-		const db = Database(':memory:');
 		try {
 			await runMigrations(db, tempDir);
 			expect.unreachable();
@@ -31,9 +30,8 @@ describe('sqlite database', () => {
 		}
 	});
 
-	it('should run the current migrations without problem', async () => {
+	itWithFixtures('should run the current migrations without problem', async ({ db }) => {
 		const path = MIGRATIONS_PATH;
-		const db = Database(':memory:');
 		await runMigrations(db, path);
 	});
 });
