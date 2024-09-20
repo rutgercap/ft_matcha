@@ -3,7 +3,6 @@ export default interface User {
 	email: string;
 }
 
-
 export interface ProfileInfo {
 	gender: string;
 	sex_preference: string;

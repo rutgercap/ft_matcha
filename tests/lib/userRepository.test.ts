@@ -1,4 +1,4 @@
-import {UserRepository} from '$lib/userRepository';
+import { UserRepository } from '$lib/userRepository';
 import runMigrations, { MIGRATIONS_PATH } from '$lib/database';
 import { describe, it, beforeEach, expect } from 'vitest';
 import { faker } from '@faker-js/faker';

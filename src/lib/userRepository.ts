@@ -70,11 +70,14 @@ class UserRepository {
 	}
 
 	public createUser(user: NewUser): Promise<User> {
-		return new Promise(async (resolve, reject) => {
+		return new Promise((resolve, reject) => {
 			try {
 				const id = uuidv4();
 				const result = this.db
-					.prepare<[string, string], User>('INSERT INTO users (id, email) VALUES (?, ?) RETURNING *;')
+					.prepare<
+						[string, string],
+						User
+					>('INSERT INTO users (id, email) VALUES (?, ?) RETURNING *;')
 					.get(id, user.email);
 				if (result !== undefined) {
 					resolve(result);

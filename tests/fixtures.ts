@@ -18,5 +18,5 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	},
 	userRepository: ({ db }, use) => {
 		return use(new UserRepository(db));
-	}, 
+	}
 });
