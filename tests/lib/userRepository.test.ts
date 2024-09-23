@@ -28,6 +28,19 @@ describe('UserRepository', () => {
 
 		expect(response).toBeNull();
 	});
+
+	it('should be able to set a new picture', async () =>{
+		const user = { id: faker.number.int(), email: faker.internet.email() };
+
+		await userRepository.createUser(user);
+		const picture_id = await userRepository.setPicture(user.id)
+		const picture = await userRepository.picture(picture_id)
+
+		console.log(picture_id, picture)
+
+
+
+	})
 	
 	it('should be able to set preferences', async () => {
 		const user = { id: faker.number.int(), email: faker.internet.email() };
@@ -37,11 +50,11 @@ describe('UserRepository', () => {
 			gender: faker.animal.horse(),
 			sex_preference: faker.animal.horse(),
 			biography: faker.lorem.lines(),
+			pictures: [faker.number.octal()],
 			tags: [faker.color.human()],
 		}
 
 		await userRepository.setProfile(user.id, profileTest);
-
 		const found = await userRepository.userProfile(user.id);
 
 		expect(found).toStrictEqual(profileTest)
