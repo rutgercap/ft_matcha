@@ -47,7 +47,12 @@ async function updateMigrationHashes(
 	fs.writeFileSync(lockFilePath, JSON.stringify(hashes, null, 2));
 }
 
-async function runMigrations(db: DatabaseType, migrationsPath: PathLike, lockFilePath: PathLike) {
+async function runMigrations(
+	db: DatabaseType,
+	migrationsPath: PathLike,
+	lockFilePath: PathLike,
+	silent = true
+) {
 	const migrationHashes = await getMigrationHashes(lockFilePath);
 	try {
 		const migrationFiles = fs.readdirSync(migrationsPath).filter((file) => file.endsWith('.sql'));
@@ -63,7 +68,9 @@ async function runMigrations(db: DatabaseType, migrationsPath: PathLike, lockFil
 						`Migration ${file} has changed. Please update the migration script or manually adjust the lock file.`
 					);
 				}
-				console.log(`Migration ${file} already executed, skipping...`);
+				if (!silent) {
+					console.log(`Migration ${file} already executed, skipping...`);
+				}
 				continue;
 			}
 
@@ -72,12 +79,14 @@ async function runMigrations(db: DatabaseType, migrationsPath: PathLike, lockFil
 		}
 
 		await updateMigrationHashes(lockFilePath, migrationHashes);
-		console.log('Migrations applied successfully.');
 	} catch (e) {
 		if (e instanceof MigrationError) {
 			throw e;
 		}
 		throw new MigrationError('Migration failed: ' + String(e));
+	}
+	if (!silent) {
+		console.log('Migrations completed successfully.');
 	}
 }
 
