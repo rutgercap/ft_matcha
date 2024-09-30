@@ -5,7 +5,6 @@
 	let menuOpen = false;
 
 	function toggleMenu() {
-		console.log('menu' + menuOpen);
 		menuOpen = !menuOpen;
 	}
 </script>

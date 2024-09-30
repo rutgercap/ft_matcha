@@ -11,4 +11,4 @@ if (existsSync(DATABASE_PATH)) {
 
 const db = getDb();
 
-runMigrations(db, MIGRATIONS_PATH, LOCK_FILE_PATH, false);
+await runMigrations(db, MIGRATIONS_PATH, LOCK_FILE_PATH, false);

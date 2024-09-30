@@ -2,18 +2,12 @@ import { DuplicateEntryError } from '$lib/userRepository';
 import { describe, expect } from 'vitest';
 import { faker } from '@faker-js/faker';
 import { generateIdFromEntropySize } from 'lucia';
-import { hash } from '@node-rs/argon2';
 import { itWithFixtures } from '../fixtures';
 
 describe('UserRepository', () => {
 	itWithFixtures('should be able to create a new user', async ({ userRepository }) => {
 		const userId = generateIdFromEntropySize(10);
-		const password = await hash(faker.internet.password(), {
-			memoryCost: 19456,
-			timeCost: 2,
-			outputLen: 32,
-			parallelism: 1
-		});
+		const password = faker.internet.password();
 		const user = { id: userId, email: faker.internet.email(), username: faker.internet.userName() };
 
 		const response = await userRepository.createUser(user, password);
@@ -22,14 +16,9 @@ describe('UserRepository', () => {
 		expect(found).toMatchObject(user);
 	});
 
-	itWithFixtures('Should be able to fetch user by username', async ({ userRepository }) => { 
+	itWithFixtures('Should be able to fetch user by username', async ({ userRepository }) => {
 		const userId = generateIdFromEntropySize(10);
-		const password = await hash(faker.internet.password(), {
-			memoryCost: 19456,
-			timeCost: 2,
-			outputLen: 32,
-			parallelism: 1
-		});
+		const password = faker.internet.password();
 		const user = { id: userId, email: faker.internet.email(), username: faker.internet.userName() };
 		await userRepository.createUser(user, password);
 
@@ -48,12 +37,7 @@ describe('UserRepository', () => {
 		'should return DuplicateEntryError if username taken',
 		async ({ userRepository }) => {
 			const userName = faker.internet.userName();
-			const password = await hash(faker.internet.password(), {
-				memoryCost: 19456,
-				timeCost: 2,
-				outputLen: 32,
-				parallelism: 1
-			});
+			const password = faker.internet.password();
 			const userOne = {
 				id: generateIdFromEntropySize(10),
 				email: faker.internet.email(),

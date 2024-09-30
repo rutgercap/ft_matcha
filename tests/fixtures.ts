@@ -16,7 +16,7 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	db: async ({}, use) => {
 		const tempMigrationsDir = temp.mkdirSync('migrations');
 		const db = new Database(':memory:');
-		await runMigrations(db, MIGRATIONS_PATH, path.join(tempMigrationsDir, 'migrations.lock'));
+		await runMigrations(db, MIGRATIONS_PATH, path.join(tempMigrationsDir, 'migrations.lock'), true);
 		use(db);
 		temp.cleanupSync();
 	},

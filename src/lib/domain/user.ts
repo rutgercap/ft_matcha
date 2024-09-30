@@ -6,6 +6,10 @@ export const userSchema = z.object({
 	username: z.string()
 });
 
+export const userWithPasswordSchema = userSchema.extend({
+	password_hash: z.string()
+});
+
 export const profileInfoSchema = z.object({
 	gender: z.string(),
 	sexPreference: z.string(),
@@ -15,5 +19,5 @@ export const profileInfoSchema = z.object({
 });
 
 export type User = z.infer<typeof userSchema>;
-
+export type UserWithPassword = z.infer<typeof userWithPasswordSchema>;
 export type ProfileInfo = z.infer<typeof profileInfoSchema>;

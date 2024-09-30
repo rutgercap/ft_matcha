@@ -1,7 +1,8 @@
 import type { Database } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
-import type { User } from './domain/user';
+import type { User, UserWithPassword } from './domain/user';
 import type { ProfileInfo } from './domain/user';
+import { hash } from '@node-rs/argon2';
 
 class UserRepositoryError extends Error {
 	exception: unknown;
@@ -21,15 +22,18 @@ class DuplicateEntryError extends UserRepositoryError {
 
 class UserRepository {
 	constructor(private db: Database) {}
-	
 
-	userByUsername(username: string) {
+	async userByUsername(username: string): Promise<UserWithPassword | null> {
 		return new Promise((resolve, reject) => {
 			try {
-				const result = this.db.prepare<string, User>('SELECT * FROM users WHERE username = ?').get(username);
+				const result = this.db
+					.prepare<string, UserWithPassword>('SELECT * FROM users WHERE username = ?')
+					.get(username);
 				resolve(result ? result : null);
 			} catch (e) {
-				reject(new UserRepositoryError('Something went wrong fetching user for username: ' + username, e));
+				reject(
+					new UserRepositoryError('Something went wrong fetching user for username: ' + username, e)
+				);
 			}
 		});
 	}
@@ -41,23 +45,23 @@ class UserRepository {
 					.prepare<string, ProfileInfo>(
 						`
 						SELECT 
-									profiles.user_id, 
-									profiles.gender, 
-									profiles.sex_preference, 
-									profiles.biography, 
-									GROUP_CONCAT(DISTINCT pictures.url) AS pictures, 
-									GROUP_CONCAT(DISTINCT tags.tag) AS tags
-								FROM 
-									profiles
-								INNER JOIN 
-									pictures ON profiles.user_id = pictures.user_id
-								INNER JOIN 
-									tags ON profiles.user_id = tags.user_id
-								WHERE 
-									profiles.user_id = ? 
-								GROUP BY 
-									profiles.user_id;
-				`
+							profiles.user_id, 
+							profiles.gender, 
+							profiles.sex_preference, 
+							profiles.biography, 
+							GROUP_CONCAT(DISTINCT pictures.url) AS pictures, 
+							GROUP_CONCAT(DISTINCT tags.tag) AS tags
+						FROM 
+							profiles
+						INNER JOIN 
+							pictures ON profiles.user_id = pictures.user_id
+						INNER JOIN 
+							tags ON profiles.user_id = tags.user_id
+						WHERE 
+							profiles.user_id = ? 
+						GROUP BY 
+							profiles.user_id;
+					`
 					)
 					.get(id);
 				resolve(result ? result : null);
@@ -78,30 +82,43 @@ class UserRepository {
 	public user(id: string): Promise<User | null> {
 		return new Promise((resolve, reject) => {
 			try {
-				const result = this.db.prepare<string, User>('SELECT * FROM users WHERE id = ?').get(id);
-				resolve(result ? result : null);
+				const result = this.db
+					.prepare<string, UserWithPassword>('SELECT * FROM users WHERE id = ?')
+					.get(id);
+				if (!result) {
+					resolve(null);
+				}
+				
+				const { password_hash, ...userWithoutPassword } = result as UserWithPassword;
+				resolve(userWithoutPassword);
 			} catch (e) {
 				reject(new UserRepositoryError('Something went wrong fetching user for id: ' + id, e));
 			}
 		});
 	}
 
-	public createUser(user: User, passwordHash: string): Promise<User> {
+	public async createUser(user: User, password: string): Promise<User> {
+		const passwordHash = await hash(password, {
+			memoryCost: 19456,
+			timeCost: 2,
+			outputLen: 32,
+			parallelism: 1
+		});
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
 					.prepare<
 						[string, string, string, string],
-						User
+						UserWithPassword
 					>('INSERT INTO users (id, email, username, password_hash) VALUES (?, ?, ?, ?) RETURNING *;')
 					.get(user.id, user.email, user.username, passwordHash);
 				if (result !== undefined) {
-					resolve(result);
+					const { password_hash, ...userWithoutPassword } = result;
+					resolve(userWithoutPassword);
 				}
 				reject(new UserRepositoryError(`Something went wrong creating user: ${user.email}`, null));
 			} catch (e) {
 				if (e instanceof SqliteError) {
-					console.log('e.code', e.code);
 					if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
 						reject(new DuplicateEntryError(`Duplicate entry for user: ${user.email}`));
 					}

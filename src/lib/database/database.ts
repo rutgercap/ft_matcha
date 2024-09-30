@@ -75,15 +75,18 @@ async function runMigrations(
 			}
 
 			db.exec(migrationContent);
+			if (!silent) {
+				console.log(`Migration ${file} executed.`);
+			}
 			migrationHashes[file] = hash;
 		}
-
-		await updateMigrationHashes(lockFilePath, migrationHashes);
 	} catch (e) {
 		if (e instanceof MigrationError) {
 			throw e;
 		}
 		throw new MigrationError('Migration failed: ' + String(e));
+	} finally {
+		await updateMigrationHashes(lockFilePath, migrationHashes);
 	}
 	if (!silent) {
 		console.log('Migrations completed successfully.');
