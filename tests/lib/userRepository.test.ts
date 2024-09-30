@@ -22,6 +22,22 @@ describe('UserRepository', () => {
 		expect(found).toMatchObject(user);
 	});
 
+	itWithFixtures('Should be able to fetch user by username', async ({ userRepository }) => { 
+		const userId = generateIdFromEntropySize(10);
+		const password = await hash(faker.internet.password(), {
+			memoryCost: 19456,
+			timeCost: 2,
+			outputLen: 32,
+			parallelism: 1
+		});
+		const user = { id: userId, email: faker.internet.email(), username: faker.internet.userName() };
+		await userRepository.createUser(user, password);
+
+		const found = await userRepository.userByUsername(user.username);
+
+		expect(found).toMatchObject(user);
+	});
+
 	itWithFixtures('should return null if user does not exist', async ({ userRepository }) => {
 		const response = await userRepository.user(faker.string.uuid());
 

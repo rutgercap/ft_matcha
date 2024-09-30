@@ -21,6 +21,18 @@ class DuplicateEntryError extends UserRepositoryError {
 
 class UserRepository {
 	constructor(private db: Database) {}
+	
+
+	userByUsername(username: string) {
+		return new Promise((resolve, reject) => {
+			try {
+				const result = this.db.prepare<string, User>('SELECT * FROM users WHERE username = ?').get(username);
+				resolve(result ? result : null);
+			} catch (e) {
+				reject(new UserRepositoryError('Something went wrong fetching user for username: ' + username, e));
+			}
+		});
+	}
 
 	async userProfile(id: string): Promise<ProfileInfo | null> {
 		return new Promise((resolve, reject) => {
