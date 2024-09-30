@@ -88,7 +88,6 @@ class UserRepository {
 				if (!result) {
 					resolve(null);
 				}
-				
 				const { password_hash, ...userWithoutPassword } = result as UserWithPassword;
 				resolve(userWithoutPassword);
 			} catch (e) {

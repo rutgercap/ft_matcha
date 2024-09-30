@@ -75,9 +75,6 @@
 					>Sign in</button
 				>
 			</div>
-			{#if $message}
-				<p class="mt-2 text-sm text-red-600">{$message}</p>
-			{/if}
 		</form>
 	</div>
 </div>
