@@ -1,7 +1,7 @@
 import type { Database } from 'better-sqlite3';
-import type User from './domain/user';
+import { SqliteError } from 'better-sqlite3';
+import type { User } from './domain/user';
 import type { ProfileInfo } from './domain/user';
-import { v4 as uuidv4 } from 'uuid';
 
 class UserRepositoryError extends Error {
 	exception: unknown;
@@ -12,7 +12,12 @@ class UserRepositoryError extends Error {
 	}
 }
 
-type NewUser = Omit<User, 'id'>;
+class DuplicateEntryError extends UserRepositoryError {
+	constructor(message: string) {
+		super(message, null);
+		this.name = 'DuplicateEntryError';
+	}
+}
 
 class UserRepository {
 	constructor(private db: Database) {}
@@ -69,25 +74,30 @@ class UserRepository {
 		});
 	}
 
-	public createUser(user: NewUser): Promise<User> {
+	public createUser(user: User, passwordHash: string): Promise<User> {
 		return new Promise((resolve, reject) => {
 			try {
-				const id = uuidv4();
 				const result = this.db
 					.prepare<
-						[string, string],
+						[string, string, string, string],
 						User
-					>('INSERT INTO users (id, email) VALUES (?, ?) RETURNING *;')
-					.get(id, user.email);
+					>('INSERT INTO users (id, email, username, password_hash) VALUES (?, ?, ?, ?) RETURNING *;')
+					.get(user.id, user.email, user.username, passwordHash);
 				if (result !== undefined) {
 					resolve(result);
 				}
 				reject(new UserRepositoryError(`Something went wrong creating user: ${user.email}`, null));
 			} catch (e) {
+				if (e instanceof SqliteError) {
+					console.log('e.code', e.code);
+					if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+						reject(new DuplicateEntryError(`Duplicate entry for user: ${user.email}`));
+					}
+				}
 				reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));
 			}
 		});
 	}
 }
 
-export { UserRepository, UserRepositoryError };
+export { UserRepository, UserRepositoryError, DuplicateEntryError };
