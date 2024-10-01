@@ -2,15 +2,19 @@
 	import '../app.css';
 	import { Heart, Icon, XMark, Bars3, Bell } from 'svelte-hero-icons';
 	import type { LayoutData } from './$types';
+	import signout from '$lib/signout';
 
 	export let data: LayoutData;
-	let user = data.user;
+	$: user = data.user;
 
 	let menuOpen = false;
 
 	function toggleMenu() {
-		console.log('menuopen');
 		menuOpen = !menuOpen;
+	}
+
+	async function handleSignout() {
+		await signout();
 	}
 </script>
 
@@ -25,7 +29,7 @@
 					aria-controls="mobile-menu"
 					aria-expanded="false"
 				>
-					<!-- <span class="absolute -inset-0.5"></span> -->
+					<span class="absolute -inset-0.5"></span>
 					<span class="sr-only">Open main menu</span>
 					<Icon src={Bars3} class=" {menuOpen ? 'hidden' : 'block'} block h-6 w-6" />
 					<Icon src={XMark} class=" {menuOpen ? 'block' : 'hidden'} block h-6 w-6" />
@@ -52,7 +56,7 @@
 					type="button"
 					class="relative rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
 				>
-					<!-- <span class="absolute -inset-1.5"></span> -->
+					<span class="absolute -inset-1.5"></span>
 					<span class="sr-only">View notifications</span>
 					<Icon src={Bell} class="h-6 w-6" />
 				</button>
@@ -69,7 +73,7 @@
 								aria-expanded="false"
 								aria-haspopup="true"
 							>
-								<!-- <span class="absolute -inset-1.5"></span> -->
+								<span class="absolute -inset-1.5"></span>
 								<span class="sr-only">Open user menu</span>
 								<img
 									class="h-8 w-8 rounded-full"
@@ -96,20 +100,21 @@
 								tabindex="-1"
 								id="user-menu-item-0">Your Profile</a
 							>
-							<a
-								href="/sign-out"
+							<button
+								on:click={handleSignout}
 								class="block px-4 py-2 text-sm text-gray-700"
 								role="menuitem"
 								tabindex="-1"
-								id="user-menu-item-2">Sign out</a
-							>
+								id="user-menu-item-2"
+								>Sign out
+							</button>
 						</div>
 					{:else}
 						<a
-							href="/login"
+							href="/sign-in"
 							class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
 						>
-							Login
+							Sign in	
 						</a>
 					{/if}
 				</div>
@@ -125,6 +130,11 @@
 				href="/profile"
 				class="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
 				>Profile</a
+			>
+			<button
+				on:click={handleSignout}
+				class="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+				>Sign out</button
 			>
 		</div>
 	</div>

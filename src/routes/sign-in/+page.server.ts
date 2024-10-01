@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { verify } from '@node-rs/argon2';
 import { lucia } from '$lib/auth';
 
-const loginSchema = z.object({
+const signInSchema = z.object({
 	username: z.string().min(4).max(31),
 	password: z.string().min(6).max(255)
 });
@@ -17,14 +17,14 @@ export const load: PageServerLoad = async ({ locals: { user } }) => {
 	}
 	const form = await superValidate(
 		{ password: 'password', username: 'rutgercap' },
-		zod(loginSchema)
+		zod(signInSchema)
 	);
 	return { form };
 };
 
 export const actions: Actions = {
 	default: async ({ request, cookies, locals: { userRepository } }) => {
-		const form = await superValidate(request, zod(loginSchema));
+		const form = await superValidate(request, zod(signInSchema));
 		if (!form.valid) {
 			return fail(400, { form });
 		}
@@ -48,9 +48,7 @@ export const actions: Actions = {
 				form
 			});
 		}
-		const session = await lucia.createSession(user.id, {
-			username: user.username
-		});
+		const session = await lucia.createSession(user.id, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		cookies.set(sessionCookie.name, sessionCookie.value, {
 			path: '.',
