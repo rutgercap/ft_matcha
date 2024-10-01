@@ -1,26 +1,31 @@
 <script lang="ts">
 	import '../app.css';
-	import { Heart, Icon, XMark, Bars3 } from 'svelte-hero-icons';
+	import { Heart, Icon, XMark, Bars3, Bell } from 'svelte-hero-icons';
+	import type { LayoutData } from './$types';
+
+	export let data: LayoutData;
+	let user = data.user;
 
 	let menuOpen = false;
 
 	function toggleMenu() {
+		console.log('menuopen');
 		menuOpen = !menuOpen;
 	}
 </script>
 
-<nav class="bg-white shadow">
+<nav class="bg-white shadow relative z-50">
 	<div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
 		<div class="relative flex h-16 justify-between">
 			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
 				<button
-					type="button"
 					on:click={toggleMenu}
+					type="button"
 					class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
 					aria-controls="mobile-menu"
 					aria-expanded="false"
 				>
-					<span class="absolute -inset-0.5"></span>
+					<!-- <span class="absolute -inset-0.5"></span> -->
 					<span class="sr-only">Open main menu</span>
 					<Icon src={Bars3} class=" {menuOpen ? 'hidden' : 'block'} block h-6 w-6" />
 					<Icon src={XMark} class=" {menuOpen ? 'block' : 'hidden'} block h-6 w-6" />
@@ -43,46 +48,70 @@
 				class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
 			>
 				<button
+					on:click={() => console.log('click')}
 					type="button"
 					class="relative rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
 				>
-					<span class="absolute -inset-1.5"></span>
+					<!-- <span class="absolute -inset-1.5"></span> -->
 					<span class="sr-only">View notifications</span>
-					<svg
-						class="h-6 w-6"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						aria-hidden="true"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-						/>
-					</svg>
+					<Icon src={Bell} class="h-6 w-6" />
 				</button>
 
 				<!-- Profile dropdown -->
 				<div class="relative ml-3">
-					<div>
-						<button
-							type="button"
-							class="relative flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-							id="user-menu-button"
-							aria-expanded="false"
-							aria-haspopup="true"
+					{#if user}
+						<div>
+							<button
+								type="button"
+								on:click={toggleMenu}
+								class="relative flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+								id="user-menu-button"
+								aria-expanded="false"
+								aria-haspopup="true"
+							>
+								<!-- <span class="absolute -inset-1.5"></span> -->
+								<span class="sr-only">Open user menu</span>
+								<img
+									class="h-8 w-8 rounded-full"
+									src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+									alt=""
+								/>
+							</button>
+						</div>
+						<!-- PC dropdown -->
+						<div
+							class="absolute {menuOpen
+								? ''
+								: 'hidden'} max-sm:hidden right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+							role="menu"
+							aria-orientation="vertical"
+							aria-labelledby="user-menu-button"
+							tabindex="-1"
 						>
-							<span class="absolute -inset-1.5"></span>
-							<span class="sr-only">Open user menu</span>
-							<img
-								class="h-8 w-8 rounded-full"
-								src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-								alt=""
-							/>
-						</button>
-					</div>
+							<!-- Active: "bg-gray-100", Not Active: "" -->
+							<a
+								href="/profile"
+								class="block px-4 py-2 text-sm text-gray-700"
+								role="menuitem"
+								tabindex="-1"
+								id="user-menu-item-0">Your Profile</a
+							>
+							<a
+								href="/sign-out"
+								class="block px-4 py-2 text-sm text-gray-700"
+								role="menuitem"
+								tabindex="-1"
+								id="user-menu-item-2">Sign out</a
+							>
+						</div>
+					{:else}
+						<a
+							href="/login"
+							class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+						>
+							Login
+						</a>
+					{/if}
 				</div>
 			</div>
 		</div>
