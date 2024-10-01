@@ -1,8 +1,10 @@
 import type { Database } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
-import type { User, UserWithPassword } from './domain/user';
+import type { User } from './domain/user';
 import type { ProfileInfo } from './domain/user';
 import { hash } from '@node-rs/argon2';
+
+type UserWithPassword = User & { password_hash: string };
 
 class UserRepositoryError extends Error {
 	exception: unknown;
