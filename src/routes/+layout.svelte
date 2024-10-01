@@ -21,20 +21,23 @@
 <nav class="bg-white shadow relative z-50">
 	<div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
 		<div class="relative flex h-16 justify-between">
-			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
-				<button
-					on:click={toggleMenu}
-					type="button"
-					class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-					aria-controls="mobile-menu"
-					aria-expanded="false"
-				>
-					<span class="absolute -inset-0.5"></span>
-					<span class="sr-only">Open main menu</span>
-					<Icon src={Bars3} class=" {menuOpen ? 'hidden' : 'block'} block h-6 w-6" />
-					<Icon src={XMark} class=" {menuOpen ? 'block' : 'hidden'} block h-6 w-6" />
-				</button>
-			</div>
+			{#if user}
+				<!-- Mobile menu button -->
+				<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+					<button
+						on:click={toggleMenu}
+						type="button"
+						class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+						aria-controls="mobile-menu"
+						aria-expanded="false"
+					>
+						<span class="absolute -inset-0.5"></span>
+						<span class="sr-only">Open main menu</span>
+						<Icon src={Bars3} class=" {menuOpen ? 'hidden' : 'block'} block h-6 w-6" />
+						<Icon src={XMark} class=" {menuOpen ? 'block' : 'hidden'} block h-6 w-6" />
+					</button>
+				</div>
+			{/if}
 			<div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
 				<a href="/" class="flex flex-shrink-0 items-center">
 					<Icon src={Heart} class="h-8 w-auto" />
