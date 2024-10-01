@@ -23,4 +23,3 @@ declare module 'lucia' {
 		Lucia: typeof lucia;
 	}
 }
-
