@@ -16,9 +16,12 @@ class UserRepositoryError extends Error {
 }
 
 class DuplicateEntryError extends UserRepositoryError {
-	constructor(message: string) {
+	entity: string;
+
+	constructor(message: string, entity: string) {
 		super(message, null);
 		this.name = 'DuplicateEntryError';
+		this.entity = entity;
 	}
 }
 
@@ -119,9 +122,20 @@ class UserRepository {
 				}
 				reject(new UserRepositoryError(`Something went wrong creating user: ${user.email}`, null));
 			} catch (e) {
+				console.log(e);
 				if (e instanceof SqliteError) {
 					if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-						reject(new DuplicateEntryError(`Duplicate entry for user: ${user.email}`));
+						const regex = /users\.(.*)/;
+						const match = e.message.match(regex);
+						if (!match) {
+							reject(new UserRepositoryError(`Duplicate entry for user: ${user.email}`, 'unkown'));
+						}
+						reject(
+							new DuplicateEntryError(
+								`Duplicate entry for user: ${user.email}`,
+								(match as RegExpMatchArray)[1]
+							)
+						);
 					}
 				}
 				reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));

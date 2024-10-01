@@ -4,10 +4,10 @@
 
 	export let data;
 
-	const { form, errors } = superForm(data.form);
+	const { form, errors, constraints } = superForm(data.form);
 </script>
 
-<div class="flex min-h-svh flex-col justify-center px-6 lg:px-8">
+<div class="flex md:pt-12 flex-col justify-center px-6 lg:px-8">
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<img
 			class="mx-auto h-10 w-auto"
@@ -19,7 +19,7 @@
 		</h2>
 	</div>
 
-	<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<form class="space-y-6" method="POST" use:enhance>
 			<div>
 				<label for="username" class="block text-sm font-medium leading-6 text-gray-900">
@@ -33,6 +33,8 @@
 						type="text"
 						required
 						class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+						{...$constraints.username}
+						aria-invalid={$errors.username ? 'true' : undefined}
 					/>
 					{#if $errors.username}
 						<p class="mt-2 text-sm text-red-600">{$errors.username}</p>
@@ -52,6 +54,8 @@
 						autocomplete="email"
 						required
 						class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+						aria-invalid={$errors.email ? 'true' : undefined}
+						{...$constraints.email}
 					/>
 					{#if $errors.email}
 						<p class="mt-2 text-sm text-red-600">{$errors.email}</p>
@@ -76,6 +80,8 @@
 						name="password"
 						type="password"
 						bind:value={$form.password}
+						{...$constraints.password}
+						aria-invalid={$errors.password ? 'true' : undefined}
 						autocomplete="current-password"
 						required
 						class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -93,5 +99,11 @@
 				>
 			</div>
 		</form>
+		<p class="mt-10 text-center text-sm text-gray-500">
+			Already have an account?
+			<a href="sign-in" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+				>Sign in instead.</a
+			>
+		</p>
 	</div>
 </div>

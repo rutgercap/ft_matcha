@@ -4,10 +4,10 @@
 
 	export let data;
 
-	const { form, errors, constraints } = superForm(data.form);
+	const { form, errors, constraints, message } = superForm(data.form);
 </script>
 
-<div class="flex min-h-full flex-col justify-center px-6 lg:px-8">
+<div class="flex md:pt-12 flex-col justify-center px-6 lg:px-8">
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<img
 			class="mx-auto h-10 w-auto"
@@ -31,6 +31,7 @@
 						id="username"
 						name="username"
 						required
+						aria-invalid={$errors.username ? 'true' : undefined}
 						class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
 						{...$constraints.username}
 					/>
@@ -57,6 +58,7 @@
 						id="password"
 						name="password"
 						type="password"
+						aria-invalid={$errors.password ? 'true' : undefined}
 						autocomplete="current-password"
 						required
 						{...$constraints.password}
@@ -75,6 +77,15 @@
 					>Sign in
 				</button>
 			</div>
+			{#if $message}
+				<p class="mt-2 text-sm text-red-600">{$message}</p>
+			{/if}
 		</form>
+		<p class="mt-10 text-center text-sm text-gray-500">
+			Not a member?
+			<a href="sign-up" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+				>Sign up instead.</a
+			>
+		</p>
 	</div>
 </div>

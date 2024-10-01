@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { superValidate } from 'sveltekit-superforms';
+import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { verify } from '@node-rs/argon2';
@@ -15,10 +15,7 @@ export const load: PageServerLoad = async ({ locals: { user } }) => {
 	if (user) {
 		redirect(303, '/');
 	}
-	const form = await superValidate(
-		{ password: 'password', username: 'rutgercap' },
-		zod(signInSchema)
-	);
+	const form = await superValidate(zod(signInSchema));
 	return { form };
 };
 
@@ -43,9 +40,8 @@ export const actions: Actions = {
 			parallelism: 1
 		});
 		if (!validPassword) {
-			return fail(400, {
-				message: 'Incorrect username or password',
-				form
+			return message(form, 'Incorrect username or password', {
+				status: 400
 			});
 		}
 		const session = await lucia.createSession(user.id, {});

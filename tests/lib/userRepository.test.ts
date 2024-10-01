@@ -54,6 +54,7 @@ describe('UserRepository', () => {
 				await userRepository.createUser(userTwo, password);
 			} catch (e) {
 				expect(e).toBeInstanceOf(DuplicateEntryError);
+				expect((e as DuplicateEntryError).entity).toBe('username');
 			}
 		}
 	);
