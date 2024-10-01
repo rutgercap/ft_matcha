@@ -131,3 +131,4 @@ class UserRepository {
 }
 
 export { UserRepository, UserRepositoryError, DuplicateEntryError };
+export type { UserWithPassword };

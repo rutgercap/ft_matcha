@@ -12,7 +12,10 @@ const signUpSchema = z.object({
 	email: z.string().email()
 });
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals: { user } }) => {
+	if (user) {
+		redirect(303, '/');
+	}
 	const form = await superValidate(
 		{ email: 'rutgercappendijk@gmail.com', password: 'password', username: 'rutgercap' },
 		zod(signUpSchema)
@@ -21,7 +24,10 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, locals: { userRepository } }) => {
+	default: async ({ request, cookies, locals: { userRepository, user } }) => {
+		if (user) {
+			redirect(303, '/');
+		}
 		const form = await superValidate(request, zod(signUpSchema));
 		if (!form.valid) {
 			return fail(400, { form });

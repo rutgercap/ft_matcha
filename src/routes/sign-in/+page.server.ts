@@ -11,7 +11,10 @@ const loginSchema = z.object({
 	password: z.string().min(6).max(255)
 });
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals: { user } }) => {
+	if (user) {
+		redirect(303, '/');
+	}
 	const form = await superValidate(
 		{ password: 'password', username: 'rutgercap' },
 		zod(loginSchema)
