@@ -13,7 +13,7 @@ const profileSchema = z.object({
 	sexualPreference: z
 		.enum(['men', 'women', 'all', 'other'])
 		.refine((value) => isSexualPreference(value)),
-	biography: z.string().max(500)
+	biography: z.string().min(0).max(500)
 });
 
 export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {

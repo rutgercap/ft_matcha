@@ -4,11 +4,13 @@
 	import type { LayoutData } from './$types';
 	import signout from '$lib/signout';
 	import { page } from '$app/stores';
+	import { initials as getInitials } from '$lib/domain/profile';
 
-	$: url = $page.url.pathname  
+	$: url = $page.url.pathname;
 
 	export let data: LayoutData;
 	$: user = data.user;
+	$: initials = data.personalInfo ? getInitials(data.personalInfo) : 'XX';
 
 	let menuOpen = false;
 
@@ -67,7 +69,9 @@
 					<!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
 					<a
 						href="/profile"
-						class="{isActive(url, 'profile') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
+						class="{isActive(url, 'profile')
+							? 'border-indigo-500 text-gray-900'
+							: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
 						>Profile</a
 					>
 				</div>
@@ -87,7 +91,7 @@
 							<span class="sr-only">View notifications</span>
 							<Icon src={Bell} class="h-6 w-6" />
 						</button>
-						<div>
+						<div class="hidden md:block">
 							<button
 								type="button"
 								on:click|stopPropagation={toggleMenu}
@@ -98,11 +102,11 @@
 							>
 								<span class="absolute -inset-1.5"></span>
 								<span class="sr-only">Open user menu</span>
-								<img
-									class="h-8 w-8 rounded-full"
-									src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-									alt=""
-								/>
+								<span
+									class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500"
+								>
+									<span class="text-sm font-medium leading-none text-white">{initials}</span>
+								</span>
 							</button>
 						</div>
 
@@ -161,7 +165,9 @@
 			<!-- Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700" -->
 			<a
 				href="/profile"
-				class="block {isActive(url, 'profile') ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
+				class="block {isActive(url, 'profile')
+					? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+					: 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
 				>Profile</a
 			>
 			<button
