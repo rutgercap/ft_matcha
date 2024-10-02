@@ -5,7 +5,6 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { isGender, isSexualPreference } from '$lib/domain/profile';
 import type { User } from 'lucia';
-import { invalidate } from '$app/navigation';
 
 const profileSchema = z.object({
 	firstName: z.string().min(1).max(255),
@@ -17,7 +16,7 @@ const profileSchema = z.object({
 	biography: z.string().max(500)
 });
 
-export const load: PageServerLoad = async ({ depends, locals: { user, userRepository } }) => {
+export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {
 	const currentUser = user as User;
 	const currentProfile = await userRepository.personalInfoFor(currentUser.id);
 	const form = await superValidate(currentProfile ?? {}, zod(profileSchema));
@@ -39,6 +38,6 @@ export const actions: Actions = {
 		} catch {
 			return message(form, 'An error occurred while updating your profile', { status: 500 });
 		}
-		return message(form, 'Profile updated!', );
+		return message(form, 'Profile updated!');
 	}
 };

@@ -7,6 +7,8 @@ import type { User } from 'lucia';
 
 type UserWithPassword = User & { passwordHash: string };
 
+type UserWithoutProfileSetup = Omit<User, 'profileIsSetup'>;
+
 type SnakeCase<S extends string> = S extends `${infer T}${infer U}`
 	? `${T extends Capitalize<T> ? '_' : ''}${Lowercase<T>}${SnakeCase<U>}`
 	: S;
@@ -117,21 +119,24 @@ class UserRepository {
 	}
 
 	async upsertPersonalInfo(id: string, profileTest: ProfileInfo): Promise<void> {
+		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
+			`
+				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography) 
+				VALUES (?, ?, ?, ?, ?, ?) 
+				ON CONFLICT(user_id) DO UPDATE SET 
+				first_name=excluded.first_name,
+				last_name=excluded.last_name,
+				gender=excluded.gender,
+				sexual_preference=excluded.sexual_preference,
+				biography=excluded.biography;`
+		);
+		const updateProfileSet = this.db.prepare<[string]>(
+			'UPDATE users SET profile_is_setup = 1 WHERE id = ?'
+		);
 		return new Promise((resolve, reject) => {
 			try {
-				this.db
-					.prepare<[string, string, string, string, string, string]>(
-						`
-						INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography) 
-						VALUES (?, ?, ?, ?, ?, ?) 
-						ON CONFLICT(user_id) DO UPDATE SET 
-    					first_name=excluded.first_name,
-    					last_name=excluded.last_name,
-    					gender=excluded.gender,
-    					sexual_preference=excluded.sexual_preference,
-    					biography=excluded.biography;`
-					)
-					.run(
+				const transaction = this.db.transaction((id: string, profileTest: ProfileInfo) => {
+					insertIntoProfile.run(
 						id,
 						profileTest.firstName,
 						profileTest.lastName,
@@ -139,6 +144,9 @@ class UserRepository {
 						profileTest.sexualPreference.toString(),
 						profileTest.biography
 					);
+					updateProfileSet.run(id);
+				});
+				transaction(id, profileTest);
 				resolve();
 			} catch (e) {
 				if (e instanceof SqliteError) {
@@ -171,7 +179,7 @@ class UserRepository {
 		});
 	}
 
-	public async createUser(user: User, password: string): Promise<User> {
+	public async createUser(user: UserWithoutProfileSetup, password: string): Promise<User> {
 		const passwordHash = await hash(password, {
 			memoryCost: 19456,
 			timeCost: 2,
@@ -215,4 +223,4 @@ class UserRepository {
 }
 
 export { UserRepository, UserRepositoryError, DuplicateEntryError };
-export type { UserWithPassword };
+export type { UserWithPassword, UserWithoutProfileSetup };

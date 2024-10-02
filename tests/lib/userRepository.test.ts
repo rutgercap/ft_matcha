@@ -11,7 +11,7 @@ function anyUser(overrides: Partial<User> = {}): User {
 		id: userId,
 		email: faker.internet.email(),
 		username: faker.internet.userName(),
-		profileIsSetup: false,
+		profileIsSetup: faker.datatype.boolean(),
 		...overrides
 	};
 }
@@ -30,7 +30,7 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 describe('UserRepository', () => {
 	itWithFixtures('should be able to create a new user', async ({ userRepository }) => {
 		const password = faker.internet.password();
-		const user = anyUser();
+		const user = anyUser({ profileIsSetup: false });
 
 		const response = await userRepository.createUser(user, password);
 		const found = await userRepository.user(response.id);
@@ -40,7 +40,7 @@ describe('UserRepository', () => {
 
 	itWithFixtures('should be able to set user profile', async ({ userRepository }) => {
 		const userProfile = anyUserProfile();
-		const user = anyUser();
+		const user = anyUser({ profileIsSetup: true });
 		await userRepository.createUser(user, faker.internet.password());
 
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
@@ -51,7 +51,7 @@ describe('UserRepository', () => {
 
 	itWithFixtures('should be able to update user profile', async ({ userRepository }) => {
 		const userProfile = anyUserProfile();
-		const user = anyUser();
+		const user = anyUser({ profileIsSetup: true });
 		await userRepository.createUser(user, faker.internet.password());
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
@@ -62,9 +62,26 @@ describe('UserRepository', () => {
 		expect(found).toMatchObject(userProfile);
 	});
 
+	itWithFixtures(
+		'Setting user profile sets profile_is_setup to true',
+		async ({ userRepository }) => {
+			const user = anyUser({ profileIsSetup: false });
+			await userRepository.createUser(user, faker.internet.password());
+
+			let found = (await userRepository.user(user.id)) as User;
+			expect(found.profileIsSetup).toBe(false);
+
+			const userProfile = anyUserProfile();
+			await userRepository.upsertPersonalInfo(user.id, userProfile);
+
+			found = (await userRepository.user(user.id)) as User;
+			expect(found.profileIsSetup).toBe(true);
+		}
+	);
+
 	itWithFixtures('Should be able to fetch user by username', async ({ userRepository }) => {
 		const password = faker.internet.password();
-		const user = anyUser();
+		const user = anyUser({ profileIsSetup: false });
 		await userRepository.createUser(user, password);
 
 		const found = await userRepository.userByUsername(user.username);
@@ -83,8 +100,8 @@ describe('UserRepository', () => {
 		async ({ userRepository }) => {
 			const userName = faker.internet.userName();
 			const password = faker.internet.password();
-			const userOne = anyUser({ username: userName });
-			const userTwo = anyUser({ username: userName });
+			const userOne = anyUser({ username: userName, profileIsSetup: false });
+			const userTwo = anyUser({ username: userName, profileIsSetup: false });
 			await userRepository.createUser(userOne, password);
 
 			try {

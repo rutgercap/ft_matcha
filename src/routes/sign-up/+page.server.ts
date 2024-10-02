@@ -33,7 +33,6 @@ export const actions: Actions = {
 			redirect(303, '/');
 		}
 		const form = await superValidate(request, zod(signUpSchema));
-		console.log('no');
 		if (!form.valid) {
 			return fail(400, { form });
 		}
