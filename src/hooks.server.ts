@@ -1,10 +1,10 @@
 import { getDb } from '$lib/database/database';
 import { UserRepository } from '$lib/userRepository';
-import type { Handle } from '@sveltejs/kit';
+import { type Handle } from '@sveltejs/kit';
 import { lucia } from '$lib/auth';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const db = await getDb();
+	const db = getDb();
 	event.locals.userRepository = new UserRepository(db);
 
 	const sessionId = event.cookies.get(lucia.sessionCookieName);

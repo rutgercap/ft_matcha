@@ -1,9 +1,22 @@
+enum Gender {
+	MAN="man",
+	WOMAN="woman",
+	OTHER="other"
+}
+
+enum SexualPreference {
+	MEN="men",
+	WOMEN="women",
+	ALL="all",
+	OTHER="other"
+}
+
 type ProfileInfo = {
-	gender: string;
-	sexPreference: string;
+	firstName: string;
+	lastName: string;	
+	gender:  Gender;
+	sexualPreference: SexualPreference;
 	biography: string;
-	tags: string[];
-	pictures: string[];
 };
 
 type User = {
@@ -12,4 +25,5 @@ type User = {
 	username: string;
 };
 
+export { Gender, SexualPreference };
 export type { ProfileInfo, User };

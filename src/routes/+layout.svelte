@@ -146,7 +146,7 @@
 
 	<!-- Mobile menu, show/hide based on menu state. -->
 	<div
-		class="sm:hidden shadow {menuOpen ? '' : 'hidden'}"
+		class="sm:hidden bg-white shadow {menuOpen ? '' : 'hidden'}"
 		id="mobile-menu"
 		aria-labelledby="user-menu-button"
 	>
@@ -166,11 +166,11 @@
 	</div>
 </nav>
 
-<main class="min-h-[calc(100vh-4rem)] pt-16">
+<main class="min-h-[calc(100vh-4rem)] pt-8 md:pt-16">
 	<slot />
 </main>
 
-<footer class="bg-white">
+<footer class="bg-slate-50 shadow-md">
 	<div class="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
 		<div class="flex justify-center space-x-6 md:order-2">
 			<a href="https://facebook.com" target="”_blank”" class="text-gray-400 hover:text-gray-500">

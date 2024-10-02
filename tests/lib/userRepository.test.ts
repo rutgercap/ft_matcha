@@ -3,12 +3,17 @@ import { describe, expect } from 'vitest';
 import { faker } from '@faker-js/faker';
 import { generateIdFromEntropySize } from 'lucia';
 import { itWithFixtures } from '../fixtures';
+import { Gender, SexualPreference, type ProfileInfo, type User } from '$lib/domain/user';
+
+function anyUser(): User {
+	const userId = generateIdFromEntropySize(10);
+	return { id: userId, email: faker.internet.email(), username: faker.internet.userName() };
+}
 
 describe('UserRepository', () => {
 	itWithFixtures('should be able to create a new user', async ({ userRepository }) => {
-		const userId = generateIdFromEntropySize(10);
 		const password = faker.internet.password();
-		const user = { id: userId, email: faker.internet.email(), username: faker.internet.userName() };
+		const user = anyUser();
 
 		const response = await userRepository.createUser(user, password);
 		const found = await userRepository.user(response.id);
@@ -16,10 +21,28 @@ describe('UserRepository', () => {
 		expect(found).toMatchObject(user);
 	});
 
+	itWithFixtures('should be able to set user profile', async ({ userRepository }) => {
+		const userProfile: ProfileInfo = {
+			firstName: faker.person.firstName(),
+			lastName: faker.person.lastName(),
+			gender: faker.helpers.arrayElement(Object.values(Gender)),
+			sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
+			biography: faker.lorem.paragraph({ min: 1, max: 10 })
+		};
+		const user = anyUser();
+		await userRepository.createUser(user, faker.internet.password());
+
+		await userRepository.setPersonalInfo(user.id, userProfile);
+
+		const found = await userRepository.peronsalInfoFor(user.id);
+		console.log(found);
+		console.log(userProfile);
+		expect(found).toMatchObject(userProfile);
+	});
+
 	itWithFixtures('Should be able to fetch user by username', async ({ userRepository }) => {
-		const userId = generateIdFromEntropySize(10);
 		const password = faker.internet.password();
-		const user = { id: userId, email: faker.internet.email(), username: faker.internet.userName() };
+		const user = anyUser();
 		await userRepository.createUser(user, password);
 
 		const found = await userRepository.userByUsername(user.username);
