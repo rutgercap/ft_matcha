@@ -1,6 +1,6 @@
 <div class="relative isolate px-6 pt-14 lg:px-8">
 	<div
-		class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
+		class="absolute inset-x-0 -top-40 transform-gpu overflow-hidden blur-3xl sm:-top-80"
 		aria-hidden="true"
 	>
 		<div
@@ -14,7 +14,7 @@
 			<p class="mt-6 text-lg leading-8 text-gray-600">Hot dating site for robots</p>
 			<div class="mt-10 flex items-center justify-center gap-x-6">
 				<a
-					href="/sign-in"
+					href="/sign-up"
 					class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
 					>Get started</a
 				>

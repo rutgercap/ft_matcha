@@ -12,7 +12,9 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
-		"test:unit": "vitest --run"
+		"test:unit": "vitest --run",
+		"db:reset": "tsx src/lib/database/reset.ts",
+		"db:migrate": "tsx src/lib/database/migrateUp.ts"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^9.0.1",
@@ -22,8 +24,10 @@
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@types/better-sqlite3": "^7.6.11",
 		"@types/eslint": "^9.6.1",
+		"@types/lodash": "^4.17.9",
 		"@types/pg-pool": "^2.0.6",
 		"@types/temp": "^0.9.4",
+		"@types/uuid": "^10.0.0",
 		"autoprefixer": "^10.4.20",
 		"eslint": "^9.10.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -34,21 +38,27 @@
 		"prettier-plugin-svelte": "^3.2.6",
 		"svelte": "^4.2.19",
 		"svelte-check": "^4.0.2",
+		"sveltekit-superforms": "^2.19.0",
 		"tailwindcss": "^3.4.11",
 		"temp": "^0.9.4",
+		"tsx": "^4.19.1",
 		"typescript": "^5.6.2",
 		"typescript-eslint": "^8.6.0",
 		"vite": "^5.4.6",
-		"vitest": "^2.1.1"
+		"vitest": "^2.1.1",
+		"zod": "^3.23.8"
 	},
 	"type": "module",
 	"dependencies": {
-		"@auth/sveltekit": "^1.5.0",
+		"@lucia-auth/adapter-sqlite": "^3.0.2",
+		"@node-rs/argon2": "^1.8.3",
 		"@tailwindcss/forms": "^0.5.9",
 		"@types/pg": "^8.11.10",
 		"better-sqlite3": "^11.3.0",
-		"fs": "0.0.1-security",
-		"svelte-hero-icons": "^5.2.0"
+		"lodash": "^4.17.21",
+		"lucia": "^3.2.0",
+		"svelte-hero-icons": "^5.2.0",
+		"uuid": "^10.0.0"
 	},
 	"engines": {
 		"node": ">=20.0.0"
