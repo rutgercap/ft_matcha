@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
 
 	export let data;
 
-	const { form, errors, constraints, message, tainted, isTainted } = superForm(data.form);
+	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form);
 </script>
 
 <form class="px-4 mb-8" method="POST" use:enhance>

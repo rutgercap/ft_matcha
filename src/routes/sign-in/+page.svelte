@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { superForm } from 'sveltekit-superforms';
 
 	export let data;
 
-	const { form, errors, constraints, message } = superForm(data.form);
+	const { enhance, form, errors, constraints, message } = superForm(data.form);
 </script>
 
 <div class="flex md:pt-12 flex-col justify-center px-6 lg:px-8">
