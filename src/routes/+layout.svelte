@@ -3,6 +3,9 @@
 	import { Heart, Icon, XMark, Bars3, Bell } from 'svelte-hero-icons';
 	import type { LayoutData } from './$types';
 	import signout from '$lib/signout';
+	import { page } from '$app/stores';
+
+	$: url = $page.url.pathname  
 
 	export let data: LayoutData;
 	$: user = data.user;
@@ -29,6 +32,10 @@
 
 	async function handleSignout() {
 		await signout();
+	}
+
+	function isActive(url: string, dest: string): boolean {
+		return url.startsWith(`/${dest}`);
 	}
 </script>
 
@@ -60,7 +67,7 @@
 					<!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
 					<a
 						href="/profile"
-						class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+						class="{isActive(url, 'profile') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
 						>Profile</a
 					>
 				</div>
@@ -112,14 +119,14 @@
 							<!-- Active: "bg-gray-100", Not Active: "" -->
 							<a
 								href="/profile"
-								class="block px-4 py-2 text-sm text-gray-700"
+								class="hover:bg-gray-100 block px-4 py-2 text-sm text-gray-700"
 								role="menuitem"
 								tabindex="-1"
 								id="user-menu-item-0">Your Profile</a
 							>
 							<button
 								on:click={handleSignout}
-								class="block px-4 py-2 text-sm text-gray-700 w-full text-left"
+								class="block px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100 text-left"
 								role="menuitem"
 								tabindex="-1"
 								id="user-menu-item-1"
@@ -154,7 +161,7 @@
 			<!-- Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700" -->
 			<a
 				href="/profile"
-				class="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+				class="block {isActive(url, 'profile') ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
 				>Profile</a
 			>
 			<button
