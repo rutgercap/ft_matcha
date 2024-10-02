@@ -109,7 +109,7 @@ class UserRepository {
 		});
 	}
 
-	async setPersonalInfo(id: string, profileTest: ProfileInfo): Promise<void> {
+	async upsertPersonalInfo(id: string, profileTest: ProfileInfo): Promise<void> {
 		return new Promise((resolve, reject) => {
 			try {
 				this.db

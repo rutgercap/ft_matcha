@@ -25,14 +25,16 @@ export const actions: Actions = {
 		if (!form.valid) {
 			return fail(400, { form });
 		}
+		
 		const { username, password } = form.data;
 
 		const user = await userRepository.userByUsername(username);
 		if (!user) {
-			return fail(400, {
-				form
+			return message(form, 'Incorrect username or password', {
+				status: 400
 			});
 		}
+		
 		const validPassword = await verify(user.password_hash, password, {
 			memoryCost: 19456,
 			timeCost: 2,
@@ -50,6 +52,6 @@ export const actions: Actions = {
 			path: '.',
 			...sessionCookie.attributes
 		});
-		redirect(302, '/');
+		return redirect(302, '/');
 	}
 };

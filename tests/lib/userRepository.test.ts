@@ -10,6 +10,16 @@ function anyUser(): User {
 	return { id: userId, email: faker.internet.email(), username: faker.internet.userName() };
 }
 
+function anyUserProfile(): ProfileInfo {
+	return {
+		firstName: faker.person.firstName(),
+		lastName: faker.person.lastName(),
+		gender: faker.helpers.arrayElement(Object.values(Gender)),
+		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
+		biography: faker.lorem.paragraph({ min: 1, max: 25 })
+	};
+}
+
 describe('UserRepository', () => {
 	itWithFixtures('should be able to create a new user', async ({ userRepository }) => {
 		const password = faker.internet.password();
@@ -22,21 +32,26 @@ describe('UserRepository', () => {
 	});
 
 	itWithFixtures('should be able to set user profile', async ({ userRepository }) => {
-		const userProfile: ProfileInfo = {
-			firstName: faker.person.firstName(),
-			lastName: faker.person.lastName(),
-			gender: faker.helpers.arrayElement(Object.values(Gender)),
-			sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
-			biography: faker.lorem.paragraph({ min: 1, max: 10 })
-		};
+		const userProfile = anyUserProfile();
 		const user = anyUser();
 		await userRepository.createUser(user, faker.internet.password());
 
-		await userRepository.setPersonalInfo(user.id, userProfile);
+		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
 		const found = await userRepository.peronsalInfoFor(user.id);
-		console.log(found);
-		console.log(userProfile);
+		expect(found).toMatchObject(userProfile);
+	});
+
+	itWithFixtures('should be able to update user profile', async ({ userRepository }) => {
+		let userProfile = anyUserProfile();
+		const user = anyUser();
+		await userRepository.createUser(user, faker.internet.password());
+		await userRepository.upsertPersonalInfo(user.id, userProfile);
+
+		userProfile.biography = "I am a new person";
+		await userRepository.upsertPersonalInfo(user.id, userProfile);
+
+		const found = await userRepository.peronsalInfoFor(user.id);
 		expect(found).toMatchObject(userProfile);
 	});
 

@@ -24,11 +24,6 @@ export const load: PageServerLoad = async ({ locals: { user } }) => {
 		redirect(303, '/');
 	}
 	const form = await superValidate(
-		{
-			email: 'rutgercappendijk@gmail.com',
-			password: 'password',
-			username: 'rutgercap'
-		},
 		zod(signUpSchema)
 	);
 	return { form };
@@ -40,6 +35,7 @@ export const actions: Actions = {
 			redirect(303, '/');
 		}
 		const form = await superValidate(request, zod(signUpSchema));
+		console.log("no")
 		if (!form.valid) {
 			return fail(400, { form });
 		}
@@ -54,8 +50,6 @@ export const actions: Actions = {
 				path: '.',
 				...sessionCookie.attributes
 			});
-
-			redirect(302, '/');
 		} catch (e) {
 			if (e instanceof DuplicateEntryError) {
 				if (['username', 'email'].includes(e.entity)) {
@@ -76,5 +70,6 @@ export const actions: Actions = {
 				});
 			}
 		}
+		redirect(302, '/');
 	}
 };
