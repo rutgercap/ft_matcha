@@ -23,9 +23,7 @@ export const load: PageServerLoad = async ({ locals: { user } }) => {
 	if (user) {
 		redirect(303, '/');
 	}
-	const form = await superValidate(
-		zod(signUpSchema)
-	);
+	const form = await superValidate(zod(signUpSchema));
 	return { form };
 };
 
@@ -35,7 +33,7 @@ export const actions: Actions = {
 			redirect(303, '/');
 		}
 		const form = await superValidate(request, zod(signUpSchema));
-		console.log("no")
+		console.log('no');
 		if (!form.valid) {
 			return fail(400, { form });
 		}

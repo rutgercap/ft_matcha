@@ -1,21 +1,19 @@
 import type { Database } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
-import type { User } from './domain/user';
-import type { ProfileInfo } from './domain/user';
+import type { ProfileInfo } from './domain/profile';
 import { hash } from '@node-rs/argon2';
 import _ from 'lodash';
+import type { User } from 'lucia';
 
-
-type UserWithPassword = User & { password_hash: string };
+type UserWithPassword = User & { passwordHash: string };
 
 type SnakeCase<S extends string> = S extends `${infer T}${infer U}`
-  ? `${T extends Capitalize<T> ? "_" : ""}${Lowercase<T>}${SnakeCase<U>}`
-  : S;
+	? `${T extends Capitalize<T> ? '_' : ''}${Lowercase<T>}${SnakeCase<U>}`
+	: S;
 
 type ToSnakeCase<T> = {
-  [K in keyof T as SnakeCase<string & K>]: T[K];
+	[K in keyof T as SnakeCase<string & K>]: T[K];
 };
-
 
 class UserRepositoryError extends Error {
 	exception: unknown;
@@ -43,9 +41,18 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
-					.prepare<string, UserWithPassword>('SELECT * FROM users WHERE username = ?')
+					.prepare<
+						string,
+						ToSnakeCase<UserWithPassword>
+					>('SELECT id, email, username, password_hash, profile_is_setup FROM users WHERE username = ?')
 					.get(username);
-				resolve(result ? result : null);
+				if (result) {
+					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key)) as any;
+					camelCaseObject.profileIsSetup = camelCaseObject.profileIsSetup === 0 ? false : true;
+					resolve(camelCaseObject as UserWithPassword);
+				} else {
+					resolve(null);
+				}
 			} catch (e) {
 				reject(
 					new UserRepositoryError('Something went wrong fetching user for username: ' + username, e)
@@ -89,7 +96,7 @@ class UserRepository {
 		});
 	}
 
-	peronsalInfoFor(id: string): Promise<ProfileInfo | null> {
+	personalInfoFor(id: string): Promise<ProfileInfo | null> {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
@@ -113,9 +120,8 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				this.db
-					.prepare<
-						[string, string, string, string, string, string]
-					>(`
+					.prepare<[string, string, string, string, string, string]>(
+						`
 						INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography) 
 						VALUES (?, ?, ?, ?, ?, ?) 
 						ON CONFLICT(user_id) DO UPDATE SET 
@@ -123,7 +129,8 @@ class UserRepository {
     					last_name=excluded.last_name,
     					gender=excluded.gender,
     					sexual_preference=excluded.sexual_preference,
-    					biography=excluded.biography;`)
+    					biography=excluded.biography;`
+					)
 					.run(
 						id,
 						profileTest.firstName,
@@ -147,13 +154,17 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
-					.prepare<string, UserWithPassword>('SELECT * FROM users WHERE id = ?')
+					.prepare<
+						string,
+						UserWithPassword
+					>('SELECT id, email, username, profile_is_setup FROM users WHERE id = ?')
 					.get(id);
 				if (!result) {
 					resolve(null);
 				}
-				const { password_hash, ...userWithoutPassword } = result as UserWithPassword;
-				resolve(userWithoutPassword);
+				const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key)) as any;
+				camelCaseObject.profileIsSetup = camelCaseObject.profileIsSetup === 0 ? false : true;
+				resolve(camelCaseObject as User);
 			} catch (e) {
 				reject(new UserRepositoryError('Something went wrong fetching user for id: ' + id, e));
 			}
@@ -170,14 +181,15 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
-					.prepare<
-						[string, string, string, string],
-						UserWithPassword
-					>('INSERT INTO users (id, email, username, password_hash) VALUES (?, ?, ?, ?) RETURNING *;')
+					.prepare<[string, string, string, string], ToSnakeCase<UserWithPassword>>(
+						`INSERT INTO users (id, email, username, password_hash) 
+						VALUES (?, ?, ?, ?) 
+						RETURNING id, email, username, profile_is_setup;`
+					)
 					.get(user.id, user.email, user.username, passwordHash);
 				if (result !== undefined) {
-					const { password_hash, ...userWithoutPassword } = result;
-					resolve(userWithoutPassword);
+					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
+					resolve(camelCaseObject as unknown as User);
 				}
 				reject(new UserRepositoryError(`Something went wrong creating user: ${user.email}`, null));
 			} catch (e) {

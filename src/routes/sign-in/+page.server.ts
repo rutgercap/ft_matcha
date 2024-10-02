@@ -25,7 +25,7 @@ export const actions: Actions = {
 		if (!form.valid) {
 			return fail(400, { form });
 		}
-		
+
 		const { username, password } = form.data;
 
 		const user = await userRepository.userByUsername(username);
@@ -34,8 +34,8 @@ export const actions: Actions = {
 				status: 400
 			});
 		}
-		
-		const validPassword = await verify(user.password_hash, password, {
+
+		const validPassword = await verify(user.passwordHash, password, {
 			memoryCost: 19456,
 			timeCost: 2,
 			outputLen: 32,

@@ -1,5 +1,5 @@
 import type { UserRepository } from '$lib/userRepository';
-import type { User as LuciaUser, Session } from 'Lucia';
+import type { User, Session } from 'Lucia';
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 declare global {
@@ -7,7 +7,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			userRepository: UserRepository;
-			user: LuciaUser | null;
+			user: User | null;
 			session: Session | null;
 		}
 		// interface PageData {}

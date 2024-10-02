@@ -1,22 +1,29 @@
 import { DuplicateEntryError } from '$lib/userRepository';
 import { describe, expect } from 'vitest';
 import { faker } from '@faker-js/faker';
-import { generateIdFromEntropySize } from 'lucia';
+import { generateIdFromEntropySize, type User } from 'lucia';
 import { itWithFixtures } from '../fixtures';
-import { Gender, SexualPreference, type ProfileInfo, type User } from '$lib/domain/user';
+import { Gender, SexualPreference, type ProfileInfo } from '$lib/domain/profile';
 
-function anyUser(): User {
+function anyUser(overrides: Partial<User> = {}): User {
 	const userId = generateIdFromEntropySize(10);
-	return { id: userId, email: faker.internet.email(), username: faker.internet.userName() };
+	return {
+		id: userId,
+		email: faker.internet.email(),
+		username: faker.internet.userName(),
+		profileIsSetup: false,
+		...overrides
+	};
 }
 
-function anyUserProfile(): ProfileInfo {
+function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 	return {
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
 		gender: faker.helpers.arrayElement(Object.values(Gender)),
 		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
-		biography: faker.lorem.paragraph({ min: 1, max: 25 })
+		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
+		...overrides
 	};
 }
 
@@ -38,20 +45,20 @@ describe('UserRepository', () => {
 
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
-		const found = await userRepository.peronsalInfoFor(user.id);
+		const found = await userRepository.personalInfoFor(user.id);
 		expect(found).toMatchObject(userProfile);
 	});
 
 	itWithFixtures('should be able to update user profile', async ({ userRepository }) => {
-		let userProfile = anyUserProfile();
+		const userProfile = anyUserProfile();
 		const user = anyUser();
 		await userRepository.createUser(user, faker.internet.password());
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
-		userProfile.biography = "I am a new person";
+		userProfile.biography = 'I am a new person';
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
-		const found = await userRepository.peronsalInfoFor(user.id);
+		const found = await userRepository.personalInfoFor(user.id);
 		expect(found).toMatchObject(userProfile);
 	});
 
@@ -76,16 +83,8 @@ describe('UserRepository', () => {
 		async ({ userRepository }) => {
 			const userName = faker.internet.userName();
 			const password = faker.internet.password();
-			const userOne = {
-				id: generateIdFromEntropySize(10),
-				email: faker.internet.email(),
-				username: userName
-			};
-			const userTwo = {
-				id: generateIdFromEntropySize(10),
-				email: faker.internet.email(),
-				username: userName
-			};
+			const userOne = anyUser({ username: userName });
+			const userTwo = anyUser({ username: userName });
 			await userRepository.createUser(userOne, password);
 
 			try {

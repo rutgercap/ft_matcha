@@ -5,11 +5,11 @@ enum Gender {
 }
 
 function isGender(value: string): value is Gender {
-	return Object.values(Gender).includes(value as Gender); 
+	return Object.values(Gender).includes(value as Gender);
 }
 
 function isSexualPreference(value: string): value is SexualPreference {
-	return Object.values(SexualPreference).includes(value as SexualPreference); 
+	return Object.values(SexualPreference).includes(value as SexualPreference);
 }
 
 enum SexualPreference {
@@ -27,11 +27,5 @@ type ProfileInfo = {
 	biography: string;
 };
 
-type User = {
-	id: string;
-	email: string;
-	username: string;
-};
-
 export { Gender, SexualPreference, isSexualPreference, isGender };
-export type { ProfileInfo, User };
+export type { ProfileInfo };

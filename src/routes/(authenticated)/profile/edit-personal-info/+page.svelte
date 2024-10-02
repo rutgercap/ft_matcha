@@ -133,7 +133,9 @@
 		<button
 			type="submit"
 			disabled={!isTainted($tainted)}
-			class="rounded-md {isTainted($tainted) ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'text-gray-400' } px-3 py-2 text-sm font-semibold  shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+			class="rounded-md {isTainted($tainted)
+				? 'bg-indigo-600 hover:bg-indigo-500 text-white'
+				: 'text-gray-400'} px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
 		>
 			Save
 		</button>
