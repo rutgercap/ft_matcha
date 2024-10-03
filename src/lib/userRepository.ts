@@ -4,6 +4,7 @@ import type { ProfileInfo } from './domain/profile';
 import { hash } from '@node-rs/argon2';
 import _ from 'lodash';
 import type { User } from 'lucia';
+import { v4 as uuidv4 } from 'uuid';
 
 type UserWithPassword = User & { passwordHash: string };
 
@@ -98,19 +99,28 @@ class UserRepository {
 		});
 	}
 
-	personalInfoFor(id: string): Promise<ProfileInfo | null> {
+	profileInfoFor(id: string): Promise<ProfileInfo | null> {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
-					.prepare<string, ToSnakeCase<ProfileInfo>>('SELECT * FROM profile_info WHERE user_id = ?')
+					.prepare<string, ToSnakeCase<ProfileInfo>>(
+						`
+						SELECT profile_info.*, GROUP_CONCAT(tags.tag) AS tags 
+						FROM profile_info
+						LEFT JOIN tags ON profile_info.user_id = tags.user_id
+						WHERE profile_info.user_id = ?
+						GROUP BY profile_info.user_id;`
+					)
 					.get(id);
 				if (!result) {
 					resolve(null);
 				} else {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
+					camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
+				console.log(e);
 				reject(
 					new UserRepositoryError('Something went wrong fetching user for username: ' + id, e)
 				);
@@ -118,7 +128,7 @@ class UserRepository {
 		});
 	}
 
-	async upsertPersonalInfo(id: string, profileTest: ProfileInfo): Promise<void> {
+	async upsertPersonalInfo(id: string, info: ProfileInfo): Promise<void> {
 		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
 			`
 				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography) 
@@ -133,6 +143,10 @@ class UserRepository {
 		const updateProfileSet = this.db.prepare<[string]>(
 			'UPDATE users SET profile_is_setup = 1 WHERE id = ?'
 		);
+		const deleteTags = this.db.prepare<[string]>(`DELETE FROM tags WHERE user_id = ?`);
+		const insertTag = this.db.prepare<[string, string, string]>(
+			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
+		);
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction((id: string, profileTest: ProfileInfo) => {
@@ -145,8 +159,12 @@ class UserRepository {
 						profileTest.biography
 					);
 					updateProfileSet.run(id);
+					deleteTags.run(id);
+					profileTest.tags.forEach((tag) => {
+						insertTag.run(uuidv4(), id, tag);
+					});
 				});
-				transaction(id, profileTest);
+				transaction(id, info);
 				resolve();
 			} catch (e) {
 				if (e instanceof SqliteError) {

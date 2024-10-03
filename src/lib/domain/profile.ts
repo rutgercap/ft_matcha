@@ -25,7 +25,12 @@ type ProfileInfo = {
 	gender: Gender;
 	sexualPreference: SexualPreference;
 	biography: string;
+	tags: string[];
 };
 
-export { Gender, SexualPreference, isSexualPreference, isGender };
+function initials(profileInfo: ProfileInfo): string {
+	return (profileInfo.firstName[0] + profileInfo.lastName[0]).toUpperCase();
+}
+
+export { Gender, SexualPreference, isSexualPreference, isGender, initials };
 export type { ProfileInfo };

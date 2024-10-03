@@ -23,6 +23,7 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		gender: faker.helpers.arrayElement(Object.values(Gender)),
 		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
+		tags: [faker.lorem.word(), faker.lorem.word()],
 		...overrides
 	};
 }
@@ -45,7 +46,7 @@ describe('UserRepository', () => {
 
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
-		const found = await userRepository.personalInfoFor(user.id);
+		const found = await userRepository.profileInfoFor(user.id);
 		expect(found).toMatchObject(userProfile);
 	});
 
@@ -58,7 +59,19 @@ describe('UserRepository', () => {
 		userProfile.biography = 'I am a new person';
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
-		const found = await userRepository.personalInfoFor(user.id);
+		const found = await userRepository.profileInfoFor(user.id);
+		expect(found).toMatchObject(userProfile);
+	});
+
+	itWithFixtures('Setting new tags does not double tags', async ({ userRepository }) => {
+		const userProfile = anyUserProfile();
+		const user = anyUser({ profileIsSetup: true });
+		await userRepository.createUser(user, faker.internet.password());
+
+		userProfile.tags = ['tag1000'];
+		await userRepository.upsertPersonalInfo(user.id, userProfile);
+
+		const found = await userRepository.profileInfoFor(user.id);
 		expect(found).toMatchObject(userProfile);
 	});
 
