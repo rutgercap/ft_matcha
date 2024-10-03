@@ -5,7 +5,6 @@
 	export let data: PageData;
 
 	let { profileInfo } = data;
-	const tags = ['Cooking', 'Gaming', 'Killing-people'];
 </script>
 
 <div class="max-w-3xl md:mx-auto mx-4 mb-10">
@@ -19,7 +18,7 @@
 		</div>
 		<div class="mt-4 flex md:ml-4 md:mt-0">
 			<a
-				href="/profile/edit-personal-info"
+				href="/profile/edit-profile"
 				type="button"
 				class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
 				>Edit</a
@@ -87,7 +86,7 @@
 			<div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
 				<dt class="text-sm font-medium leading-6 text-gray-900">Interests</dt>
 				<dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-					{#each tags as tag}
+					{#each profileInfo.tags as tag}
 						<span
 							class="mx-1 inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
 							>#{tag}</span

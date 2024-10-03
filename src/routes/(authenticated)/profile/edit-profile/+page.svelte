@@ -4,7 +4,9 @@
 
 	export let data;
 
-	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form);
+	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
+		resetForm: false,
+	});
 </script>
 
 <div class="max-w-3xl mx-auto">
@@ -55,7 +57,7 @@
 				</div>
 
 				<div class="sm:col-span-3">
-					<label for="country" class="block text-sm font-medium leading-6 text-gray-900"
+					<label for="gender" class="block text-sm font-medium leading-6 text-gray-900"
 						>Gender</label
 					>
 					<div class="mt-2">
@@ -77,7 +79,7 @@
 					{/if}
 				</div>
 				<div class="sm:col-span-3">
-					<label for="country" class="block text-sm font-medium leading-6 text-gray-900"
+					<label for="sexualPreference" class="block text-sm font-medium leading-6 text-gray-900"
 						>Sexual preference</label
 					>
 					<div class="mt-2">
@@ -100,7 +102,7 @@
 					{/if}
 				</div>
 				<div class="col-span-full">
-					<label for="about" class="block text-sm font-medium leading-6 text-gray-900"
+					<label for="biography" class="block text-sm font-medium leading-6 text-gray-900"
 						>Biography</label
 					>
 					<div class="mt-2">
@@ -117,6 +119,25 @@
 					<p class="mt-3 text-sm leading-6 text-gray-600">Write a few sentences about yourself.</p>
 					{#if $errors.biography}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.biography}</p>
+					{/if}
+				</div>
+				<div class="col-span-full">
+					<label for="tags" class="block text-sm font-medium leading-6 text-gray-900">Tags</label>
+					<div class="mt-2">
+						<textarea
+							id="tags"
+							name="tags"
+							rows="1"
+							class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+							bind:value={$form.tags}
+							aria-invalid={$errors.tags ? 'true' : undefined}
+							aria-describedby={$errors.tags ? 'tags-error' : undefined}
+							{...$constraints.tags}
+						></textarea>
+					</div>
+					<p class="mt-3 text-sm leading-6 text-gray-600">Tags are comma separated.</p>
+					{#if $errors.tags}
+						<p class="mt-2 text-sm text-red-600" id="tags-error">{$errors.tags._errors}</p>
 					{/if}
 				</div>
 			</div>
