@@ -15,17 +15,20 @@ const profileSchema = z.object({
 		.refine((value) => isSexualPreference(value)),
 	biography: z.string().min(0).max(500).default(''),
 	tags: z
-	.string()
-	.transform((val) => val.split(',').map((item) => item.trim())) // Split and trim each item
-	.refine((arr) => arr.length > 0 && arr.length <= 50, {
-	  message: 'Array length must be between 1 and 50.',
-	}),
+		.string()
+		.transform((val) => val.split(',').map((item) => item.trim())) // Split and trim each item
+		.refine((arr) => arr.length > 0 && arr.length <= 50, {
+			message: 'Array length must be between 1 and 50.'
+		})
 });
 
 export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {
 	const currentUser = user as User;
-	let currentProfile = await userRepository.profileInfoFor(currentUser.id);
-	const form = await superValidate(currentProfile ? {...currentProfile, tags: currentProfile.tags.join(',')}: {}, zod(profileSchema));
+	const currentProfile = await userRepository.profileInfoFor(currentUser.id);
+	const form = await superValidate(
+		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
+		zod(profileSchema)
+	);
 	return { form };
 };
 
