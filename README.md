@@ -4,20 +4,17 @@ Web dev project for 42.
 
 ## How to run:
 
-First install dependencies:
+***note: for the moment the app is on port 3000***
 
-```bash
-pnpm install
+to build the image:
+
+```sh
+cd path-to-repo
+docker build -t matcha_sveltkit .
 ```
 
-Then run in dev mode with:
-
-```bash
-pnpm run dev
+to run the image:
+```sh
+docker run -p 3000:3000 match_sveltkit
 ```
 
-To run the tests, you can run:
-
-```bash
-pnpm run test:unit
-```
