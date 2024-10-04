@@ -6,15 +6,24 @@ Web dev project for 42.
 
 ***note: for the moment the app is on port 3000***
 
-to build the image:
+to build and run image:
 
 ```sh
-cd path-to-repo
-docker build -t matcha_sveltkit .
+make up # equivalent to: docker compose -f docker-compose.dev.yml up --build
 ```
 
-to run the image:
+to shut the container down:
 ```sh
-docker run -p 3000:3000 match_sveltkit
+make down # equivalent to: docker compose -f docker-compose.dev.yml down
+```
+
+Run the unit test:
+```sh
+make test # equivalent to: docker compose -f docker-compose.dev.yml exec matcha pnpm run test:unit
+```
+
+Prune your system:
+```sh
+make prune # equivalent to: docker system prune -a --volumes -f
 ```
 
