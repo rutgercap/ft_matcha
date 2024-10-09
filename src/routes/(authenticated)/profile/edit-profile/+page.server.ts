@@ -23,6 +23,8 @@ const profileSchema = z.object({
 });
 
 export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {
+
+	console.log(user?.id);
 	const currentUser = user as User;
 	let currentProfile = await userRepository.profileInfoFor(currentUser.id);
 	const form = await superValidate(currentProfile ? {...currentProfile, tags: currentProfile.tags.join(',')}: {}, zod(profileSchema));

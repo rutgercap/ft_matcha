@@ -4,17 +4,8 @@ import { faker } from '@faker-js/faker';
 import { generateIdFromEntropySize, type User } from 'lucia';
 import { itWithFixtures } from '../fixtures';
 import { Gender, SexualPreference, type ProfileInfo } from '$lib/domain/profile';
+import { anyUser } from '../testHelpers';
 
-function anyUser(overrides: Partial<User> = {}): User {
-	const userId = generateIdFromEntropySize(10);
-	return {
-		id: userId,
-		email: faker.internet.email(),
-		username: faker.internet.userName(),
-		profileIsSetup: faker.datatype.boolean(),
-		...overrides
-	};
-}
 
 function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 	return {
@@ -39,14 +30,12 @@ describe('UserRepository', () => {
 		expect(found).toMatchObject(user);
 	});
 
-	itWithFixtures('should be able to set user profile', async ({ userRepository }) => {
+	itWithFixtures('should be able to set user profile', async ({ userRepository, savedUser }) => {
 		const userProfile = anyUserProfile();
-		const user = anyUser({ profileIsSetup: true });
-		await userRepository.createUser(user, faker.internet.password());
 
-		await userRepository.upsertPersonalInfo(user.id, userProfile);
+		await userRepository.upsertPersonalInfo(savedUser.id, userProfile);
 
-		const found = await userRepository.profileInfoFor(user.id);
+		const found = await userRepository.profileInfoFor(savedUser.id);
 		expect(found).toMatchObject(userProfile);
 	});
 
