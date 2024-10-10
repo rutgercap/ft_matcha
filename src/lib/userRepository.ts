@@ -103,12 +103,14 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
-					.prepare<string, ToSnakeCase<ProfileInfo>>(`
+					.prepare<string, ToSnakeCase<ProfileInfo>>(
+						`
 						SELECT profile_info.*, GROUP_CONCAT(tags.tag) AS tags 
 						FROM profile_info
 						LEFT JOIN tags ON profile_info.user_id = tags.user_id
 						WHERE profile_info.user_id = ?
-						GROUP BY profile_info.user_id;`)
+						GROUP BY profile_info.user_id;`
+					)
 					.get(id);
 				if (!result) {
 					resolve(null);
@@ -141,14 +143,12 @@ class UserRepository {
 		const updateProfileSet = this.db.prepare<[string]>(
 			'UPDATE users SET profile_is_setup = 1 WHERE id = ?'
 		);
-		const deleteTags = this.db.prepare<[string]>(
-			`DELETE FROM tags WHERE user_id = ?`
-		);
+		const deleteTags = this.db.prepare<[string]>(`DELETE FROM tags WHERE user_id = ?`);
 		const insertTag = this.db.prepare<[string, string, string]>(
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
 		return new Promise((resolve, reject) => {
-		try {
+			try {
 				const transaction = this.db.transaction((id: string, profileTest: ProfileInfo) => {
 					insertIntoProfile.run(
 						id,
@@ -161,7 +161,7 @@ class UserRepository {
 					updateProfileSet.run(id);
 					deleteTags.run(id);
 					profileTest.tags.forEach((tag) => {
-						insertTag.run(uuidv4(),id, tag);
+						insertTag.run(uuidv4(), id, tag);
 					});
 				});
 				transaction(id, info);

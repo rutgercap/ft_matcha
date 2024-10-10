@@ -4,20 +4,26 @@ Web dev project for 42.
 
 ## How to run:
 
-First install dependencies:
+***note: for the moment the app is on port 3000***
 
-```bash
-pnpm install
+to build and run image:
+
+```sh
+make up # equivalent to: docker compose -f docker-compose.dev.yml up --build
 ```
 
-Then run in dev mode with:
-
-```bash
-pnpm run dev
+to shut the container down:
+```sh
+make down # equivalent to: docker compose -f docker-compose.dev.yml down
 ```
 
-To run the tests, you can run:
-
-```bash
-pnpm run test:unit
+Run the unit test:
+```sh
+make test # equivalent to: docker compose -f docker-compose.dev.yml exec matcha pnpm run test:unit
 ```
+
+Prune your system:
+```sh
+make prune # equivalent to: docker system prune -a --volumes -f
+```
+

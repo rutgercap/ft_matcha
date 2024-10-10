@@ -57,7 +57,7 @@ describe('UserRepository', () => {
 		const user = anyUser({ profileIsSetup: true });
 		await userRepository.createUser(user, faker.internet.password());
 
-		userProfile.tags= ["tag1000"];
+		userProfile.tags = ['tag1000'];
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
 		const found = await userRepository.profileInfoFor(user.id);
