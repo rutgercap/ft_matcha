@@ -5,8 +5,8 @@ import { createHash } from 'crypto';
 import type { Database as DatabaseType } from 'better-sqlite3';
 
 export const MIGRATIONS_PATH = 'migrations';
-export const LOCK_FILE_PATH = 'migrations.lock';
-export const DATABASE_PATH = 'database.db';
+export const LOCK_FILE_PATH = 'database/migrations.lock';
+export const DATABASE_PATH = 'database/database.db';
 
 // singleton instance
 let db: DatabaseType | null = null;
