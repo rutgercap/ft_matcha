@@ -3,7 +3,7 @@ import { generateIdFromEntropySize } from 'lucia';
 import * as fs from 'fs';
 import * as path from 'path';
 
-class ImageRepositoryError extends Error {
+export class ImageRepositoryError extends Error {
 	exception: unknown;
 	constructor(message: string, exception: unknown) {
 		super(message);
@@ -11,6 +11,16 @@ class ImageRepositoryError extends Error {
 		this.exception = exception;
 	}
 }
+
+export class ConstraintImageRepositoryError extends Error {
+	exception: unknown;
+	constructor(message: string, exception: unknown) {
+		super(message);
+		this.name = 'ImageRepositoryError';
+		this.exception = exception;
+	}
+}
+
 
 class ImageRepository {
     constructor(private destination: string, private db: Database) {}
@@ -28,6 +38,14 @@ class ImageRepository {
         let result : null | any = null
         try {
             result = sql.run(id, user_id, order);
+            let img_cnt = this.db.prepare<string>(`SELECT count(*) AS cnt
+                                                    FROM profile_pictures
+                                                    WHERE user_id = ?`).get(user_id)
+            if (img_cnt.cnt > 5) {
+                this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(id)
+                throw new ConstraintImageRepositoryError('Maximum image limit reach for user:' + user_id, null)
+            }
+
         } catch (error: any) {
             if (error.message.includes("UNIQUE constraint failed")) {
                 const sql = this.db.prepare<string, number>(`
@@ -35,8 +53,10 @@ class ImageRepository {
                     `);
                 result = sql.get(user_id, order)
                 id = result.id;
+            } else if (error instanceof ConstraintImageRepositoryError) {
+                throw error
             } else {
-                throw new ImageRepositoryError('Error occured trying to upsert image', error)
+                throw new ImageRepositoryError('Error occured trying to upsert image for user:' + user_id, error)
             }
         }
 
@@ -73,7 +93,8 @@ class ImageRepository {
                 SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
                 `);
             const res = sql.get(user_id, order)
-            return this.imageById(res.id)
+            let test = this.imageById(res.id)
+            return test
         } catch (error) {
             throw new ImageRepositoryError('Error trying to fetch the image from user_id and order', error)
         }
@@ -88,6 +109,31 @@ class ImageRepository {
         } catch (error) {
             // Handle the case where the file does not exist or another error occurs
             throw new ImageRepositoryError('Error trying to read image:' + filePath, error)
+        }
+    }
+    public async deleteImage(user_id: string, order: number) {
+        try {
+            const sql = this.db.prepare<string, number>(`
+                SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
+                `);
+            const res = sql.get(user_id, order)
+
+            this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(res.id)
+            await this.deleteImageById(res.id)
+        } catch (error) {
+            throw new ImageRepositoryError('Error trying to fetch the image for deletion from user_id and order', error)
+        }
+
+    }
+
+    public async deleteImageById(id: string): Promise<void> {
+        const filePath = `./profile-pictures/${id}.jpg`; // Construct the file path
+        try {
+            await fs.promises.unlink(filePath); // Delete the file
+            console.log(`Image ${filePath} deleted successfully.`); // Log successful deletion
+        } catch (error) {
+            // Handle the case where the file does not exist or another error occurs
+            throw new ImageRepositoryError('Error trying to delete image:' + filePath, error);
         }
     }
 }
