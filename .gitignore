@@ -25,4 +25,5 @@ vite.config.ts.timestamp-*
 database.db
 database
 profile-pictures/*
-!profile-pictures/default.jpg
+!profile-pictures/default*
+
