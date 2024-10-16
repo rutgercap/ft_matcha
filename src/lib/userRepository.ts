@@ -5,6 +5,7 @@ import { hash } from '@node-rs/argon2';
 import _ from 'lodash';
 import type { User } from 'lucia';
 import { v4 as uuidv4 } from 'uuid';
+import { ImageRepository } from './imageRepository';
 
 type UserWithPassword = User & { passwordHash: string };
 

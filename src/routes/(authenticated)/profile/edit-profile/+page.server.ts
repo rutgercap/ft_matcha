@@ -6,6 +6,11 @@ import { z } from 'zod';
 import { isGender, isSexualPreference } from '$lib/domain/profile';
 import type { User } from 'lucia';
 
+const MAX_FILE_SIZE = 5000000;
+
+
+const ACCEPTED_IMAGE_SIZE = ["image/jpeg", "image/jpg", "image/ProcessingInstruction", "image/webp"];
+
 const profileSchema = z.object({
 	firstName: z.string().min(1).max(255),
 	lastName: z.string().min(1).max(255),
@@ -19,7 +24,12 @@ const profileSchema = z.object({
 		.transform((val) => val.split(',').map((item) => item.trim())) // Split and trim each item
 		.refine((arr) => arr.length > 0 && arr.length <= 50, {
 			message: 'Array length must be between 1 and 50.'
-		})
+		}),
+	pictures: z
+		  .instanceof(File, { message: 'Please upload a file.'})
+		  .refine((f) => f.size < MAX_FILE_SIZE, 'Max 100 kB upload size.')
+		  .optional() // TODO remove optinal when load function will be updated with currentImage
+
 });
 
 export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {
@@ -40,6 +50,7 @@ export const actions: Actions = {
 			return fail(401, { message: 'You must be signed in to update your profile' });
 		}
 		const form = await superValidate(request, zod(profileSchema));
+		console.log("LALALALALALALAL", form.data)
 		if (!form.valid) {
 			return message(form, 'Please fix the invalid fields before trying again.', { status: 400 });
 		}

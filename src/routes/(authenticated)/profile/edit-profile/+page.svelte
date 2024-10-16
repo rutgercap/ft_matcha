@@ -1,16 +1,18 @@
 <script lang="ts">
-	import { superForm } from 'sveltekit-superforms';
+	import { superForm, fileProxy } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
 
-	export let data;
+	export let data: PageData;
 
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
 		resetForm: false
 	});
+	const file = fileProxy(form, 'image')
+	
 </script>
 
 <div class="max-w-3xl mx-auto">
-	<form class="px-4 mb-8" method="POST" use:enhance>
+	<form class="px-4 mb-8" method="POST" use:enhance enctype="multipart/form-data">
 		<div class="space-y-10">
 			<h2 class="text-base font-semibold leading-7 text-gray-900">Profile Information</h2>
 			<div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -138,6 +140,20 @@
 					<p class="mt-3 text-sm leading-6 text-gray-600">Tags are comma separated.</p>
 					{#if $errors.tags}
 						<p class="mt-2 text-sm text-red-600" id="tags-error">{$errors.tags._errors}</p>
+					{/if}
+				</div>
+					<!-- Image upload field-->
+				<div class="col-span-full">
+					<label for="pictures" class="block text-sm font-medium leading-6 text-gray-900">Profile pictures</label>
+					<input
+						id="pictures"
+						name="pictures"
+						type="file"
+						accept="image/png, image/jpeg, image/jpg"
+    					bind:files={$file}
+					/>
+					{#if errors.profileImage}
+						<span class="error">{errors.profileImage}</span>
 					{/if}
 				</div>
 			</div>
