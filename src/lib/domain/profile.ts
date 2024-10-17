@@ -26,6 +26,7 @@ type ProfileInfo = {
 	sexualPreference: SexualPreference;
 	biography: string;
 	tags: string[];
+	pictures: File | undefined
 };
 
 function initials(profileInfo: ProfileInfo): string {

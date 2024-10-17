@@ -6,6 +6,7 @@ import _ from 'lodash';
 import type { User } from 'lucia';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageRepository } from './imageRepository';
+import { Buffer } from 'buffer'
 
 type UserWithPassword = User & { passwordHash: string };
 
@@ -39,7 +40,7 @@ class DuplicateEntryError extends UserRepositoryError {
 }
 
 class UserRepository {
-	constructor(private db: Database) {}
+	constructor(private db: Database, private imageRepo : ImageRepository) {}
 
 	async userByUsername(username: string): Promise<UserWithPassword | null> {
 		return new Promise((resolve, reject) => {
@@ -100,17 +101,19 @@ class UserRepository {
 		});
 	}
 
-	profileInfoFor(id: string): Promise<ProfileInfo | null> {
+	async profileInfoFor(id: string): Promise<ProfileInfo | null> {
+		const pictures : Buffer = await this.imageRepo.image(id, 0)
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
 					.prepare<string, ToSnakeCase<ProfileInfo>>(
 						`
-						SELECT profile_info.*, GROUP_CONCAT(tags.tag) AS tags 
+						SELECT profile_info.*, GROUP_CONCAT(tags.tag) AS tags
 						FROM profile_info
 						LEFT JOIN tags ON profile_info.user_id = tags.user_id
 						WHERE profile_info.user_id = ?
-						GROUP BY profile_info.user_id;`
+						GROUP BY profile_info.user_id
+						`
 					)
 					.get(id);
 				if (!result) {
@@ -118,6 +121,9 @@ class UserRepository {
 				} else {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
 					camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
+					if (pictures) {
+						camelCaseObject.pictures = new File([pictures], "test.png", { type: "image/*" });
+					}
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
@@ -148,6 +154,12 @@ class UserRepository {
 		const insertTag = this.db.prepare<[string, string, string]>(
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
+		let buffer : null | Buffer = null
+		if (info.pictures) {
+			buffer = await info.pictures.arrayBuffer()
+			buffer = Buffer.from(buffer)
+		}
+
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction((id: string, profileTest: ProfileInfo) => {
@@ -166,10 +178,14 @@ class UserRepository {
 					});
 				});
 				transaction(id, info);
+
+				if (buffer) {
+					this.imageRepo.upsertImage(id, 0, buffer)
+				}
+
 				resolve();
 			} catch (e) {
 				if (e instanceof SqliteError) {
-					console.log(e);
 					reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));
 				}
 				reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));

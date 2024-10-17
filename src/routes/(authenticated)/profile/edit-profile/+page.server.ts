@@ -37,6 +37,7 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository } })
 	console.log(user?.id);
 	const currentUser = user as User;
 	const currentProfile = await userRepository.profileInfoFor(currentUser.id);
+	console.log('ICICICICICICIIC LE TEST', currentProfile)
 	const form = await superValidate(
 		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
 		zod(profileSchema)
@@ -50,7 +51,6 @@ export const actions: Actions = {
 			return fail(401, { message: 'You must be signed in to update your profile' });
 		}
 		const form = await superValidate(request, zod(profileSchema));
-		console.log("LALALALALALALAL", form.data)
 		if (!form.valid) {
 			return message(form, 'Please fix the invalid fields before trying again.', { status: 400 });
 		}
@@ -63,3 +63,5 @@ export const actions: Actions = {
 		return message(form, 'Profile updated!');
 	}
 };
+
+
