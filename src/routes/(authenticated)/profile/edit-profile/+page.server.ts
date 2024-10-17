@@ -11,6 +11,13 @@ const MAX_FILE_SIZE = 5000000;
 
 const ACCEPTED_IMAGE_SIZE = ["image/jpeg", "image/jpg", "image/ProcessingInstruction", "image/webp"];
 
+const picturesSchema = z.union([
+	z
+	  .instanceof(File, { message: 'Please upload a valid file.' }) // Accepts File objects
+	  .refine((f) => f.size < MAX_FILE_SIZE, { message: 'Max 100 kB upload size.' }),
+	z.string({ message: 'Must be a valid string representing the image name.' }) // Accepts image filenames as strings
+  ]);
+
 const profileSchema = z.object({
 	firstName: z.string().min(1).max(255),
 	lastName: z.string().min(1).max(255),
@@ -25,10 +32,7 @@ const profileSchema = z.object({
 		.refine((arr) => arr.length > 0 && arr.length <= 50, {
 			message: 'Array length must be between 1 and 50.'
 		}),
-	pictures: z
-		  .instanceof(File, { message: 'Please upload a file.'})
-		  .refine((f) => f.size < MAX_FILE_SIZE, 'Max 100 kB upload size.')
-		  .optional() // TODO remove optinal when load function will be updated with currentImage
+	pictures: picturesSchema.optional()
 
 });
 
@@ -37,11 +41,11 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository } })
 	console.log(user?.id);
 	const currentUser = user as User;
 	const currentProfile = await userRepository.profileInfoFor(currentUser.id);
-	console.log('ICICICICICICIIC LE TEST', currentProfile)
 	const form = await superValidate(
 		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
 		zod(profileSchema)
 	);
+	console.log('ICICICICICICIIC LE TEST', currentProfile)
 	return { form };
 };
 
@@ -63,5 +67,6 @@ export const actions: Actions = {
 		return message(form, 'Profile updated!');
 	}
 };
+
 
 

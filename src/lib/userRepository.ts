@@ -102,7 +102,7 @@ class UserRepository {
 	}
 
 	async profileInfoFor(id: string): Promise<ProfileInfo | null> {
-		const pictures : Buffer | null = await this.imageRepo.image(id, 0)
+		const pictures : string | null = await this.imageRepo.imageIdOnly(id, 0)
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db

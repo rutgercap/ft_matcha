@@ -87,6 +87,17 @@ class ImageRepository {
         return result
     }
 
+    public imageIdOnly(user_id:string, order:number) : string | null {
+        try {
+            const sql = this.db.prepare<string, number>(`
+                SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
+                `);
+            const res = sql.get(user_id, order)
+        } catch (e) {
+            new ImageRepositoryError('Error trying to fetch the image id only from user_id and order', e)
+        }
+    }
+
     public async image(user_id: string, order: number): Promise<Buffer | null> {
         try {
             const sql = this.db.prepare<string, number>(`
