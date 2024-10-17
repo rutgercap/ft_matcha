@@ -72,22 +72,22 @@ class UserRepository {
 				const result = this.db
 					.prepare<string, ProfileInfo>(
 						`
-						SELECT 
-							profiles.user_id, 
-							profiles.gender, 
-							profiles.sex_preference, 
-							profiles.biography, 
-							GROUP_CONCAT(DISTINCT pictures.url) AS pictures, 
+						SELECT
+							profiles.user_id,
+							profiles.gender,
+							profiles.sex_preference,
+							profiles.biography,
+							GROUP_CONCAT(DISTINCT pictures.url) AS pictures,
 							GROUP_CONCAT(DISTINCT tags.tag) AS tags
-						FROM 
+						FROM
 							profiles
-						INNER JOIN 
+						INNER JOIN
 							pictures ON profiles.user_id = pictures.user_id
-						INNER JOIN 
+						INNER JOIN
 							tags ON profiles.user_id = tags.user_id
-						WHERE 
-							profiles.user_id = ? 
-						GROUP BY 
+						WHERE
+							profiles.user_id = ?
+						GROUP BY
 							profiles.user_id;
 					`
 					)
@@ -102,7 +102,7 @@ class UserRepository {
 	}
 
 	async profileInfoFor(id: string): Promise<ProfileInfo | null> {
-		const pictures : Buffer = await this.imageRepo.image(id, 0)
+		const pictures : Buffer | null = await this.imageRepo.image(id, 0)
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
@@ -121,9 +121,10 @@ class UserRepository {
 				} else {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
 					camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
-					if (pictures) {
+					if (pictures)
 						camelCaseObject.pictures = new File([pictures], "test.png", { type: "image/*" });
-					}
+					else
+						camelCaseObject.pictures = undefined
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
@@ -138,9 +139,9 @@ class UserRepository {
 	async upsertPersonalInfo(id: string, info: ProfileInfo): Promise<void> {
 		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
 			`
-				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography) 
-				VALUES (?, ?, ?, ?, ?, ?) 
-				ON CONFLICT(user_id) DO UPDATE SET 
+				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography)
+				VALUES (?, ?, ?, ?, ?, ?)
+				ON CONFLICT(user_id) DO UPDATE SET
 				first_name=excluded.first_name,
 				last_name=excluded.last_name,
 				gender=excluded.gender,
@@ -225,8 +226,8 @@ class UserRepository {
 			try {
 				const result = this.db
 					.prepare<[string, string, string, string], ToSnakeCase<UserWithPassword>>(
-						`INSERT INTO users (id, email, username, password_hash) 
-						VALUES (?, ?, ?, ?) 
+						`INSERT INTO users (id, email, username, password_hash)
+						VALUES (?, ?, ?, ?)
 						RETURNING id, email, username, profile_is_setup;`
 					)
 					.get(user.id, user.email, user.username, passwordHash);

@@ -93,7 +93,10 @@ class ImageRepository {
                 SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
                 `);
             const res = sql.get(user_id, order)
-            let test = this.imageById(res.id)
+            let test: Buffer | null = null
+            if (res && res.id){
+                test = this.imageById(res.id)
+            }
             return test
         } catch (error) {
             throw new ImageRepositoryError('Error trying to fetch the image from user_id and order', error)

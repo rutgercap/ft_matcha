@@ -15,6 +15,7 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
 		tags: [faker.lorem.word(), faker.lorem.word()],
+		pictures: undefined,
 		...overrides
 	};
 }
@@ -49,6 +50,7 @@ describe('UserRepository', () => {
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
 		const found = await userRepository.profileInfoFor(user.id);
+
 		expect(found).toMatchObject(userProfile);
 	});
 

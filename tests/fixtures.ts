@@ -18,6 +18,9 @@ interface MyFixtures {
 	savedUser: User;
 }
 
+let IMAGE_FOLDER = './profile-pictures'
+
+
 export const itWithFixtures = it.extend<MyFixtures>({
 	db: async ({}, use) => {
 		const tempMigrationsDir = temp.mkdirSync('migrations');
@@ -26,13 +29,14 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(db);
 		temp.cleanupSync();
 	},
-	userRepository: async ({ db }, use) => {
-		await use(new UserRepository(db));
-	},
 	imageRepository: async ({ db }, use) => {
-		const tempMigrationsDir = temp.mkdirSync('migrations');
+		const tempMigrationsDir = IMAGE_FOLDER;
+
 		await use(new ImageRepository(tempMigrationsDir, db));
 		temp.cleanupSync();
+	},
+	userRepository: async ({ db, imageRepository }, use) => {
+		await use(new UserRepository(db, imageRepository));
 	},
 	savedUser: async ({ userRepository }, use) => {
 		const user = anyUser();
