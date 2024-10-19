@@ -102,7 +102,6 @@ class UserRepository {
 	}
 
 	async profileInfoFor(id: string): Promise<ProfileInfo | null> {
-		const pictures : string | null = await this.imageRepo.imageIdOnly(id, 0)
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
@@ -116,15 +115,13 @@ class UserRepository {
 						`
 					)
 					.get(id);
+					const pictures : string = this.imageRepo.imageIdOnly(id, 0)
 				if (!result) {
 					resolve(null);
 				} else {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
 					camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
-					if (pictures)
-						camelCaseObject.pictures = new File([pictures], "test.png", { type: "image/*" });
-					else
-						camelCaseObject.pictures = undefined
+					camelCaseObject.pictures_filenames = pictures
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {

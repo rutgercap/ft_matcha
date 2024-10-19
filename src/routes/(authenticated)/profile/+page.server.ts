@@ -20,7 +20,6 @@ async function personalInfoFor(
 export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {
 	const currentUser = user as User;
 	const maybeProfileInfo = await personalInfoFor(currentUser, userRepository);
-	console.log("--------------------->", maybeProfileInfo)
 	if (!maybeProfileInfo) {
 		error(404, {
 			message: 'Not found'

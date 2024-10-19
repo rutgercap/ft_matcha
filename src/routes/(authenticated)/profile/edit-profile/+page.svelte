@@ -8,6 +8,12 @@
 		resetForm: false
 	});
 	const file = fileProxy(form, 'image')
+	let imageUrl = '/api/pics/' + $form.pictures_filenames
+	
+	// Trigger file input click when the image is clicked
+	function triggerFileInput() {
+		document.getElementById('pictures').click(); // Simulate click on the hidden input
+	}
 	
 </script>
 
@@ -151,7 +157,19 @@
 						type="file"
 						accept="image/png, image/jpeg, image/jpg"
     					bind:files={$file}
+						class="hidden"
 					/>
+
+					  <!-- Display the image and make it clickable -->
+					<div class="profile-picture-upload" on:click={triggerFileInput}>
+						<img
+						src={imageUrl}
+						alt="Profile picture"
+						class="profile-picture-preview"
+						style="cursor: pointer; max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 50%;"
+						/>
+					</div>
+
 					{#if errors.profileImage}
 						<span class="error">{errors.profileImage}</span>
 					{/if}

@@ -87,12 +87,15 @@ class ImageRepository {
         return result
     }
 
-    public imageIdOnly(user_id:string, order:number) : string | null {
+    public imageIdOnly(user_id:string, order:number) : string {
         try {
             const sql = this.db.prepare<string, number>(`
                 SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
                 `);
             const res = sql.get(user_id, order)
+            if (!res || !res.id)
+                return 'default2'
+            return res.id
         } catch (e) {
             new ImageRepositoryError('Error trying to fetch the image id only from user_id and order', e)
         }
