@@ -7,21 +7,32 @@
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
 		resetForm: true
 	});
-	let imageUrl = '/api/pics/' + $form.pictures_filenames + `?t=${Date.now()}`
 
-	// Trigger file input click when the image is clicked
-	function triggerFileInput() {
-		document.getElementById('pictures').click(); // Simulate click on the hidden input
+	let all_url = ['/api/pics/' + $form.pictures_filenames[0] + `?t=${Date.now()}`, 
+					'/api/pics/' + $form.pictures_filenames[1] + `?t=${Date.now()}`,
+					 '/api/pics/' + $form.pictures_filenames[2] + `?t=${Date.now()}`, 
+					 '/api/pics/' + $form.pictures_filenames[3] + `?t=${Date.now()}`, 
+					 '/api/pics/' + $form.pictures_filenames[4] + `?t=${Date.now()}`
+					]
+
+	function triggerEachFileInput(idx) {
+		console.log('triggerEachFileInoout:', idx)
+		document.getElementById(`pictures-${idx}`).click(); // Simulate click on the hidden input
+
 	}
 
-	let avatar;
-	const handleFileInput = (e) => {
-    	$form.image = e.currentTarget.files?.item(0) as File; // No need for 'as File' here
+	  const handleEachFileInput = (idx, e) => {
+		console.log('ICICICICICICICIIC le test', $form.pictures)
+		if (!$form.pictures) {
+			console.log('ICCCCCCCCCCCCCC LE TEST 2')
+			$form.pictures = []
+		}
+		console.log('just apres ----->',e.currentTarget.files?.item(0))
+    	$form.pictures[idx] = (e.currentTarget.files?.item(0) as File); // No need for 'as File' here
 		let reader = new FileReader();  // To read the file as a DataURL
-		reader.readAsDataURL($form.image);  // Convert the file to DataURL
+		reader.readAsDataURL($form.pictures[idx]);  // Convert the file to DataURL
 		reader.onload = (e) => {
-			imageUrl = e.target.result;  
-			console.log(imageUrl);  // For debugging, logs the DataURL (image in base64 format)
+			all_url[idx] = e.target.result; 
 		};
   	};
 
@@ -161,11 +172,12 @@
 					<!-- Image upload field-->
 				<div class="col-span-full">
 					<label for="pictures" class="block text-sm font-medium leading-6 text-gray-900">Profile pictures</label>
+					{#each all_url as imgUrl, index}
 					<input
-						id="pictures"
+						id={`pictures-${index}`}
 						name="pictures"
 						type="file"
-						on:input={handleFileInput}
+						on:input={(e) => handleEachFileInput(index, e)}
 						accept="image/png, image/jpeg, image/jpg"
 						class="hidden"
 					/>
@@ -173,15 +185,15 @@
 					<!-- Display the image and make it clickable -->
 
 					<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
-					<div class="profile-picture-upload" on:click={triggerFileInput}>
+					<div class="profile-picture-upload" on:click={() => triggerEachFileInput(index)}>
 						<img
-						src={imageUrl}
+						src={imgUrl}
 						alt="profile"
 						class="profile-picture-preview"
 						style="cursor: pointer; max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 50%;"
 						/>
 					</div>
-
+					{/each}
 					{#if errors.profileImage}
 						<span class="error">{errors.profileImage}</span>
 					{/if}

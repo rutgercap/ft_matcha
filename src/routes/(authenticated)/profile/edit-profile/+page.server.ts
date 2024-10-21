@@ -8,16 +8,6 @@ import type { User } from 'lucia';
 
 const MAX_FILE_SIZE = 5000000;
 
-
-const ACCEPTED_IMAGE_SIZE = ["image/jpeg", "image/jpg", "image/webp"];
-
-const picturesSchema = z.union([
-	z
-	  .instanceof(File, { message: 'Please upload a valid file.' }) // Accepts File objects
-	  .refine((f) => f.size < MAX_FILE_SIZE, { message: 'Max 100 kB upload size.' }),
-	z.string({ message: 'Must be a valid string representing the image name.' }) // Accepts image filenames as strings
-  ]).default('');
-
 const profileSchema = z.object({
 	firstName: z.string().min(1).max(255),
 	lastName: z.string().min(1).max(255),
@@ -35,10 +25,12 @@ const profileSchema = z.object({
 	pictures: z
 	.instanceof(File, { message: 'Please upload a valid file.' }) // Accepts File objects
 	.refine((f) => f.size < MAX_FILE_SIZE, { message: 'Max 100 kB upload size.' })
-	.optional(),
+	.optional()
+	.array(),
 	pictures_filenames: z.string({ message: 'Must be a valid string representing the image name.' })
 	.default('default2')
 	.transform((val) => val || 'default2')
+	.array()
 });
 
 export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {
@@ -50,7 +42,7 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository } })
 		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
 		zod(profileSchema)
 	);
-	console.log('ICICICICICIICICICIC LE TEST: ', form.data)
+	// console.log('ICICICICICIICICICIC LE TEST: ', form.data)
 	return { form };
 };
 
@@ -60,6 +52,7 @@ export const actions: Actions = {
 			return fail(401, { message: 'You must be signed in to update your profile' });
 		}
 		const form = await superValidate(request, zod(profileSchema));
+		console.log('IN ACTION FUNCTION ', form.data)
 		if (!form.valid) {
 			return message(form, 'Please fix the invalid fields before trying again.', { status: 400 });
 		}
