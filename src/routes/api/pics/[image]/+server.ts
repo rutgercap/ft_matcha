@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 const FILE_EXTENSION = '.jpg'
+console.log('je suis sence passer par la ')
 // The directory where images are stored
 const imagesDir = path.resolve('./profile-pictures');
 export function GET({ params }) {
@@ -14,7 +15,8 @@ export function GET({ params }) {
     if (fs.existsSync(imagePath)) {
       const file = fs.readFileSync(imagePath);
       // Determine the MIME type based on file extension
-      const mimeType = 'image/jpeg'
+      const mimeType = 'image/jpg'
+
 
       return new Response(file, {
         headers: {

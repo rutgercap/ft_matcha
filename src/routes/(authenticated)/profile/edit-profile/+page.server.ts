@@ -50,6 +50,7 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository } })
 		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
 		zod(profileSchema)
 	);
+	console.log('ICICICICICIICICICIC LE TEST: ', form.data)
 	return { form };
 };
 

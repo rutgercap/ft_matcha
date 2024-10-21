@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { superForm, fileProxy } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
 
 	export let data: PageData;
@@ -7,14 +7,24 @@
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
 		resetForm: false
 	});
-	const file = fileProxy(form, 'image')
 	let imageUrl = '/api/pics/' + $form.pictures_filenames
-	
+
 	// Trigger file input click when the image is clicked
 	function triggerFileInput() {
 		document.getElementById('pictures').click(); // Simulate click on the hidden input
 	}
-	
+
+	let avatar;
+	const handleFileInput = (e) => {
+    	$form.image = e.currentTarget.files?.item(0) as File; // No need for 'as File' here
+		let reader = new FileReader();  // To read the file as a DataURL
+		reader.readAsDataURL($form.image);  // Convert the file to DataURL
+		reader.onload = (e) => {
+			imageUrl = e.target.result;  // Store the DataURL as `avatar`
+			console.log(imageUrl);  // For debugging, logs the DataURL (image in base64 format)
+		};
+  	};
+
 </script>
 
 <div class="max-w-3xl mx-auto">
@@ -155,16 +165,18 @@
 						id="pictures"
 						name="pictures"
 						type="file"
+						on:input={handleFileInput}
 						accept="image/png, image/jpeg, image/jpg"
-    					bind:files={$file}
 						class="hidden"
 					/>
 
-					  <!-- Display the image and make it clickable -->
+					<!-- Display the image and make it clickable -->
+
+					<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
 					<div class="profile-picture-upload" on:click={triggerFileInput}>
 						<img
 						src={imageUrl}
-						alt="Profile picture"
+						alt="profile"
 						class="profile-picture-preview"
 						style="cursor: pointer; max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 50%;"
 						/>
