@@ -5,9 +5,9 @@
 	export let data: PageData;
 
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
-		resetForm: false
+		resetForm: true
 	});
-	let imageUrl = '/api/pics/' + $form.pictures_filenames
+	let imageUrl = '/api/pics/' + $form.pictures_filenames + `?t=${Date.now()}`
 
 	// Trigger file input click when the image is clicked
 	function triggerFileInput() {
@@ -20,7 +20,7 @@
 		let reader = new FileReader();  // To read the file as a DataURL
 		reader.readAsDataURL($form.image);  // Convert the file to DataURL
 		reader.onload = (e) => {
-			imageUrl = e.target.result;  // Store the DataURL as `avatar`
+			imageUrl = e.target.result;  
 			console.log(imageUrl);  // For debugging, logs the DataURL (image in base64 format)
 		};
   	};
