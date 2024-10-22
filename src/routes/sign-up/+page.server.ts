@@ -50,7 +50,7 @@ export const actions: Actions = {
 		} catch (e) {
 			if (e instanceof DuplicateEntryError) {
 				if (['username', 'email'].includes(e.entity)) {
-					// Must be onf of the two options to type hacked it to 'email' to suppress type error
+					// Must be one of the two options to type hacked it to 'email' to suppress type error
 					return setError(
 						form,
 						e.entity as 'email',

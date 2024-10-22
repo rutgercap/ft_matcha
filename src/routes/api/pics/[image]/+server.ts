@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 
 const FILE_EXTENSION = '.jpg'
-console.log('je suis sence passer par la ')
 // The directory where images are stored
 const imagesDir = path.resolve('./profile-pictures');
 export function GET({ params }) {

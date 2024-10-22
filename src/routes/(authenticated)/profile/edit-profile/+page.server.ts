@@ -26,23 +26,22 @@ const profileSchema = z.object({
 	.instanceof(File, { message: 'Please upload a valid file.' }) // Accepts File objects
 	.refine((f) => f.size < MAX_FILE_SIZE, { message: 'Max 100 kB upload size.' })
 	.optional()
-	.array(),
+	.array()
+	.default([null, null, null, null, null]),
 	pictures_filenames: z.string({ message: 'Must be a valid string representing the image name.' })
-	.default('default2')
 	.transform((val) => val || 'default2')
 	.array()
+	.default(['default2', 'default2', 'default2', 'default2', 'default2'])
 });
 
 export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {
-
-	console.log(user?.id);
 	const currentUser = user as User;
 	const currentProfile = await userRepository.profileInfoFor(currentUser.id);
 	const form = await superValidate(
 		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
 		zod(profileSchema)
 	);
-	// console.log('ICICICICICIICICICIC LE TEST: ', form.data)
+	console.log('ICICICICICICIC le test', form.data)
 	return { form };
 };
 
@@ -52,7 +51,6 @@ export const actions: Actions = {
 			return fail(401, { message: 'You must be signed in to update your profile' });
 		}
 		const form = await superValidate(request, zod(profileSchema));
-		console.log('IN ACTION FUNCTION ', form.data)
 		if (!form.valid) {
 			return message(form, 'Please fix the invalid fields before trying again.', { status: 400 });
 		}
@@ -62,7 +60,6 @@ export const actions: Actions = {
 		} catch {
 			return message(form, 'An error occurred while updating your profile', { status: 500 });
 		}
-		console.log('in action function:', formData)
 		return message(form, 'Profile updated!');
 	}
 };

@@ -3,6 +3,8 @@ import { generateIdFromEntropySize } from 'lucia';
 import * as fs from 'fs';
 import * as path from 'path';
 
+const MAX_PICTURES = 5
+
 export class ImageRepositoryError extends Error {
 	exception: unknown;
 	constructor(message: string, exception: unknown) {
@@ -25,7 +27,15 @@ export class ConstraintImageRepositoryError extends Error {
 class ImageRepository {
     constructor(private destination: string, private db: Database) {}
 
-
+    public upsertImageAll(user_id: string, buffers: Array<Buffer | null>) {
+        try {
+            for (let i = 0; i < MAX_PICTURES; i++)
+                if (buffers[i])
+                    this.upsertImage(user_id, i, buffers[i])
+        } catch (error) {
+            throw new ImageRepositoryError('Error occurs trying to upser all pictures for user:' + user_id, error)
+        }
+    }
 
     public upsertImage(user_id: string, order: number, imageBuffer: Buffer) {
         // Prepare the SQL query
@@ -41,7 +51,7 @@ class ImageRepository {
             let img_cnt = this.db.prepare<string>(`SELECT count(*) AS cnt
                                                     FROM profile_pictures
                                                     WHERE user_id = ?`).get(user_id)
-            if (img_cnt.cnt > 5) {
+            if (img_cnt.cnt > MAX_PICTURES) {
                 this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(id)
                 throw new ConstraintImageRepositoryError('Maximum image limit reach for user:' + user_id, null)
             }
@@ -85,6 +95,19 @@ class ImageRepository {
 
         /* result is of type {change: x, LastInsertedRow: y} */
         return result
+    }
+
+    public allImageIdOnly(user_id:string) : Array<string> {
+        try {
+            const pictures : Array<string> = new Array<string>("default2", "default2", "default2", "default2", "default2")
+            for (let i = 0; i < MAX_PICTURES; i++) {
+                pictures[i] = this.imageIdOnly(user_id, i)
+            }
+            return pictures
+        } catch (error) {
+            throw new ImageRepositoryError('Error trying to get all image filename for user:' + user_id, error)
+        }
+
     }
 
     public imageIdOnly(user_id:string, order:number) : string {
@@ -152,6 +175,18 @@ class ImageRepository {
             // Handle the case where the file does not exist or another error occurs
             throw new ImageRepositoryError('Error trying to delete image:' + filePath, error);
         }
+    }
+
+    public async convertFileToBuffer(files: Array<File | null>) : Array<File, null> {
+        const buffers : Array<Buffer | null> = [null, null, null, null, null]
+        try {
+            for (let i = 0; i < MAX_PICTURES; i++)
+                if (files[i])
+                    buffers[i] = (Buffer.from(await files[i].arrayBuffer()))
+        } catch (error) {
+            throw new ImageRepositoryError('Error occurs trying to convert Files to Buffer', error)
+        }
+        return buffers
     }
 }
 

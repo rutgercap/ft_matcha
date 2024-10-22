@@ -5,6 +5,15 @@
 	export let data: PageData;
 
 	let { profileInfo } = data;
+
+	console.log(profileInfo.pictures_filenames)
+
+	let all_url = ['/api/pics/' + profileInfo.pictures_filenames[0] + `?t=${Date.now()}`, 
+					'/api/pics/' + profileInfo.pictures_filenames[1] + `?t=${Date.now()}`,
+					 '/api/pics/' + profileInfo.pictures_filenames[2] + `?t=${Date.now()}`, 
+					 '/api/pics/' + profileInfo.pictures_filenames[3] + `?t=${Date.now()}`, 
+					 '/api/pics/' + profileInfo.pictures_filenames[4] + `?t=${Date.now()}`
+					]
 </script>
 
 <div class="max-w-3xl md:mx-auto mx-4 mb-10">
@@ -25,48 +34,41 @@
 			>
 		</div>
 	</div>
-
-	<div class="mt-14 grid gap-4">
+	<br />
+	<div class="mt-1 grid gap-4">
 		<div>
 			<img
 				class="h-auto max-w-full rounded-lg"
-				src="https://flowbite.s3.amazonaws.com/docs/gallery/featured/image.jpg"
+				src={all_url[0]}
 				alt=""
 			/>
 		</div>
-		<div class="grid grid-cols-5 gap-4">
+		<div class="grid grid-cols-4 gap-4">
 			<div>
 				<img
 					class="h-auto max-w-full rounded-lg"
-					src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-1.jpg"
+					src={all_url[1]}
 					alt=""
 				/>
 			</div>
 			<div>
 				<img
 					class="h-auto max-w-full rounded-lg"
-					src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-2.jpg"
+					src={all_url[2]}
 					alt=""
 				/>
 			</div>
 			<div>
 				<img
 					class="h-auto max-w-full rounded-lg"
-					src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-3.jpg"
+					src={all_url[3]}
 					alt=""
 				/>
 			</div>
 			<div>
 				<img
 					class="h-auto max-w-full rounded-lg"
-					src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-4.jpg"
-					alt=""
-				/>
-			</div>
-			<div>
-				<img
-					class="h-auto max-w-full rounded-lg"
-					src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-5.jpg"
+					src={all_url[4]}
 					alt=""
 				/>
 			</div>
@@ -76,16 +78,16 @@
 	<div class="mt-6 border-t border-gray-100">
 		<dl class="divide-y divide-gray-100">
 			<div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-				<dt class="text-sm font-medium leading-6 text-gray-900">About</dt>
-				<dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+				<dt class="text-lg font-medium leading-6 text-gray-900">About</dt>
+				<dd class="mt-1 text-lg leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
 					{profileInfo.biography}
 				</dd>
 			</div>
 		</dl>
 		<dl class="divide-y divide-gray-100">
 			<div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-				<dt class="text-sm font-medium leading-6 text-gray-900">Interests</dt>
-				<dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+				<dt class="text-lg font-medium leading-6 text-gray-900">Interests</dt>
+				<dd class="mt-1 text-lg leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
 					{#each profileInfo.tags as tag}
 						<span
 							class="mx-1 inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
@@ -97,16 +99,16 @@
 		</dl>
 		<dl class="divide-y divide-gray-100">
 			<div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-				<dt class="text-sm font-medium leading-6 text-gray-900">Is a</dt>
-				<dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+				<dt class="text-lg font-medium leading-6 text-gray-900">Is a</dt>
+				<dd class="mt-1 text-lg leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
 					{profileInfo.gender}
 				</dd>
 			</div>
 		</dl>
 		<dl class="divide-y divide-gray-100">
 			<div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-				<dt class="text-sm font-medium leading-6 text-gray-900">Is looking for</dt>
-				<dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+				<dt class="text-lg font-medium leading-6 text-gray-900">Is looking for</dt>
+				<dd class="mt-1 text-lg leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
 					{profileInfo.sexualPreference}
 				</dd>
 			</div>

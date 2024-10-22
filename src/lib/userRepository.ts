@@ -115,9 +115,7 @@ class UserRepository {
 						`
 					)
 					.get(id);
-					const pictures : Array<string> = new Array<string>("default2", "default2", "default2", "default2", "default2")
-					for (let i = 0; i < 5; i++)
-						pictures[i] = this.imageRepo.imageIdOnly(id, i)
+					const pictures : Array<string> = this.imageRepo.allImageIdOnly(id)
 				if (!result) {
 					resolve(null);
 				} else {
@@ -154,14 +152,9 @@ class UserRepository {
 		const insertTag = this.db.prepare<[string, string, string]>(
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
-		let buffer : Array<Buffer | null> = [null, null, null, null, null]
-		if (info.pictures) {
-			console.log(' IN UPSERTPERSONALINFO ->', info.pictures)
-			for (let i = 0; i < 5; i++)
-				if (info.pictures[i])
-					buffer[i] = (Buffer.from(await info.pictures[i].arrayBuffer()))
-		}
-
+		
+		const buffers : Array<Buffer | null> = await this.imageRepo.convertFileToBuffer(info.pictures)
+		
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction((id: string, profileTest: ProfileInfo) => {
@@ -181,11 +174,8 @@ class UserRepository {
 				});
 				transaction(id, info);
 
-				if (buffer) {
-					for (let i = 0; i < 5; i++)
-						if (buffer[i])
-							this.imageRepo.upsertImage(id, i, buffer[i])
-				}
+				if (buffers)
+					this.imageRepo.upsertImageAll(id, buffers)
 
 				resolve();
 			} catch (e) {

@@ -16,18 +16,14 @@
 					]
 
 	function triggerEachFileInput(idx) {
-		console.log('triggerEachFileInoout:', idx)
 		document.getElementById(`pictures-${idx}`).click(); // Simulate click on the hidden input
 
 	}
 
 	  const handleEachFileInput = (idx, e) => {
-		console.log('ICICICICICICICIIC le test', $form.pictures)
 		if (!$form.pictures) {
-			console.log('ICCCCCCCCCCCCCC LE TEST 2')
 			$form.pictures = []
 		}
-		console.log('just apres ----->',e.currentTarget.files?.item(0))
     	$form.pictures[idx] = (e.currentTarget.files?.item(0) as File); // No need for 'as File' here
 		let reader = new FileReader();  // To read the file as a DataURL
 		reader.readAsDataURL($form.pictures[idx]);  // Convert the file to DataURL
@@ -169,10 +165,13 @@
 						<p class="mt-2 text-sm text-red-600" id="tags-error">{$errors.tags._errors}</p>
 					{/if}
 				</div>
-					<!-- Image upload field-->
+
+				<!-- Image upload field-->
+				<label for="pictures" class="block text-sm font-medium leading-6 text-gray-900">Profile pictures</label>
+
 				<div class="col-span-full">
-					<label for="pictures" class="block text-sm font-medium leading-6 text-gray-900">Profile pictures</label>
-					{#each all_url as imgUrl, index}
+					{#each all_url as img_url, index}
+					
 					<input
 						id={`pictures-${index}`}
 						name="pictures"
@@ -183,14 +182,12 @@
 					/>
 
 					<!-- Display the image and make it clickable -->
-
 					<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
 					<div class="profile-picture-upload" on:click={() => triggerEachFileInput(index)}>
 						<img
-						src={imgUrl}
+						src={img_url}
 						alt="profile"
 						class="profile-picture-preview"
-						style="cursor: pointer; max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 50%;"
 						/>
 					</div>
 					{/each}
@@ -223,3 +220,32 @@
 		</div>
 	</form>
 </div>
+
+<style>
+	label {
+		margin-bottom: 5px; /* Adds spacing between label and pictures */
+		display: block; /* Ensures label takes full width */
+	}
+	/* Flexbox to align images in a row */
+	.profile-picture-row {
+		display: flex;
+		gap: 10px; /* Space between images */
+		justify-content: flex-start;
+	}
+
+	.profile-picture-upload {
+		display: inline-block;
+		cursor: pointer;
+		width: 144px;  /* Set fixed width for the preview box */
+		height: 144px; /* Set fixed height for the preview box */
+	}
+
+	/* Ensure all images are the same size and aspect ratio */
+	.profile-picture-preview {
+		width: 100%;
+		height: 100%;
+		object-fit: cover; /* Make sure the image covers the area uniformly */
+		border-radius: 10px; /* Add some rounding for a smooth look */
+		border: 1px solid #ddd; /* Optional border to highlight images */
+	}
+</style>
