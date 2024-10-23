@@ -18,7 +18,7 @@ interface MyFixtures {
 	savedUser: User;
 }
 
-let IMAGE_FOLDER = './profile-pictures'
+let IMAGE_FOLDER = './tests/lib/pictures-repo-test'
 
 
 export const itWithFixtures = it.extend<MyFixtures>({

@@ -75,5 +75,9 @@ describe('ImageRepository', () => {
 
     })
 
+    // itWithFixtures('should be able to upsert fiv pictures in a row', async ({savedUser, imageRepository}) => {
+
+    // })
+
 });
 

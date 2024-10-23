@@ -125,7 +125,6 @@ class UserRepository {
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
-				console.log(e);
 				reject(
 					new UserRepositoryError('Something went wrong fetching user for username: ' + id, e)
 				);
@@ -152,9 +151,9 @@ class UserRepository {
 		const insertTag = this.db.prepare<[string, string, string]>(
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
-		
+
 		const buffers : Array<Buffer | null> = await this.imageRepo.convertFileToBuffer(info.pictures)
-		
+
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction((id: string, profileTest: ProfileInfo) => {

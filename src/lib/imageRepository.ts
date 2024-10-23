@@ -75,7 +75,7 @@ class ImageRepository {
             // If insert was successful, save the image to './user-pictures/' folder
 
             // Ensure that the folder exists
-            const folderPath = './profile-pictures';
+            const folderPath = this.destination;
             if (!fs.existsSync(folderPath)) {
                 fs.mkdirSync(folderPath, { recursive: true });
             }
@@ -142,7 +142,7 @@ class ImageRepository {
     }
 
     public async imageById(id: string): Promise<Buffer | null> {
-        const filePath = `./profile-pictures/${id}.jpg`; // Construct the file path
+        const filePath = this.destination + `/${id}.jpg`; // Construct the file path
         try {
             const imageBuffer = await fs.promises.readFile(filePath); // Read the file into a Buffer
             return imageBuffer; // Return the Buffer
@@ -167,7 +167,7 @@ class ImageRepository {
     }
 
     public async deleteImageById(id: string): Promise<void> {
-        const filePath = `./profile-pictures/${id}.jpg`; // Construct the file path
+        const filePath = this.destination + `/${id}.jpg`; // Construct the file path
         try {
             await fs.promises.unlink(filePath); // Delete the file
             console.log(`Image ${filePath} deleted successfully.`); // Log successful deletion

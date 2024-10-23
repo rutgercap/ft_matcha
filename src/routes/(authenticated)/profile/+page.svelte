@@ -6,12 +6,10 @@
 
 	let { profileInfo } = data;
 
-	console.log(profileInfo.pictures_filenames)
-
-	let all_url = ['/api/pics/' + profileInfo.pictures_filenames[0] + `?t=${Date.now()}`, 
+	let all_url = ['/api/pics/' + profileInfo.pictures_filenames[0] + `?t=${Date.now()}`,
 					'/api/pics/' + profileInfo.pictures_filenames[1] + `?t=${Date.now()}`,
-					 '/api/pics/' + profileInfo.pictures_filenames[2] + `?t=${Date.now()}`, 
-					 '/api/pics/' + profileInfo.pictures_filenames[3] + `?t=${Date.now()}`, 
+					 '/api/pics/' + profileInfo.pictures_filenames[2] + `?t=${Date.now()}`,
+					 '/api/pics/' + profileInfo.pictures_filenames[3] + `?t=${Date.now()}`,
 					 '/api/pics/' + profileInfo.pictures_filenames[4] + `?t=${Date.now()}`
 					]
 </script>
