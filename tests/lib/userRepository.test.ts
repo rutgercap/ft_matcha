@@ -37,9 +37,6 @@ describe('UserRepository', () => {
 		await userRepository.upsertPersonalInfo(savedUser.id, userProfile);
 
 		const found = await userRepository.profileInfoFor(savedUser.id);
-		console.log('LAAAAAA', found)
-		console.log('LIIIIII', userProfile)
-
 		// ignoring the image properties that are tested in the imageRepository
 		expect(found).toEqual(expect.objectContaining({
 			firstName: userProfile.firstName,
