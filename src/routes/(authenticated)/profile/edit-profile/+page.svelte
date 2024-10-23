@@ -8,10 +8,10 @@
 		resetForm: true
 	});
 
-	let all_url = ['/api/pics/' + $form.pictures_filenames[0] + `?t=${Date.now()}`, 
+	let all_url = ['/api/pics/' + $form.pictures_filenames[0] + `?t=${Date.now()}`,
 					'/api/pics/' + $form.pictures_filenames[1] + `?t=${Date.now()}`,
-					 '/api/pics/' + $form.pictures_filenames[2] + `?t=${Date.now()}`, 
-					 '/api/pics/' + $form.pictures_filenames[3] + `?t=${Date.now()}`, 
+					 '/api/pics/' + $form.pictures_filenames[2] + `?t=${Date.now()}`,
+					 '/api/pics/' + $form.pictures_filenames[3] + `?t=${Date.now()}`,
 					 '/api/pics/' + $form.pictures_filenames[4] + `?t=${Date.now()}`
 					]
 
@@ -28,7 +28,7 @@
 		let reader = new FileReader();  // To read the file as a DataURL
 		reader.readAsDataURL($form.pictures[idx]);  // Convert the file to DataURL
 		reader.onload = (e) => {
-			all_url[idx] = e.target.result; 
+			all_url[idx] = e.target.result;
 		};
   	};
 
@@ -169,31 +169,41 @@
 				<!-- Image upload field-->
 				<label for="pictures" class="block text-sm font-medium leading-6 text-gray-900">Profile pictures</label>
 
-				<div class="col-span-full">
+				<div class="col-span-full profile-picture-row" >
 					{#each all_url as img_url, index}
-					
-					<input
-						id={`pictures-${index}`}
-						name="pictures"
-						type="file"
-						on:input={(e) => handleEachFileInput(index, e)}
-						accept="image/png, image/jpeg, image/jpg"
-						class="hidden"
-					/>
 
-					<!-- Display the image and make it clickable -->
-					<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
-					<div class="profile-picture-upload" on:click={() => triggerEachFileInput(index)}>
-						<img
-						src={img_url}
-						alt="profile"
-						class="profile-picture-preview"
-						/>
-					</div>
+						<div class="profile-picture-container">
+							<input
+								id={`pictures-${index}`}
+								name="pictures"
+								type="file"
+								on:input={(e) => handleEachFileInput(index, e)}
+								accept="image/png, image/jpeg, image/jpg"
+								class="hidden"
+							/>
+
+							<!-- Display the image and make it clickable -->
+							<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
+							<div class="profile-picture-upload" on:click={() => triggerEachFileInput(index)}>
+								<img
+								src={img_url}
+								alt="profile"
+								class="profile-picture-preview"
+								/>
+							</div>
+							<div class="delete-icon" >
+								<img
+									src="https://png.pngtree.com/png-vector/20190531/ourmid/pngtree-trash-bin-icon-png-image_1252303.jpg"
+									alt="Delete"
+									class="delete-button"
+								/>
+							</div>
+							{#if errors.profileImage}
+								<span class="error">{errors.profileImage}</span>
+							{/if}
+						</div>
+
 					{/each}
-					{#if errors.profileImage}
-						<span class="error">{errors.profileImage}</span>
-					{/if}
 				</div>
 			</div>
 		</div>
@@ -222,30 +232,46 @@
 </div>
 
 <style>
-	label {
-		margin-bottom: 5px; /* Adds spacing between label and pictures */
-		display: block; /* Ensures label takes full width */
-	}
 	/* Flexbox to align images in a row */
 	.profile-picture-row {
-		display: flex;
-		gap: 10px; /* Space between images */
-		justify-content: flex-start;
+	display: flex;
+	gap: 10px; /* Space between images */
+	justify-content: flex-start;
+	flex-wrap: wrap; /* Wrap images to a new row if they don't fit in the same line */
+	}
+
+	.profile-picture-container {
+	display: flex;
+	flex-direction: column; /* Stack image and delete icon vertically */
+	align-items: center;
+	width: 144px; /* Set fixed width for each image container */
 	}
 
 	.profile-picture-upload {
-		display: inline-block;
-		cursor: pointer;
-		width: 144px;  /* Set fixed width for the preview box */
-		height: 144px; /* Set fixed height for the preview box */
+	display: inline-block;
+	cursor: pointer;
+	width: 144px;  /* Set fixed width for the preview box */
+	height: 144px; /* Set fixed height for the preview box */
+	position: relative;
 	}
 
 	/* Ensure all images are the same size and aspect ratio */
 	.profile-picture-preview {
-		width: 100%;
-		height: 100%;
-		object-fit: cover; /* Make sure the image covers the area uniformly */
-		border-radius: 10px; /* Add some rounding for a smooth look */
-		border: 1px solid #ddd; /* Optional border to highlight images */
+	width: 100%;
+	height: 100%;
+	object-fit: cover; /* Make sure the image covers the area uniformly */
+	border-radius: 10px; /* Add some rounding for a smooth look */
+	border: 1px solid #ddd; /* Optional border to highlight images */
+	}
+
+	/* Delete icon */
+	.delete-icon {
+	margin-top: 5px; /* Space between image and delete button */
+	cursor: pointer;
+	}
+
+	.delete-button {
+	width: 24px;
+	height: 24px;
 	}
 </style>

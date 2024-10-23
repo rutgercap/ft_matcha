@@ -10,6 +10,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
 	const imageRepo = new ImageRepository(IMAGE_FOLDER, db)
 	event.locals.userRepository = new UserRepository(db, imageRepo);
+	
 
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
 	if (!sessionId) {

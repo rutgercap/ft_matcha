@@ -30,3 +30,10 @@ export function GET({ params }) {
     return new Response('Error reading image', { status: 500 });
   }
 };
+
+export function DELETE({ locals: { user, userRepository }, params }) {
+  const imageName = params;
+
+  console.log('ICIC LE TEST', userRepository, params)
+
+}

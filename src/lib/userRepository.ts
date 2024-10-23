@@ -248,6 +248,16 @@ class UserRepository {
 			}
 		});
 	}
+
+	public async deleteUserImage(picture_id: string) {
+		try {
+			this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(picture_id)
+			await this.imageRepo.deleteImageById(picture_id)
+		} catch (error) {
+			throw new UserRepositoryError('Error occurs trying to delete image: ' + picture_id, error)
+		}
+
+	}
 }
 
 export { UserRepository, UserRepositoryError, DuplicateEntryError };

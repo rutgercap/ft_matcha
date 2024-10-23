@@ -2,6 +2,7 @@ import { describe, expect } from "vitest";
 import { itWithFixtures } from "../fixtures";
 import * as fs from 'fs';
 import { ImageRepository, ConstraintImageRepositoryError, ImageRepositoryError } from "$lib/imageRepository";
+import path from 'path';
 
 describe('ImageRepository', () => {
     itWithFixtures('should be able to save an image', async ({ savedUser, imageRepository }) => {
@@ -84,7 +85,6 @@ describe('ImageRepository', () => {
         imageRepository.upsertImageAll(savedUser.id, imageBuffer)
 
         const image_filenames = imageRepository.allImageIdOnly(savedUser.id)
-        import path from 'path';
         let found : Array<Buffer> = []
         for (let i = 0; i < image_filenames.length; i++) {
             found.push(await imageRepository.imageById(image_filenames[i]))
@@ -93,5 +93,26 @@ describe('ImageRepository', () => {
         expect(found).toEqual(imageBuffer)
     })
 
+    itWithFixtures('it is meant to clean the test picture folder after the tests', async ({savedUser, imageRepository}) => {
+        try {
+            const folderPath = 'tests/lib/pictures-repo-test'
+            const files = await fs.readdir(folderPath);
+
+            for (const file of files) {
+              const filePath = path.join(folderPath, file);
+              const stat = await fs.stat(filePath);
+
+              if (stat.isDirectory()) {
+                await fs.rm(filePath, { recursive: true, force: true }); // Recursively delete subdirectories and their contents
+              } else {
+                await fs.unlink(filePath); // Delete individual files
+              }
+            }
+
+            console.log(`Successfully cleared the contents of the folder: ${folderPath}`);
+          } catch (error) {
+            console.error(`Error clearing the folder: ${error.message}`);
+          }
+    })
 });
 
