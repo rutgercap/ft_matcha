@@ -75,9 +75,23 @@ describe('ImageRepository', () => {
 
     })
 
-    // itWithFixtures('should be able to upsert fiv pictures in a row', async ({savedUser, imageRepository}) => {
+    itWithFixtures('should be able to upsert fiv pictures in a row', async ({savedUser, imageRepository}) => {
+        const imageBuffer : Array<Buffer> = []
 
-    // })
+        for (let i = 0; i < 5; i++)
+            imageBuffer.push(await fs.promises.readFile('./profile-pictures/default.jpg'));
+
+        imageRepository.upsertImageAll(savedUser.id, imageBuffer)
+
+        const image_filenames = imageRepository.allImageIdOnly(savedUser.id)
+        import path from 'path';
+        let found : Array<Buffer> = []
+        for (let i = 0; i < image_filenames.length; i++) {
+            found.push(await imageRepository.imageById(image_filenames[i]))
+        }
+
+        expect(found).toEqual(imageBuffer)
+    })
 
 });
 
