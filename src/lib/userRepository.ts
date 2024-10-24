@@ -132,7 +132,7 @@ class UserRepository {
 		});
 	}
 
-	async upsertPersonalInfo(id: string, info: ProfileInfo): Promise<void> {
+	async upsertPersonalInfo(id: string, info: ProfileInfo): Promise<Array<string | null>> {
 		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
 			`
 				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography)
@@ -173,10 +173,10 @@ class UserRepository {
 				});
 				transaction(id, info);
 
-				if (buffers)
-					this.imageRepo.upsertImageAll(id, buffers)
+				// if (buffers)
+				const inserted_filename: Array<string | null> = this.imageRepo.upsertImageAll(id, buffers)
 
-				resolve();
+				resolve(inserted_filename);
 			} catch (e) {
 				if (e instanceof SqliteError) {
 					reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));
@@ -251,8 +251,13 @@ class UserRepository {
 
 	public async deleteUserImage(picture_id: string) {
 		try {
-			this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(picture_id)
-			await this.imageRepo.deleteImageById(picture_id)
+			const res = this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(picture_id)
+			if (res.changes) {
+				await this.imageRepo.deleteImageById(picture_id)
+			}
+			else {
+				throw new Error('picture_id is not in the database')
+			}
 		} catch (error) {
 			throw new UserRepositoryError('Error occurs trying to delete image: ' + picture_id, error)
 		}

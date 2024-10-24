@@ -5,7 +5,7 @@
 	export let data: PageData;
 
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
-		resetForm: true
+		resetForm: false
 	});
 
 	let all_url = ['/api/pics/' + $form.pictures_filenames[0] + `?t=${Date.now()}`,
@@ -20,7 +20,7 @@
 
 	}
 
-	  const handleEachFileInput = (idx, e) => {
+	const handleEachFileInput = (idx, e) => {
 		if (!$form.pictures) {
 			$form.pictures = []
 		}
@@ -31,6 +31,40 @@
 			all_url[idx] = e.target.result;
 		};
   	};
+
+	const handleDeletePicture = (index) => {
+		// Check if the index is valid
+		if (index < 0 || index >= all_url.length) {
+			console.error('Invalid index');
+			return;
+		}
+
+		let urlToDelete = all_url[index];
+
+		if (urlToDelete.startsWith('data:image/')) {
+			urlToDelete = all_url[index] = '/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`
+
+		}
+		// Send a DELETE request to the server
+		fetch(urlToDelete, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				// Add any necessary authorization headers
+				// 'Authorization': 'Bearer <your_token>'
+			},
+		})
+		.then(response => {
+			 if (response.status === 204 || response.headers.get('Content-Length') === '0') {
+				$form.pictures_filenames[index] = 'default2'
+				all_url[index] = '/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`
+        		return; // No content to return
+    		}
+
+		})
+
+	}
+
 
 </script>
 
@@ -191,7 +225,8 @@
 								class="profile-picture-preview"
 								/>
 							</div>
-							<div class="delete-icon" >
+							<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
+							<div class="delete-icon" on:click={() => handleDeletePicture(index)}>
 								<img
 									src="https://png.pngtree.com/png-vector/20190531/ourmid/pngtree-trash-bin-icon-png-image_1252303.jpg"
 									alt="Delete"
@@ -237,21 +272,20 @@
 	display: flex;
 	gap: 10px; /* Space between images */
 	justify-content: flex-start;
-	flex-wrap: wrap; /* Wrap images to a new row if they don't fit in the same line */
 	}
 
 	.profile-picture-container {
 	display: flex;
 	flex-direction: column; /* Stack image and delete icon vertically */
 	align-items: center;
-	width: 144px; /* Set fixed width for each image container */
+	width: 140px; /* Set fixed width for each image container */
 	}
 
 	.profile-picture-upload {
 	display: inline-block;
 	cursor: pointer;
-	width: 144px;  /* Set fixed width for the preview box */
-	height: 144px; /* Set fixed height for the preview box */
+	width: 135px;  /* Set fixed width for the preview box */
+	height: 135px; /* Set fixed height for the preview box */
 	position: relative;
 	}
 

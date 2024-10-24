@@ -1,3 +1,4 @@
+import { ImageRepository } from '$lib/imageRepository';
 import type { RequestHandler } from '@sveltejs/kit';
 import fs from 'fs';
 import path from 'path';
@@ -31,9 +32,17 @@ export function GET({ params }) {
   }
 };
 
-export function DELETE({ locals: { user, userRepository }, params }) {
-  const imageName = params;
+export async function DELETE({ locals: { user, userRepository }, params }) {
+  const imageName = params.image;
 
-  console.log('ICIC LE TEST', userRepository, params)
+  try {
+    await userRepository.deleteUserImage(imageName)
+    return new Response(null, {status: 204})
+  } catch (error) {
+    // TODO add a more detailed explanation of the error
+    return new Response('Error deleting image:' + imageName, {status: 404})
+  }
+
+
 
 }

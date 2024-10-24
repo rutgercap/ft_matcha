@@ -27,17 +27,21 @@ export class ConstraintImageRepositoryError extends Error {
 class ImageRepository {
     constructor(private destination: string, private db: Database) {}
 
-    public upsertImageAll(user_id: string, buffers: Array<Buffer | null>) {
+    public upsertImageAll(user_id: string, buffers: Array<Buffer | null>) : Array<string | null> {
         try {
-            for (let i = 0; i < MAX_PICTURES; i++)
+            let inserted_filename: Array<string | null> = [null, null, null, null, null]
+            for (let i = 0; i < MAX_PICTURES; i++) {
                 if (buffers[i])
-                    this.upsertImage(user_id, i, buffers[i])
+                    inserted_filename[i] = this.upsertImage(user_id, i, buffers[i])
+            }
+            console.log('upsert all image', inserted_filename)
+            return inserted_filename
         } catch (error) {
             throw new ImageRepositoryError('Error occurs trying to upser all pictures for user:' + user_id, error)
         }
     }
 
-    public upsertImage(user_id: string, order: number, imageBuffer: Buffer) {
+    public upsertImage(user_id: string, order: number, imageBuffer: Buffer) : string {
         // Prepare the SQL query
         let id = generateIdFromEntropySize(10);
         const sql = this.db.prepare<string, string, number>(`
@@ -55,7 +59,6 @@ class ImageRepository {
                 this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(id)
                 throw new ConstraintImageRepositoryError('Maximum image limit reach for user:' + user_id, null)
             }
-
         } catch (error: any) {
             if (error.message.includes("UNIQUE constraint failed")) {
                 const sql = this.db.prepare<string, number>(`
@@ -94,7 +97,7 @@ class ImageRepository {
         }
 
         /* result is of type {change: x, LastInsertedRow: y} */
-        return result
+        return id
     }
 
     public allImageIdOnly(user_id:string) : Array<string> {

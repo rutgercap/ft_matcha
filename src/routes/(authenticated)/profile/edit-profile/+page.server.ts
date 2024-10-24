@@ -55,7 +55,7 @@ export const actions: Actions = {
 		}
 		const formData = form.data;
 		try {
-			await userRepository.upsertPersonalInfo(user.id, formData);
+			form.data.pictures_filenames = await userRepository.upsertPersonalInfo(user.id, formData);
 		} catch {
 			return message(form, 'An error occurred while updating your profile', { status: 500 });
 		}
