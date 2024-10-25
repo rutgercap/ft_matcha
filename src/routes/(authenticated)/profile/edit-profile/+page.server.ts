@@ -41,6 +41,7 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository } })
 		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
 		zod(profileSchema)
 	);
+	console.log('', form.data)
 	return { form };
 };
 
@@ -56,9 +57,13 @@ export const actions: Actions = {
 		const formData = form.data;
 		try {
 			form.data.pictures_filenames = await userRepository.upsertPersonalInfo(user.id, formData);
+			// reseting the uploaded Files in case you edit multiple things and click save multiple times 
+			form.data.pictures = [undefined, undefined, undefined, undefined, undefined]
 		} catch {
 			return message(form, 'An error occurred while updating your profile', { status: 500 });
 		}
+
+		console.log(form.data)
 		return message(form, 'Profile updated!');
 	}
 };

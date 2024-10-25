@@ -34,7 +34,6 @@ class ImageRepository {
                 if (buffers[i])
                     inserted_filename[i] = this.upsertImage(user_id, i, buffers[i])
             }
-            console.log('upsert all image', inserted_filename)
             return inserted_filename
         } catch (error) {
             throw new ImageRepositoryError('Error occurs trying to upser all pictures for user:' + user_id, error)
