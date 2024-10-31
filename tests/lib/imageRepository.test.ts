@@ -92,27 +92,5 @@ describe('ImageRepository', () => {
 
         expect(found).toEqual(imageBuffer)
     })
-
-    itWithFixtures('it is meant to clean the test picture folder after the tests', async ({savedUser, imageRepository}) => {
-        try {
-            const folderPath = 'tests/lib/pictures-repo-test'
-            const files = await fs.readdir(folderPath);
-
-            for (const file of files) {
-              const filePath = path.join(folderPath, file);
-              const stat = await fs.stat(filePath);
-
-              if (stat.isDirectory()) {
-                await fs.rm(filePath, { recursive: true, force: true }); // Recursively delete subdirectories and their contents
-              } else {
-                await fs.unlink(filePath); // Delete individual files
-              }
-            }
-
-            console.log(`Successfully cleared the contents of the folder: ${folderPath}`);
-          } catch (error) {
-            console.error(`Error clearing the folder: ${error.message}`);
-          }
-    })
 });
 
