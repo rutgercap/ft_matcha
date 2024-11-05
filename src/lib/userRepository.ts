@@ -263,6 +263,33 @@ class UserRepository {
 		}
 
 	}
+
+	public async deleteEmailSession(id: string) {
+		try {
+			const sql = this.db.prepare<string>(`
+				DELETE FROM email_sessions WHERE user_id = ?
+				`)
+			const res = sql.run(id)
+			return res
+		} catch (error) {
+			console.log('console log error from deleteEmailsession', error)
+			throw new UserRepositoryError('Error occurs trying to delete e-mail session for user:' + id, error)
+		}
+	}
+
+	public async insertEmailSession(userId:string, tokenId: string, userEmail:string, date: Date) {
+		try {
+			const sql = this.db.prepare<string>(`
+				INSERT INTO email_sessions (id, expires_at, user_id, email)
+				VALUES (?, ?, ?, ?)
+				`)
+			const res = sql.run(tokenId, date.getTime(), userId, userEmail)
+			return res
+		} catch (error) {
+			console.log('console log error from inserEmailsession', error)
+			throw new UserRepositoryError('Error occurs trying to insert e-mail session for user:' + userId, error)
+		}
+	}
 }
 
 export { UserRepository, UserRepositoryError, DuplicateEntryError };

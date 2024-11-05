@@ -1,0 +1,15 @@
+import type { Module, Submodule } from "../../module.ts";
+import type { Branded, constrain, To } from "../ast.ts";
+declare namespace string {
+    type url = constrain<string, Branded<"url">>;
+}
+export declare const url: url.module;
+export declare namespace url {
+    type module = Module<submodule>;
+    type submodule = Submodule<$>;
+    type $ = {
+        root: string.url;
+        parse: (In: string.url) => To<URL>;
+    };
+}
+export {};

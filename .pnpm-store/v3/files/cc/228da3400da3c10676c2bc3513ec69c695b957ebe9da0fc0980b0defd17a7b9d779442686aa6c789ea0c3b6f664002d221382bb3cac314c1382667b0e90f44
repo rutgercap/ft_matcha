@@ -1,0 +1,41 @@
+import { intrinsic } from "@ark/schema";
+import { arkModule } from "../utils.js";
+import { alpha } from "./alpha.js";
+import { alphanumeric } from "./alphanumeric.js";
+import { capitalize } from "./capitalize.js";
+import { creditCard } from "./creditCard.js";
+import { stringDate } from "./date.js";
+import { digits } from "./digits.js";
+import { email } from "./email.js";
+import { integer } from "./integer.js";
+import { ip } from "./ip.js";
+import { json } from "./json.js";
+import { lower } from "./lower.js";
+import { normalize } from "./normalize.js";
+import { numeric } from "./numeric.js";
+import { semver } from "./semver.js";
+import { trim } from "./trim.js";
+import { upper } from "./upper.js";
+import { url } from "./url.js";
+import { uuid } from "./uuid.js";
+export const string = arkModule({
+    root: intrinsic.string,
+    numeric,
+    integer,
+    alpha,
+    alphanumeric,
+    digits,
+    semver,
+    ip,
+    creditCard,
+    email,
+    uuid,
+    url,
+    json,
+    trim,
+    upper,
+    lower,
+    normalize,
+    capitalize,
+    date: stringDate
+});

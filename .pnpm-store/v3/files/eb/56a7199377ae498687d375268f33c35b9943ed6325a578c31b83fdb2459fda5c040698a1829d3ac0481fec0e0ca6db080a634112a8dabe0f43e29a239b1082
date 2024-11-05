@@ -1,0 +1,8 @@
+import type { Branded, constrain } from "../ast.ts";
+export declare const isLuhnValid: (creditCardInput: string) => boolean;
+declare namespace string {
+    type creditCard = constrain<string, Branded<"creditCard">>;
+}
+export declare const creditCard: import("@ark/schema").BaseRoot<import("@ark/schema").InternalRootDeclaration>;
+export type creditCard = string.creditCard;
+export {};

@@ -5,7 +5,21 @@ import type { Actions, PageServerLoad } from './$types';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
-import { DuplicateEntryError } from '$lib/userRepository';
+import { DuplicateEntryError, UserRepository } from '$lib/userRepository';
+import { TimeSpan, createDate } from "oslo";
+
+function createEmailVerificationToken(userRepository: UserRepository, userId: string, email: string): Promise<string> {
+	// optionally invalidate all existing tokens
+	let res = userRepository.deleteEmailSession(userId)
+	const tokenId = generateIdFromEntropySize(25); // 40 characters long
+	let ret = userRepository.insertEmailSession(
+		userId,
+		tokenId,
+		email,
+		createDate(new TimeSpan(3, "m"))
+	);
+	return tokenId;
+}
 
 const signUpSchema = z.object({
 	username: z
@@ -41,6 +55,12 @@ export const actions: Actions = {
 
 		try {
 			await userRepository.createUser({ id, username, email }, password);
+			const verificationToken = createEmailVerificationToken(userRepository, id, email);
+			const verificationLink = "http://localhost:3000/email-verification/" + verificationToken;
+			console.log('IN THE SIGN UP END-POINT: verification link = ', verificationLink)
+			// TODO: this is where you send the link
+
+
 			const session = await lucia.createSession(id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies.set(sessionCookie.name, sessionCookie.value, {

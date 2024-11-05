@@ -41,7 +41,6 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository } })
 		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
 		zod(profileSchema)
 	);
-	console.log('In the load function:', form.data)
 	return { form };
 };
 
@@ -63,7 +62,6 @@ export const actions: Actions = {
 			return message(form, 'An error occurred while updating your profile', { status: 500 });
 		}
 
-		console.log('In the action function:', form.data)
 		return message(form, 'Profile updated!');
 	}
 };

@@ -1,0 +1,7 @@
+import type { Branded, constrain } from "../ast.ts";
+declare namespace string {
+    type digits = constrain<string, Branded<"digits">>;
+}
+export declare const digits: import("@ark/schema").IntersectionNode;
+export type digits = string.digits;
+export {};

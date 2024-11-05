@@ -1,0 +1,108 @@
+import type { Module, Submodule } from "../../module.ts";
+import type { AtLeastLength, AtMostLength, Branded, Constraints, ExactlyLength, LessThanLength, MoreThanLength, Narrowed, Optional, constrain, constraint } from "../ast.ts";
+import { alpha } from "./alpha.ts";
+import { alphanumeric } from "./alphanumeric.ts";
+import { capitalize } from "./capitalize.ts";
+import { creditCard } from "./creditCard.ts";
+import { stringDate } from "./date.ts";
+import { digits } from "./digits.ts";
+import { email } from "./email.ts";
+import { type stringInteger } from "./integer.ts";
+import { ip } from "./ip.ts";
+import { type stringJson } from "./json.ts";
+import { lower } from "./lower.ts";
+import { normalize } from "./normalize.ts";
+import { type stringNumeric } from "./numeric.ts";
+import { semver } from "./semver.ts";
+import { trim } from "./trim.ts";
+import { upper } from "./upper.ts";
+import { url } from "./url.ts";
+import { uuid } from "./uuid.ts";
+export declare const string: Module<{
+    trim: Submodule<trim.submodule>;
+    normalize: Submodule<{
+        root: unknown;
+        NFC: Submodule<{
+            root: unknown;
+            preformatted: unknown;
+        }>;
+        NFD: Submodule<{
+            root: unknown;
+            preformatted: unknown;
+        }>;
+        NFKC: Submodule<{
+            root: unknown;
+            preformatted: unknown;
+        }>;
+        NFKD: Submodule<{
+            root: unknown;
+            preformatted: unknown;
+        }>;
+    }>;
+    root: unknown;
+    date: Submodule<stringDate.submodule>;
+    lower: Submodule<lower.submodule>;
+    upper: Submodule<upper.submodule>;
+    integer: Submodule<stringInteger.submodule>;
+    json: Submodule<stringJson.submodule>;
+    alpha: unknown;
+    alphanumeric: unknown;
+    creditCard: unknown;
+    digits: unknown;
+    email: unknown;
+    ip: Submodule<ip.submodule>;
+    numeric: Submodule<stringNumeric.submodule>;
+    semver: unknown;
+    url: Submodule<url.submodule>;
+    uuid: Submodule<{
+        root: string.matching<string> | "00000000-0000-0000-0000-000000000000" | "ffffffff-ffff-ffff-ffff-ffffffffffff";
+        v4: unknown;
+        v6: unknown;
+        v1: unknown;
+        v2: unknown;
+        v3: unknown;
+        v5: unknown;
+        v7: unknown;
+        v8: unknown;
+    }>;
+    capitalize: Submodule<capitalize.submodule>;
+}>;
+export type Matching<rule> = {
+    matching: constraint<rule>;
+};
+export declare namespace string {
+    type atLeastLength<rule> = constrain<string, AtLeastLength<rule>>;
+    type moreThanLength<rule> = constrain<string, MoreThanLength<rule>>;
+    type atMostLength<rule> = constrain<string, AtMostLength<rule>>;
+    type lessThanLength<rule> = constrain<string, LessThanLength<rule>>;
+    type exactlyLength<rule> = constrain<string, ExactlyLength<rule>>;
+    type matching<rule> = constrain<string, Matching<rule>>;
+    type narrowed = constrain<string, Narrowed>;
+    type optional = constrain<string, Optional>;
+    type branded<rule> = constrain<string, Branded<rule>>;
+    type is<constraints extends Constraints> = constrain<string, constraints>;
+    type withConstraint<constraint> = constraint extends ExactlyLength<infer rule> ? exactlyLength<rule> : constraint extends MoreThanLength<infer rule> ? moreThanLength<rule> : constraint extends AtLeastLength<infer rule> ? atLeastLength<rule> : constraint extends AtMostLength<infer rule> ? atMostLength<rule> : constraint extends LessThanLength<infer rule> ? lessThanLength<rule> : constraint extends Matching<infer rule> ? matching<rule> : constraint extends Optional ? optional : constraint extends Narrowed ? narrowed : never;
+    type module = Module<string.submodule>;
+    type submodule = Submodule<$>;
+    type $ = {
+        root: string;
+        alpha: alpha;
+        alphanumeric: alphanumeric;
+        digits: digits;
+        numeric: stringNumeric.submodule;
+        integer: stringInteger.submodule;
+        creditCard: creditCard;
+        email: email;
+        uuid: uuid.submodule;
+        semver: semver;
+        ip: ip.submodule;
+        json: stringJson.submodule;
+        date: stringDate.submodule;
+        url: url.submodule;
+        trim: trim.submodule;
+        normalize: normalize.submodule;
+        capitalize: capitalize.submodule;
+        lower: lower.submodule;
+        upper: upper.submodule;
+    };
+}
