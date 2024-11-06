@@ -33,6 +33,7 @@ const signUpSchema = z.object({
 	email: z.string().email('Please enter a valid email address')
 });
 
+// TODO detect when user.emailIsSetup and display some kind of pop-up
 export const load: PageServerLoad = async ({ locals: { user } }) => {
 	if (user) {
 		redirect(303, '/');
@@ -56,7 +57,7 @@ export const actions: Actions = {
 		try {
 			await userRepository.createUser({ id, username, email }, password);
 			const verificationToken = createEmailVerificationToken(userRepository, id, email);
-			const verificationLink = "http://localhost:3000/email-verification/" + verificationToken;
+			const verificationLink = "http://localhost:3000/api/email-verification/" + verificationToken;
 			console.log('IN THE SIGN UP END-POINT: verification link = ', verificationLink)
 			// TODO: this is where you send the link
 
@@ -87,6 +88,6 @@ export const actions: Actions = {
 				});
 			}
 		}
-		redirect(302, '/');
+		redirect(302, '/auth-email');
 	}
 };
