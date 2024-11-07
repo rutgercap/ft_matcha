@@ -4,7 +4,6 @@ import nodemailer from "nodemailer"
 class EmailRepository{
 	transporter;
 	constructor() {
-		console.log('IN emailrepository: check that env variables are properly setup:', APP_PASSWORD, GOOGLE_EMAIL)
 		this.transporter = nodemailer.createTransport({
 			host: "smtp.gmail.com",
 			port: 587,

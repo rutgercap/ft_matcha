@@ -31,5 +31,6 @@ tests/lib/pictures-repo-test/*
 
 .env
 
-# node 
+# dependencies
 node_modules/
+.pnpm-store/
