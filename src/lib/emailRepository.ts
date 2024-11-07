@@ -22,5 +22,33 @@ class EmailRepository{
 			}
 		  });
 	
-		}
+	}
+
+	public async verificationLinkTo(email:string, link:string) {
+		const body = `
+					Hello horny robot !\n
+					Excited to be part of the matcha adventure ??\n
+					please click the link below to verify your e-mail adress.\n
+					${link}
+				`
+		const message = {
+			from: GOOGLE_EMAIL,
+			to: email,
+			subject: "Your verification link",
+			text: body,
+		};
+		return new Promise((resolve:any, reject:any) => {
+			this.transporter.sendMail(message, (err: any, info: any) => {
+				if (err) {
+					console.error(err);
+					reject(err);
+				} else {
+					resolve(info);
+				}
+			});
+
+		})
+	} 
 }
+
+export { EmailRepository }

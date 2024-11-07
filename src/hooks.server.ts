@@ -1,14 +1,17 @@
 import { getDb } from '$lib/database/database';
 import { UserRepository } from '$lib/userRepository';
 import { ImageRepository } from '$lib/imageRepository';
+import { EmailRepository } from '$lib/emailRepository';
 import { type Handle } from '@sveltejs/kit';
 import { lucia } from '$lib/auth';
+import { EmailRepository } from '$lib/emailRepository';
 
 let IMAGE_FOLDER = './profile-pictures'
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
 	const imageRepo = new ImageRepository(IMAGE_FOLDER, db)
+	const emailRepo = new EmailRepository()
 	event.locals.userRepository = new UserRepository(db, imageRepo);
 	
 
