@@ -30,3 +30,6 @@ profile-pictures/*
 tests/lib/pictures-repo-test/*
 
 .env
+
+# node 
+node_modules/
