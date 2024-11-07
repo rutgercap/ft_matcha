@@ -43,7 +43,7 @@ export const load: PageServerLoad = async ({ locals: { user } }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, locals: { userRepository, user } }) => {
+	default: async ({ request, cookies, locals: { userRepository, emailRepository, user } }) => {
 		if (user) {
 			redirect(303, '/');
 		}
@@ -60,7 +60,9 @@ export const actions: Actions = {
 			const verificationLink = "http://localhost:3000/api/email-verification/" + verificationToken;
 			console.log('IN THE SIGN UP END-POINT: verification link = ', verificationLink)
 			// TODO: this is where you send the link
+			const mail_return = await emailRepository.verificationLinkTo(email, verificationLink)
 
+			console.log('IN THE SIGNUP FUNCTION : ', mail_return)
 
 			const session = await lucia.createSession(id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
