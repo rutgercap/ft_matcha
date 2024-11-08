@@ -60,10 +60,8 @@ export const actions: Actions = {
 			const verificationLink = "http://localhost:3000/api/email-verification/" + verificationToken;
 			console.log('IN THE SIGN UP END-POINT: verification link = ', verificationLink)
 			// TODO: this is where you send the link
-			const mail_return = await emailRepository.verificationLinkTo(email, verificationLink)
-
-			console.log('IN THE SIGNUP FUNCTION : ', mail_return)
-
+			const res = await emailRepository.verificationLinkTo(email, verificationLink)
+			console.log('in signup --- > ', res)
 			const session = await lucia.createSession(id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies.set(sessionCookie.name, sessionCookie.value, {

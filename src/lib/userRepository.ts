@@ -10,7 +10,7 @@ import { Buffer } from 'buffer'
 
 type UserWithPassword = User & { passwordHash: string };
 
-type UserWithoutProfileSetup = Omit<User, 'profileIsSetup'>;
+type UserWithoutProfileSetup = Omit<User, 'profileIsSetup' | 'emailIsSetup'>;
 
 type SnakeCase<S extends string> = S extends `${infer T}${infer U}`
 	? `${T extends Capitalize<T> ? '_' : ''}${Lowercase<T>}${SnakeCase<U>}`

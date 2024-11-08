@@ -1,6 +1,15 @@
 import { APP_PASSWORD, GOOGLE_EMAIL } from "$env/static/private";
 import nodemailer from "nodemailer"
 
+class EmailRepositoryError extends Error {
+	exception: unknown;
+	constructor(message: string, exception: unknown) {
+		super(message);
+		this.name = 'EmailRepositoryError';
+		this.exception = exception;
+	}
+}
+
 class EmailRepository{
 	transporter;
 	constructor() {
@@ -16,9 +25,8 @@ class EmailRepository{
 		  this.transporter.verify(function (error:any, success: any) {
 			if (error) {
 			  console.error(error);
-			} else {
-			  console.log("Server is ready to take our messages");
-			}
+			  throw new EmailRepositoryError('Error occur trying to instaciate mail service', error)
+			} 
 		  });
 	
 	}
@@ -40,7 +48,7 @@ class EmailRepository{
 			this.transporter.sendMail(message, (err: any, info: any) => {
 				if (err) {
 					console.error(err);
-					reject(err);
+					reject(new EmailRepositoryError('Error occur trying to send mail for the following email:' + email, err));
 				} else {
 					resolve(info);
 				}
