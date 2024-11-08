@@ -8,7 +8,7 @@ export const load: LayoutServerLoad = async ({ url, locals: { user } }) => {
 	}
 	const currentUser = user as User;
 	if (!(currentUser.emailIsSetup))
-		redirect(302, '/auth-email');
+		redirect(302, '/sign-up/auth-email');
 	if (!currentUser.profileIsSetup && !url.pathname.startsWith('/profile/edit-profile')) {
 		redirect(302, '/profile/edit-profile');
 	}

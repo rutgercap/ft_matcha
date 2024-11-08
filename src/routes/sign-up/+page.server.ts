@@ -6,20 +6,8 @@ import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { DuplicateEntryError, UserRepository } from '$lib/userRepository';
-import { TimeSpan, createDate } from "oslo";
+import type { EmailRepository } from '$lib/emailRepository';
 
-function createEmailVerificationToken(userRepository: UserRepository, userId: string, email: string): Promise<string> {
-	// optionally invalidate all existing tokens
-	let res = userRepository.deleteEmailSession(userId)
-	const tokenId = generateIdFromEntropySize(25); // 40 characters long
-	let ret = userRepository.insertEmailSession(
-		userId,
-		tokenId,
-		email,
-		createDate(new TimeSpan(3, "m"))
-	);
-	return tokenId;
-}
 
 const signUpSchema = z.object({
 	username: z
@@ -56,12 +44,15 @@ export const actions: Actions = {
 
 		try {
 			await userRepository.createUser({ id, username, email }, password);
-			const verificationToken = createEmailVerificationToken(userRepository, id, email);
+			const verificationToken = emailRepository.createEmailVerificationToken(id, email);
 			const verificationLink = "http://localhost:3000/api/email-verification/" + verificationToken;
+
+			console.log("********** DEBUG **************")
 			console.log('IN THE SIGN UP END-POINT: verification link = ', verificationLink)
 			// TODO: this is where you send the link
 			const res = await emailRepository.verificationLinkTo(email, verificationLink)
 			console.log('in signup --- > ', res)
+			console.log("********** ***** **************")
 			const session = await lucia.createSession(id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies.set(sessionCookie.name, sessionCookie.value, {
@@ -88,6 +79,6 @@ export const actions: Actions = {
 				});
 			}
 		}
-		redirect(302, '/auth-email');
+		redirect(302, '/sign-up/auth-email');
 	}
 };

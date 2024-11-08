@@ -263,63 +263,6 @@ class UserRepository {
 		}
 
 	}
-
-	public emailSession(tokenId:string) {
-		try {
-			const sql = this.db.prepare<string>(`
-				SELECT *
-				FROM email_sessions
-				WHERE id = ?
-				`)
-			const res = sql.get(tokenId)
-			return res
-		} catch (error) {
-			console.log('console log error from emailSession', error)
-			throw new UserRepositoryError('Error occurs trying to get e-mail session for sessionid:' + tokenId, error)
-		}
-	}
-
-	public async deleteEmailSession(id: string) {
-		try {
-			const sql = this.db.prepare<string>(`
-				DELETE FROM email_sessions WHERE user_id = ?
-				`)
-			const res = sql.run(id)
-			return res
-		} catch (error) {
-			console.log('console log error from deleteEmailsession', error)
-			throw new UserRepositoryError('Error occurs trying to delete e-mail session for user:' + id, error)
-		}
-	}
-
-	public async insertEmailSession(userId:string, tokenId: string, userEmail:string, date: Date) {
-		try {
-			const sql = this.db.prepare<string>(`
-				INSERT INTO email_sessions (id, expires_at, user_id, email)
-				VALUES (?, ?, ?, ?)
-				`)
-			const res = sql.run(tokenId, date.getTime(), userId, userEmail)
-			return res
-		} catch (error) {
-			console.log('console log error from inserEmailsession', error)
-			throw new UserRepositoryError('Error occurs trying to insert e-mail session for user:' + userId, error)
-		}
-	}
-
-	public async updateEmailIsSetup(userId:string, val: Boolean) {
-		try {
-			const tmp : number = (val) ? 1 : 0
-			const updateProfileSet = this.db.prepare<number, string>(
-				'UPDATE users SET email_is_setup = ? WHERE id = ?'
-			);
-			const res = updateProfileSet.run(tmp, userId)
-			return res
-		} catch (error) {
-			console.log('console log error from updateEmailIsSetup', error)
-			throw new UserRepositoryError('Error occurs trying to update email_is_setup for user:' + userId, error)
-		}
-	}
-
 }
 
 export { UserRepository, UserRepositoryError, DuplicateEntryError };
