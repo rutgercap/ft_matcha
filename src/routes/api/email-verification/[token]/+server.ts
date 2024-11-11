@@ -21,6 +21,7 @@ export async function GET({ params, locals }) {
 	}
 
 	if (!token) {
+		console.log('--> in api/email-verification: token is invalid')
 		return new Response(null, { status: 404 }); // Token not found
 	}
 
