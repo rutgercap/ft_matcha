@@ -4,6 +4,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { isWithinExpirationDate } from "oslo";
 import { lucia } from '$lib/auth';
+import { error } from '@sveltejs/kit';
 
 // The directory where images are stored
 export async function GET({ params, locals }) {
@@ -22,7 +23,7 @@ export async function GET({ params, locals }) {
 
 	if (!token) {
 		console.log('--> in api/email-verification: token is invalid')
-		return new Response(null, { status: 404 }); // Token not found
+		throw error(404, 'Token is invalid or expired');
 	}
 
 	if (!isWithinExpirationDate(new Date(token.expires_at))) {

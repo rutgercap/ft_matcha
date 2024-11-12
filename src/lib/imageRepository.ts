@@ -2,8 +2,9 @@ import type { Database } from 'better-sqlite3';
 import { generateIdFromEntropySize } from 'lucia';
 import * as fs from 'fs';
 import * as path from 'path';
+import { MAX_PIC } from '$env/static/private';
 
-const MAX_PICTURES = 5
+const MAX_PICTURES = Number(MAX_PIC)
 
 export class ImageRepositoryError extends Error {
 	exception: unknown;
