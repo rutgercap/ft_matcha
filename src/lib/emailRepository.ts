@@ -82,7 +82,6 @@ class EmailRepository{
 				ORDER BY expires_at DESC
 				`)
 			const res = sql.get(userId)
-			console.log('emailSessionById: ', res)
 			return res
 		} catch (error) {
 			console.log('console log error from emailSessionByUserId', error)
