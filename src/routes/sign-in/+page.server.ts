@@ -11,6 +11,11 @@ const signInSchema = z.object({
 	password: z.string().min(6).max(255)
 });
 
+const emailSchema = z.object({
+	username: z.string().min(4).max(31),
+	email: z.string().email({ message: "Invalid email address" })
+});
+
 export const load: PageServerLoad = async ({ locals: { user } }) => {
 	if (user) {
 		redirect(303, '/');
@@ -53,5 +58,39 @@ export const actions: Actions = {
 			...sessionCookie.attributes
 		});
 		return redirect(302, '/');
+	},
+
+	forgot_pswd: async ({ request, cookies, locals: { userRepository, emailRepository } }) => {
+		console.log('IN THE FORGOT PSWD ACTION request: ', request)
+		const form = await superValidate(request, zod(emailSchema));
+		console.log('form ', form)
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+		const { username, email } = form.data;
+		const user = await userRepository.userByUsername(username);
+		if (!user || email !== user.email) {
+			return message(form, 'Incorrect username or email', {
+				status: 400
+			});
+		}
+		if (!(user.emailIsSetup)){
+			return message(form, 'your e-mail is not even verified bro you suck', {
+				status: 400
+			});
+		}
+		try {
+			const verificationToken = emailRepository.createResetPasswordToken(user.id, email, user.passwordHash);
+			const verificationLink = "http://localhost:3000/profile/edit-profile/reset-pswd/" + verificationToken;
+			const res = await emailRepository.verificationLinkTo(email, verificationLink)
+			return message(form, 'Email verified, we sent you a verification link to reset your password', { status: 200 })
+		} catch (error) {
+			console.log('ERROR IN THE FORGOT PASSWORD ACTION: ', error)
+			return message(form, 'Something went wrong on our side.\nPlease try again later.', {
+				status: 500
+			});
+		}
+
+
 	}
 };

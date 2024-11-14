@@ -1,27 +1,56 @@
 <script lang="ts">
 	import { superForm } from 'sveltekit-superforms';
-	import Dialog from '$lib/Dialog.svelte';
-	import { onMount } from 'svelte';
+	import ForgotPswd from '$lib/component/ForgotPswd.svelte';
 
 	export let data;
 
 	const { enhance, form, errors, constraints, message } = superForm(data.form);
 
 
-	// Variable to track dialog visibility
-	let isDialogOpen = false;
-
-	// Function to open dialog
-	const openDialog = () => {
-		isDialogOpen = true;
-	};
-
-	// Function to close dialog
-	const closeDialog = () => {
-		isDialogOpen = false;
-	};
+	console.log('in the sign in front page: data =',
+		form
+	)
 
 
+    const handleForgotPassword = async (event) => {
+        // Access the submitted data from the event detail
+        const { username, email } = event.detail;
+
+		form.username = username
+		form.email = email
+
+		console.log('in the handleForgotPassword function:', form)
+        // Define your action function to handle the form data here
+		const response = await fetch('/your-sign-in-route-path?forgot_pswd', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(form)
+            });
+
+		const result = await response.json();
+
+		if (response.ok) {
+			// Display a success message or handle the response as needed
+			console.log(result.message);  // "Email verified, we sent you a verification link..."
+		} else {
+			// Handle errors from the action
+			console.error(result.message);
+		}
+
+		closeForgotPasswordModal(); // Optionally close the modal
+    };
+
+	let showForgotPassword = false;
+
+    const openForgotPasswordModal = () => {
+        showForgotPassword = true;
+    };
+
+    const closeForgotPasswordModal = () => {
+        showForgotPassword = false;
+    };
 </script>
 
 <div class="flex md:pt-12 flex-col justify-center px-6 lg:px-8">
@@ -66,11 +95,11 @@
 						<div class="text-sm">
 							<button
 							  class="text-blue-600 hover:underline focus:outline-none"
-							  on:click={openDialog}
+							  on:click={openForgotPasswordModal}
 							>
 							  Forgot password?
 							</button>
-							<Dialog isOpen={isDialogOpen} onClose={closeDialog} />
+
 						</div>
 				</div>
 
@@ -103,6 +132,11 @@
 				<p class="mt-2 text-sm text-red-600">{$message}</p>
 			{/if}
 		</form>
+		<!-- Conditionally Render Forgot Password Modal -->
+		{#if showForgotPassword}
+			<ForgotPswd on:submitForgotPassword={handleForgotPassword} />
+			<button class="overlay" on:click={closeForgotPasswordModal}></button>
+    	{/if}
 		<p class="mt-10 text-center text-sm text-gray-500">
 			Not a member?
 			<a href="sign-up" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"

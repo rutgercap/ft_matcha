@@ -60,6 +60,32 @@ class EmailRepository{
 		})
 	}
 
+	public async resetPasswordLinkTo(email:string, link:string) {
+		const body = `
+					Hello clumsy robot !\n
+					dizzy with love ?\n
+					please click the link below to verify your e-mail adress.\n
+					${link}
+				`
+		const message = {
+			from: GOOGLE_EMAIL,
+			to: email,
+			subject: "Your reset password link",
+			text: body,
+		};
+		return new Promise((resolve:any, reject:any) => {
+			this.transporter.sendMail(message, (err: any, info: any) => {
+				if (err) {
+					console.error(err);
+					reject(new EmailRepositoryError('Error occur trying to send mail (reset password) for the following email:' + email, err));
+				} else {
+					resolve(info);
+				}
+			});
+
+		})
+	}
+
 	public createEmailVerificationToken(userId: string, email: string): Promise<string> {
 		// optionally invalidate all existing tokens
 		let res = this.deleteEmailSession(userId)
@@ -69,6 +95,20 @@ class EmailRepository{
 			tokenId,
 			email,
 			createDate(new TimeSpan(3, "m"))
+		);
+		return tokenId;
+	}
+
+	public createResetPasswordToken(userId: string, email: string, old_pswd: string): Promise<string> {
+		// optionally invalidate all existing tokens
+		let res = this.deleteResetPasswordSession(userId)
+		const tokenId = generateIdFromEntropySize(25); // 40 characters long
+		let ret = this.insertResetPasswordSession(
+			userId,
+			tokenId,
+			email,
+			createDate(new TimeSpan(3, "m")),
+			old_pswd
 		);
 		return tokenId;
 	}
@@ -105,6 +145,21 @@ class EmailRepository{
 		}
 	}
 
+	public resetPasswordSession(tokenId:string) {
+		try {
+			const sql = this.db.prepare<string>(`
+				SELECT *
+				FROM reset_pswd_sessions
+				WHERE id = ?
+				`)
+			const res = sql.get(tokenId)
+			return res
+		} catch (error) {
+			console.log('console log error from resetPasswordSession', error)
+			throw new EmailRepositoryError('Error occurs trying to get reset password session for sessionid:' + tokenId, error)
+		}
+	}
+
 	public async deleteEmailSession(id: string) {
 		try {
 			const sql = this.db.prepare<string>(`
@@ -115,6 +170,20 @@ class EmailRepository{
 		} catch (error) {
 			console.log('console log error from deleteEmailsession', error)
 			throw new EmailRepositoryError('Error occurs trying to delete e-mail session for user:' + id, error)
+		}
+	}
+
+
+	public async deleteResetPasswordSession(id: string) {
+		try {
+			const sql = this.db.prepare<string>(`
+				DELETE FROM reset_pswd_sessions WHERE id = ?
+				`)
+			const res = sql.run(id)
+			return res
+		} catch (error) {
+			console.log('console log error from deleteResetPasswordSession', error)
+			throw new EmailRepositoryError('Error occurs trying to delete reset password session for user:' + id, error)
 		}
 	}
 
@@ -132,6 +201,21 @@ class EmailRepository{
 		}
 	}
 
+
+	public async insertResetPasswordSession(userId:string, tokenId: string, userEmail:string, date: Date, old_pswd: string) {
+		try {
+			const sql = this.db.prepare<string>(`
+				INSERT INTO reset_pswd_sessions (id, expires_at, user_id, email, old_password_hash)
+				VALUES (?, ?, ?, ?, ?)
+				`)
+			const res = sql.run(tokenId, date.getTime(), userId, userEmail)
+			return res
+		} catch (error) {
+			console.log('console log error from insertResetPasswordSession', error)
+			throw new EmailRepositoryError('Error occurs trying to insert reset password session for user:' + userId, error)
+		}
+	}
+
 	public async updateEmailIsSetup(userId:string, val: Boolean) {
 		try {
 			const tmp : number = (val) ? 1 : 0
@@ -142,7 +226,7 @@ class EmailRepository{
 			return res
 		} catch (error) {
 			console.log('console log error from updateEmailIsSetup', error)
-			throw new EmailRepository('Error occurs trying to update email_is_setup for user:' + userId, error)
+			throw new EmailRepositoryError('Error occurs trying to update email_is_setup for user:' + userId, error)
 		}
 	}
 

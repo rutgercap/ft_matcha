@@ -23,7 +23,7 @@ export async function GET({ params, locals }) {
 
 	if (!token) {
 		console.log('--> in api/email-verification: token is invalid')
-		throw error(404, 'Token is invalid or expired');
+		throw error(404, 'Token is invalid');
 	}
 
 	if (!isWithinExpirationDate(new Date(token.expires_at))) {
