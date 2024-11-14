@@ -6,42 +6,6 @@
 
 	const { enhance, form, errors, constraints, message } = superForm(data.form);
 
-
-	console.log('in the sign in front page: data =',
-		form
-	)
-
-
-    const handleForgotPassword = async (event) => {
-        // Access the submitted data from the event detail
-        const { username, email } = event.detail;
-
-		form.username = username
-		form.email = email
-
-		console.log('in the handleForgotPassword function:', form)
-        // Define your action function to handle the form data here
-		const response = await fetch('/your-sign-in-route-path?forgot_pswd', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(form)
-            });
-
-		const result = await response.json();
-
-		if (response.ok) {
-			// Display a success message or handle the response as needed
-			console.log(result.message);  // "Email verified, we sent you a verification link..."
-		} else {
-			// Handle errors from the action
-			console.error(result.message);
-		}
-
-		closeForgotPasswordModal(); // Optionally close the modal
-    };
-
 	let showForgotPassword = false;
 
     const openForgotPasswordModal = () => {
@@ -50,6 +14,33 @@
 
     const closeForgotPasswordModal = () => {
         showForgotPassword = false;
+    };
+
+
+	const handleForgotPasswordSubmit = async () => {
+        try {
+            const response = await fetch('/sign-in?/forgot_pswd', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams($form).toString()
+            });
+
+            const result = await response.json();
+			const message = JSON.parse(result.data)
+			console.log('IN THE FRONT GETTING THE RESULT OF THE FORGOT PASSWORD SUBMISSION:', message)
+            if (response.ok) {
+                console.log('response is ok', message);
+				$message = message[9] // Handle success (e.g., show success message)
+            } else {
+                console.error('response is not ok', message); // Handle error response
+				$message = message[9] // Handle success (e.g., show success message)
+            }
+        } catch (error) {
+            console.error('Error submitting forgot password request:', error);
+        }
+		closeForgotPasswordModal()
     };
 </script>
 
@@ -66,7 +57,7 @@
 		</div>
 
 		<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-			<form class="space-y-6" method="POST" use:enhance>
+			<form class="space-y-6" method="POST" use:enhance action="?/sign_in">
 				<div>
 					<label for="username" class="block text-sm font-medium leading-6 text-gray-900"
 					>Username</label
@@ -94,6 +85,7 @@
 						</label>
 						<div class="text-sm">
 							<button
+							  type="button"
 							  class="text-blue-600 hover:underline focus:outline-none"
 							  on:click={openForgotPasswordModal}
 							>
@@ -134,8 +126,7 @@
 		</form>
 		<!-- Conditionally Render Forgot Password Modal -->
 		{#if showForgotPassword}
-			<ForgotPswd on:submitForgotPassword={handleForgotPassword} />
-			<button class="overlay" on:click={closeForgotPasswordModal}></button>
+			<ForgotPswd bind:value={$form} bind:closeComponent={showForgotPassword} on:submitForgotPassword={handleForgotPasswordSubmit} />
     	{/if}
 		<p class="mt-10 text-center text-sm text-gray-500">
 			Not a member?

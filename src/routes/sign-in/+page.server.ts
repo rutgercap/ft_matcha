@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals: { user } }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, locals: { userRepository } }) => {
+	sign_in: async ({ request, cookies, locals: { userRepository } }) => {
 		const form = await superValidate(request, zod(signInSchema));
 		if (!form.valid) {
 			return fail(400, { form });
@@ -57,16 +57,21 @@ export const actions: Actions = {
 			path: '.',
 			...sessionCookie.attributes
 		});
-		return redirect(302, '/');
+		if (user.emailIsSetup)
+			return redirect(302, '/');
+		else
+			return redirect(302, '/sign-up/auth-email');
 	},
 
 	forgot_pswd: async ({ request, cookies, locals: { userRepository, emailRepository } }) => {
-		console.log('IN THE FORGOT PSWD ACTION request: ', request)
+		console.log('IN THE FORGOT PSWD ACTION request: ')
 		const form = await superValidate(request, zod(emailSchema));
-		console.log('form ', form)
 		if (!form.valid) {
+			console.log('*************the form is not valid')
 			return fail(400, { form });
 		}
+		console.log('+++++++++++++the form IS valid', form)
+
 		const { username, email } = form.data;
 		const user = await userRepository.userByUsername(username);
 		if (!user || email !== user.email) {
@@ -82,15 +87,14 @@ export const actions: Actions = {
 		try {
 			const verificationToken = emailRepository.createResetPasswordToken(user.id, email, user.passwordHash);
 			const verificationLink = "http://localhost:3000/profile/edit-profile/reset-pswd/" + verificationToken;
-			const res = await emailRepository.verificationLinkTo(email, verificationLink)
-			return message(form, 'Email verified, we sent you a verification link to reset your password', { status: 200 })
+			// const res = await emailRepository.verificationLinkTo(email, verificationLink)
+			console.log('reset password verification link: ', verificationLink)
+			return message(form, 'Email verified, we sent you a verification link to reset your password', { status: 400 });
 		} catch (error) {
 			console.log('ERROR IN THE FORGOT PASSWORD ACTION: ', error)
 			return message(form, 'Something went wrong on our side.\nPlease try again later.', {
 				status: 500
 			});
 		}
-
-
 	}
 };
