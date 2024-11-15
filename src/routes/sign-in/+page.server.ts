@@ -1,4 +1,4 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -70,7 +70,6 @@ export const actions: Actions = {
 			console.log('*************the form is not valid')
 			return fail(400, { form });
 		}
-		console.log('+++++++++++++the form IS valid', form)
 
 		const { username, email } = form.data;
 		const user = await userRepository.userByUsername(username);
@@ -88,8 +87,18 @@ export const actions: Actions = {
 			const verificationToken = emailRepository.createResetPasswordToken(user.id, email, user.passwordHash);
 			const verificationLink = "http://localhost:3000/profile/edit-profile/reset-pswd/" + verificationToken;
 			// const res = await emailRepository.verificationLinkTo(email, verificationLink)
+			const res = userRepository.upsertProfileIsSetup(user.id, false)
+			if (!res.changes) {
+				return error(500, 'A problem occure invalidating the profile')
+			}
+			const session = await lucia.createSession(user.id, {});
+			const sessionCookie = lucia.createSessionCookie(session.id);
+			cookies.set(sessionCookie.name, sessionCookie.value, {
+				path: '.',
+				...sessionCookie.attributes
+			});
 			console.log('reset password verification link: ', verificationLink)
-			return message(form, 'Email verified, we sent you a verification link to reset your password', { status: 400 });
+			return message(form, 'Email verified, we sent you a verification link to reset your password', { status: 418 });
 		} catch (error) {
 			console.log('ERROR IN THE FORGOT PASSWORD ACTION: ', error)
 			return message(form, 'Something went wrong on our side.\nPlease try again later.', {

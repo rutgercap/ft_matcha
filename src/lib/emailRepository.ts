@@ -86,7 +86,7 @@ class EmailRepository{
 		})
 	}
 
-	public createEmailVerificationToken(userId: string, email: string): Promise<string> {
+	public createEmailVerificationToken(userId: string, email: string): string {
 		// optionally invalidate all existing tokens
 		let res = this.deleteEmailSession(userId)
 		const tokenId = generateIdFromEntropySize(25); // 40 characters long
@@ -99,7 +99,7 @@ class EmailRepository{
 		return tokenId;
 	}
 
-	public createResetPasswordToken(userId: string, email: string, old_pswd: string): Promise<string> {
+	public createResetPasswordToken(userId: string, email: string, old_pswd: string): string {
 		// optionally invalidate all existing tokens
 		let res = this.deleteResetPasswordSession(userId)
 		const tokenId = generateIdFromEntropySize(25); // 40 characters long
@@ -189,7 +189,7 @@ class EmailRepository{
 
 	public async insertEmailSession(userId:string, tokenId: string, userEmail:string, date: Date) {
 		try {
-			const sql = this.db.prepare<string>(`
+			const sql = this.db.prepare<[string, number, string, string]>(`
 				INSERT INTO email_sessions (id, expires_at, user_id, email)
 				VALUES (?, ?, ?, ?)
 				`)
@@ -204,11 +204,11 @@ class EmailRepository{
 
 	public async insertResetPasswordSession(userId:string, tokenId: string, userEmail:string, date: Date, old_pswd: string) {
 		try {
-			const sql = this.db.prepare<string>(`
+			const sql = this.db.prepare<[string, number, string, string, string]>(`
 				INSERT INTO reset_pswd_sessions (id, expires_at, user_id, email, old_password_hash)
 				VALUES (?, ?, ?, ?, ?)
 				`)
-			const res = sql.run(tokenId, date.getTime(), userId, userEmail)
+			const res = sql.run(tokenId, date.getTime(), userId, userEmail, old_pswd)
 			return res
 		} catch (error) {
 			console.log('console log error from insertResetPasswordSession', error)

@@ -16,7 +16,7 @@
         showForgotPassword = false;
     };
 
-
+	// TODO: send error message to you component to print them directly in the box
 	const handleForgotPasswordSubmit = async () => {
         try {
             const response = await fetch('/sign-in?/forgot_pswd', {
@@ -28,10 +28,11 @@
             });
 
             const result = await response.json();
+			// console.log('IN THE FRONT ', result)
 			const message = JSON.parse(result.data)
-			console.log('IN THE FRONT GETTING THE RESULT OF THE FORGOT PASSWORD SUBMISSION:', message)
+			// console.log('IN THE FRONT GETTING THE RESULT OF THE FORGOT PASSWORD SUBMISSION:', message)
             if (response.ok) {
-                console.log('response is ok', message);
+                // console.log('response is ok', message);
 				$message = message[9] // Handle success (e.g., show success message)
             } else {
                 console.error('response is not ok', message); // Handle error response

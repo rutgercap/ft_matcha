@@ -49,7 +49,7 @@ class UserRepository {
 					.prepare<
 						string,
 						ToSnakeCase<UserWithPassword>
-					>('SELECT id, email, username, password_hash, profile_is_setup FROM users WHERE username = ?')
+					>('SELECT id, email, username, password_hash, profile_is_setup, email_is_setup FROM users WHERE username = ?')
 					.get(username);
 				if (result) {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key)) as any;
@@ -207,6 +207,18 @@ class UserRepository {
 		});
 	}
 
+	public upsertProfileIsSetup(userId: string, flag: boolean) {
+		try {
+			const val = flag ? 1:0;
+			const sql = this.db.prepare<[number, string]>(`UPDATE users SET profile_is_setup = ? WHERE id = ?`);
+			const res = sql.run(val, userId)
+			return res
+		} catch (error) {
+			console.log('error in the userRepository:upsertProfileIsSetup:',error)
+			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error)
+		}
+	}
+
 	public async createUser(user: UserWithoutProfileSetup, password: string): Promise<User> {
 		const passwordHash = await hash(password, {
 			memoryCost: 19456,
@@ -249,6 +261,25 @@ class UserRepository {
 		});
 	}
 
+	public async updateUserPswd(userId:string, password:string) {
+		try {
+			const passwordHash = await hash(password, {
+				memoryCost: 19456,
+				timeCost: 2,
+				outputLen: 32,
+				parallelism: 1
+			});
+
+			const sql = this.db.prepare<[string, string]>(`UPDATE users SET password_hash = ? WHERE id = ?`);
+			const res = sql.run(passwordHash, userId)
+			return res
+		} catch (error) {
+			console.log('error occur at updateUserPswd: ', error)
+			throw new UserRepositoryError('error occur trying to update new password for user:' + userId, error)
+		}
+
+	}
+
 	public async deleteUserImage(picture_id: string) {
 		try {
 			const res = this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(picture_id)
@@ -262,7 +293,9 @@ class UserRepository {
 			throw new UserRepositoryError('Error occurs trying to delete image: ' + picture_id, error)
 		}
 
+
 	}
+
 }
 
 export { UserRepository, UserRepositoryError, DuplicateEntryError };
