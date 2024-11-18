@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 
 	let status = $page.status;
+	let errorMessage = $page.error?.message
 
 	function statusToText(status: number): string {
 		switch (status) {
@@ -34,6 +35,11 @@
 		{statusToText(status)}
 	</h1>
 	<p class="mt-6 text-lg leading-7 text-gray-600">{statusToLongText(status)}</p>
+	
+	{#if errorMessage}
+		<p class="mt-6 text-lg leading-7 font-semibold text-red-600">more seriously: {errorMessage}</p>
+	{/if}
+
 	<div class="mt-10">
 		<a href="/" class="text-sm font-semibold leading-7 text-pink-600 hover:text-pink-400"
 			><span aria-hidden="true">&larr;</span> Back to the fun</a

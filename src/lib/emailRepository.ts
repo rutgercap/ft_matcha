@@ -187,6 +187,20 @@ class EmailRepository{
 		}
 	}
 
+	public async deleteResetPasswordSessionByUserId(userId: string) {
+		try {
+			const sql = this.db.prepare<string>(`
+				DELETE FROM reset_pswd_sessions WHERE  user_id = ?
+				`)
+			const res = sql.run(userId)
+			return res
+		} catch (error) {
+			console.log('console log error from deleteResetPasswordSession', error)
+			throw new EmailRepositoryError('Error occurs trying to delete reset password session for user:' + id, error)
+		}
+	}
+
+
 	public async insertEmailSession(userId:string, tokenId: string, userEmail:string, date: Date) {
 		try {
 			const sql = this.db.prepare<[string, number, string, string]>(`

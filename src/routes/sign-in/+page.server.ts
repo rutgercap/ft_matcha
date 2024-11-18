@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals: { user } }) => {
 };
 
 export const actions: Actions = {
-	sign_in: async ({ request, cookies, locals: { userRepository } }) => {
+	sign_in: async ({ request, cookies, locals: { userRepository, emailRepository } }) => {
 		const form = await superValidate(request, zod(signInSchema));
 		if (!form.valid) {
 			return fail(400, { form });
@@ -50,6 +50,14 @@ export const actions: Actions = {
 			return message(form, 'Incorrect username or password', {
 				status: 400
 			});
+		}
+
+		// this condition is in case the user clicked the reset password button 
+		// but then log in whitout changing the oldpswd
+		if (!user.passwordIsSet) {
+			const change = await emailRepository.deleteResetPasswordSessionByUserId(user.id)
+			userRepository.upsertPasswordIsSet(user.id, true)
+			await lucia.invalidateUserSessions(user.id);
 		}
 		const session = await lucia.createSession(user.id, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
@@ -86,8 +94,8 @@ export const actions: Actions = {
 		try {
 			const verificationToken = emailRepository.createResetPasswordToken(user.id, email, user.passwordHash);
 			const verificationLink = "http://localhost:3000/profile/edit-profile/reset-pswd/" + verificationToken;
-			// const res = await emailRepository.verificationLinkTo(email, verificationLink)
-			const res = userRepository.upsertProfileIsSetup(user.id, false)
+			const res_email = await emailRepository.verificationLinkTo(email, verificationLink)
+			const res = userRepository.upsertPasswordIsSet(user.id, false)
 			if (!res.changes) {
 				return error(500, 'A problem occure invalidating the profile')
 			}

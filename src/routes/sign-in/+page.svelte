@@ -3,7 +3,7 @@
 	import ForgotPswd from '$lib/component/ForgotPswd.svelte';
 
 	export let data;
-
+	let status = 0;
 	const { enhance, form, errors, constraints, message } = superForm(data.form);
 
 	let showForgotPassword = false;
@@ -28,13 +28,13 @@
             });
 
             const result = await response.json();
-			// console.log('IN THE FRONT ', result)
 			const message = JSON.parse(result.data)
-			// console.log('IN THE FRONT GETTING THE RESULT OF THE FORGOT PASSWORD SUBMISSION:', message)
             if (response.ok) {
-                // console.log('response is ok', message);
+                console.log('response is ok --> ', result.status);
+				status = result.status
 				$message = message[9] // Handle success (e.g., show success message)
             } else {
+				status = result.status
                 console.error('response is not ok', message); // Handle error response
 				$message = message[9] // Handle success (e.g., show success message)
             }
@@ -122,7 +122,11 @@
 				</button>
 			</div>
 			{#if $message}
-				<p class="mt-2 text-sm text-red-600">{$message}</p>
+				{#if status == 418}
+					<p class="mt-2 text-sm text-green-600">{$message}</p>
+				{:else}
+					<p class="mt-2 text-sm text-red-600">{$message}</p>
+				{/if}
 			{/if}
 		</form>
 		<!-- Conditionally Render Forgot Password Modal -->

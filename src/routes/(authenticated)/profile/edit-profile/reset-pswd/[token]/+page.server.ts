@@ -19,12 +19,14 @@ export const load: PageServerLoad = async ({ cookies, params, locals}) => {
 	if (!user) {
 		return error(500, ' reset password: something went wrong on our side')
 	}
+	await lucia.invalidateUserSessions(user.id);
 	const verificationToken = params.token;
 
 	const emailRepository = locals.emailRepository
 	const token = emailRepository.resetPasswordSession(verificationToken)
 	if (token) {
-		console.log('in reset password load function, should delete reset password session but is not doing it currently')
+		await emailRepository.deleteResetPasswordSession(params.token);
+		console.log('in reset password load function')
 	}
     if (!token) {
 		console.log('--> in profile/edit-profile/reset-pswd token is invalid')
@@ -33,9 +35,8 @@ export const load: PageServerLoad = async ({ cookies, params, locals}) => {
 
     if (!isWithinExpirationDate(new Date(token.expires_at))) {
         console.log('reset password load funciton: token is out of date')
-		redirect(302, '/sign-in');
+		throw error(404, 'Token is out of date, hit forgot password again');
 	}
-	await lucia.invalidateUserSessions(user.id);
 
 	const res = await emailRepository.updateEmailIsSetup(user.id, true)
 	const session = await lucia.createSession(user.id, {});
@@ -48,7 +49,6 @@ export const load: PageServerLoad = async ({ cookies, params, locals}) => {
 
 	const form = await superValidate(zod(newPassword));
 	return { form };
-
 }
 
 
@@ -85,7 +85,7 @@ export const actions : Actions = {
 			return error(500, 'error occur trying to update password')
 
 		await emailRepository.deleteResetPasswordSession(params.token);
-		res = userRepository.upsertProfileIsSetup(user.id, true)
+		res = userRepository.upsertPasswordIsSet(user.id, true)
 		if (!res.changes)
 			return error(500, 'error occur trying to update password')
 
