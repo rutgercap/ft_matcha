@@ -1,7 +1,0 @@
-import type { Branded, constrain } from "../ast.ts";
-declare namespace string {
-    type email = constrain<string, Branded<"email">>;
-}
-export declare const email: import("@ark/schema").IntersectionNode;
-export type email = string.email;
-export {};
