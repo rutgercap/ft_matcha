@@ -12,7 +12,7 @@ all: ${NAME}
 migrate:
 	${DOCKER} exec matcha pnpm run db:migrate
 
-dev : 
+dev :
 	${DOCKER} up --build
 
 
@@ -23,10 +23,12 @@ down :
 test :
 	${DOCKER} exec matcha pnpm run test:unit
 
+
 prune : down
 	docker system prune -a --volumes -f
 
 db-clean :
 	rm -rf ${DB_PATH}/database.db
 	rm -rf ${DB_PATH}/migrations.lock
+	find ./profile-pictures -type f ! -name "default*" -delete
 

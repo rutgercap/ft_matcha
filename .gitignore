@@ -24,3 +24,13 @@ vite.config.ts.timestamp-*
 # Data
 database.db
 database
+profile-pictures/*
+!profile-pictures/default*
+
+tests/lib/pictures-repo-test/*
+
+.env
+
+# dependencies
+node_modules/
+.pnpm-store/

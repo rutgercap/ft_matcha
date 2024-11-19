@@ -14,6 +14,8 @@ interface DatabaseUserAttributes {
 	username: string;
 	profile_is_setup: number;
 	email: string;
+	email_is_setup: number;
+	password_is_set: number;
 }
 
 export const lucia = new Lucia(adapter, {
@@ -26,7 +28,9 @@ export const lucia = new Lucia(adapter, {
 		return {
 			username: attributes.username,
 			profileIsSetup: attributes.profile_is_setup === 0 ? false : true,
-			email: attributes.email
+			email: attributes.email,
+			emailIsSetup: attributes.email_is_setup === 0 ? false : true,
+			passwordIsSet: attributes.password_is_set === 0 ? false : true
 		};
 	}
 });

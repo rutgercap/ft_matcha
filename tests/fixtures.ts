@@ -6,21 +6,40 @@ import Database from 'better-sqlite3';
 import type { Database as DatabaseType } from 'better-sqlite3';
 import temp from 'temp';
 import { it } from 'vitest';
+import type { ImageRepository as ImageRepositoryType } from '$lib/imageRepository';
+import { ImageRepository } from '$lib/imageRepository';
+import type { User } from 'lucia';
+import { anyUser } from './testHelpers';
 
 interface MyFixtures {
 	db: DatabaseType;
 	userRepository: UserRepositoryType;
+	imageRepository: ImageRepositoryType;
+	savedUser: User;
 }
+
+let IMAGE_FOLDER = './tests/lib/pictures-repo-test';
 
 export const itWithFixtures = it.extend<MyFixtures>({
 	db: async ({}, use) => {
 		const tempMigrationsDir = temp.mkdirSync('migrations');
 		const db = new Database(':memory:');
 		await runMigrations(db, MIGRATIONS_PATH, path.join(tempMigrationsDir, 'migrations.lock'), true);
-		use(db);
+		await use(db);
 		temp.cleanupSync();
 	},
-	userRepository: ({ db }, use) => {
-		return use(new UserRepository(db));
+	imageRepository: async ({ db }, use) => {
+		const tempMigrationsDir = IMAGE_FOLDER;
+
+		await use(new ImageRepository(tempMigrationsDir, db));
+		temp.cleanupSync();
+	},
+	userRepository: async ({ db, imageRepository }, use) => {
+		await use(new UserRepository(db, imageRepository));
+	},
+	savedUser: async ({ userRepository }, use) => {
+		const user = anyUser();
+		await userRepository.createUser(user, 'password');
+		await use(user);
 	}
 });

@@ -5,7 +5,8 @@ import type { Actions, PageServerLoad } from './$types';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
-import { DuplicateEntryError } from '$lib/userRepository';
+import { DuplicateEntryError, UserRepository } from '$lib/userRepository';
+import type { EmailRepository } from '$lib/emailRepository';
 
 const signUpSchema = z.object({
 	username: z
@@ -19,6 +20,7 @@ const signUpSchema = z.object({
 	email: z.string().email('Please enter a valid email address')
 });
 
+// TODO detect when user.emailIsSetup and display some kind of pop-up
 export const load: PageServerLoad = async ({ locals: { user } }) => {
 	if (user) {
 		redirect(303, '/');
@@ -28,7 +30,7 @@ export const load: PageServerLoad = async ({ locals: { user } }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, locals: { userRepository, user } }) => {
+	default: async ({ request, cookies, locals: { userRepository, emailRepository, user } }) => {
 		if (user) {
 			redirect(303, '/');
 		}
@@ -41,6 +43,12 @@ export const actions: Actions = {
 
 		try {
 			await userRepository.createUser({ id, username, email }, password);
+			const verificationToken = emailRepository.createEmailVerificationToken(id, email);
+			const verificationLink = 'http://localhost:3000/api/email-verification/' + verificationToken;
+
+			console.log('IN THE SIGN UP END-POINT: verification link = ', verificationLink);
+			// TODO: this is where you send the link
+			const res = await emailRepository.verificationLinkTo(email, verificationLink);
 			const session = await lucia.createSession(id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies.set(sessionCookie.name, sessionCookie.value, {
@@ -50,7 +58,7 @@ export const actions: Actions = {
 		} catch (e) {
 			if (e instanceof DuplicateEntryError) {
 				if (['username', 'email'].includes(e.entity)) {
-					// Must be onf of the two options to type hacked it to 'email' to suppress type error
+					// Must be one of the two options to type hacked it to 'email' to suppress type error
 					return setError(
 						form,
 						e.entity as 'email',
@@ -67,6 +75,6 @@ export const actions: Actions = {
 				});
 			}
 		}
-		redirect(302, '/');
+		redirect(302, '/sign-up/auth-email');
 	}
 };

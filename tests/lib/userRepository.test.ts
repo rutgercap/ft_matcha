@@ -4,17 +4,7 @@ import { faker } from '@faker-js/faker';
 import { generateIdFromEntropySize, type User } from 'lucia';
 import { itWithFixtures } from '../fixtures';
 import { Gender, SexualPreference, type ProfileInfo } from '$lib/domain/profile';
-
-function anyUser(overrides: Partial<User> = {}): User {
-	const userId = generateIdFromEntropySize(10);
-	return {
-		id: userId,
-		email: faker.internet.email(),
-		username: faker.internet.userName(),
-		profileIsSetup: faker.datatype.boolean(),
-		...overrides
-	};
-}
+import { anyUser } from '../testHelpers';
 
 function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 	return {
@@ -24,6 +14,7 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
 		tags: [faker.lorem.word(), faker.lorem.word()],
+		pictures: [null, null, null, null, null],
 		...overrides
 	};
 }
@@ -39,15 +30,23 @@ describe('UserRepository', () => {
 		expect(found).toMatchObject(user);
 	});
 
-	itWithFixtures('should be able to set user profile', async ({ userRepository }) => {
+	itWithFixtures('should be able to set user profile', async ({ userRepository, savedUser }) => {
 		const userProfile = anyUserProfile();
-		const user = anyUser({ profileIsSetup: true });
-		await userRepository.createUser(user, faker.internet.password());
 
-		await userRepository.upsertPersonalInfo(user.id, userProfile);
+		await userRepository.upsertPersonalInfo(savedUser.id, userProfile);
 
-		const found = await userRepository.profileInfoFor(user.id);
-		expect(found).toMatchObject(userProfile);
+		const found = await userRepository.profileInfoFor(savedUser.id);
+		// ignoring the image properties that are tested in the imageRepository
+		expect(found).toEqual(
+			expect.objectContaining({
+				firstName: userProfile.firstName,
+				lastName: userProfile.lastName,
+				gender: userProfile.gender,
+				sexualPreference: userProfile.sexualPreference,
+				biography: userProfile.biography,
+				tags: userProfile.tags
+			})
+		);
 	});
 
 	itWithFixtures('should be able to update user profile', async ({ userRepository }) => {
@@ -60,7 +59,18 @@ describe('UserRepository', () => {
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
 		const found = await userRepository.profileInfoFor(user.id);
-		expect(found).toMatchObject(userProfile);
+
+		// ignoring the image properties that are tested in the imageRepository
+		expect(found).toEqual(
+			expect.objectContaining({
+				firstName: userProfile.firstName,
+				lastName: userProfile.lastName,
+				gender: userProfile.gender,
+				sexualPreference: userProfile.sexualPreference,
+				biography: userProfile.biography,
+				tags: userProfile.tags
+			})
+		);
 	});
 
 	itWithFixtures('Setting new tags does not double tags', async ({ userRepository }) => {
@@ -72,7 +82,17 @@ describe('UserRepository', () => {
 		await userRepository.upsertPersonalInfo(user.id, userProfile);
 
 		const found = await userRepository.profileInfoFor(user.id);
-		expect(found).toMatchObject(userProfile);
+		// ignoring the image properties that are tested in the imageRepository
+		expect(found).toEqual(
+			expect.objectContaining({
+				firstName: userProfile.firstName,
+				lastName: userProfile.lastName,
+				gender: userProfile.gender,
+				sexualPreference: userProfile.sexualPreference,
+				biography: userProfile.biography,
+				tags: userProfile.tags
+			})
+		);
 	});
 
 	itWithFixtures(
