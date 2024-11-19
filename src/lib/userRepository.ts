@@ -6,7 +6,7 @@ import _ from 'lodash';
 import type { User } from 'lucia';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageRepository } from './imageRepository';
-import { Buffer } from 'buffer'
+import { Buffer } from 'buffer';
 
 type UserWithPassword = User & { passwordHash: string };
 
@@ -40,7 +40,10 @@ class DuplicateEntryError extends UserRepositoryError {
 }
 
 class UserRepository {
-	constructor(private db: Database, private imageRepo : ImageRepository) {}
+	constructor(
+		private db: Database,
+		private imageRepo: ImageRepository
+	) {}
 
 	async userByUsername(username: string): Promise<UserWithPassword | null> {
 		return new Promise((resolve, reject) => {
@@ -115,13 +118,13 @@ class UserRepository {
 						`
 					)
 					.get(id);
-					const pictures : Array<string> = this.imageRepo.allImageIdOnly(id)
+				const pictures: Array<string> = this.imageRepo.allImageIdOnly(id);
 				if (!result) {
 					resolve(null);
 				} else {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
 					camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
-					camelCaseObject.pictures_filenames = pictures
+					camelCaseObject.pictures_filenames = pictures;
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
@@ -152,7 +155,7 @@ class UserRepository {
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
 
-		const buffers : Array<Buffer | null> = await this.imageRepo.convertFileToBuffer(info.pictures)
+		const buffers: Array<Buffer | null> = await this.imageRepo.convertFileToBuffer(info.pictures);
 
 		return new Promise((resolve, reject) => {
 			try {
@@ -174,7 +177,7 @@ class UserRepository {
 				transaction(id, info);
 
 				// if (buffers)
-				const inserted_filename: Array<string | null> = this.imageRepo.upsertImageAll(id, buffers)
+				const inserted_filename: Array<string | null> = this.imageRepo.upsertImageAll(id, buffers);
 
 				resolve(inserted_filename);
 			} catch (e) {
@@ -209,25 +212,29 @@ class UserRepository {
 
 	public upsertProfileIsSetup(userId: string, flag: boolean) {
 		try {
-			const val = flag ? 1:0;
-			const sql = this.db.prepare<[number, string]>(`UPDATE users SET profile_is_setup = ? WHERE id = ?`);
-			const res = sql.run(val, userId)
-			return res
+			const val = flag ? 1 : 0;
+			const sql = this.db.prepare<[number, string]>(
+				`UPDATE users SET profile_is_setup = ? WHERE id = ?`
+			);
+			const res = sql.run(val, userId);
+			return res;
 		} catch (error) {
-			console.log('error in the userRepository:upsertProfileIsSetup:',error)
-			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error)
+			console.log('error in the userRepository:upsertProfileIsSetup:', error);
+			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error);
 		}
 	}
 
 	public upsertPasswordIsSet(userId: string, flag: boolean) {
 		try {
-			const val = flag ? 1:0;
-			const sql = this.db.prepare<[number, string]>(`UPDATE users SET password_is_set = ? WHERE id = ?`);
-			const res = sql.run(val, userId)
-			return res
+			const val = flag ? 1 : 0;
+			const sql = this.db.prepare<[number, string]>(
+				`UPDATE users SET password_is_set = ? WHERE id = ?`
+			);
+			const res = sql.run(val, userId);
+			return res;
 		} catch (error) {
-			console.log('error in the userRepository:upsertProfileIsSetup:',error)
-			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error)
+			console.log('error in the userRepository:upsertProfileIsSetup:', error);
+			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error);
 		}
 	}
 
@@ -273,7 +280,7 @@ class UserRepository {
 		});
 	}
 
-	public async updateUserPswd(userId:string, password:string) {
+	public async updateUserPswd(userId: string, password: string) {
 		try {
 			const passwordHash = await hash(password, {
 				memoryCost: 19456,
@@ -282,32 +289,34 @@ class UserRepository {
 				parallelism: 1
 			});
 
-			const sql = this.db.prepare<[string, string]>(`UPDATE users SET password_hash = ? WHERE id = ?`);
-			const res = sql.run(passwordHash, userId)
-			return res
+			const sql = this.db.prepare<[string, string]>(
+				`UPDATE users SET password_hash = ? WHERE id = ?`
+			);
+			const res = sql.run(passwordHash, userId);
+			return res;
 		} catch (error) {
-			console.log('error occur at updateUserPswd: ', error)
-			throw new UserRepositoryError('error occur trying to update new password for user:' + userId, error)
+			console.log('error occur at updateUserPswd: ', error);
+			throw new UserRepositoryError(
+				'error occur trying to update new password for user:' + userId,
+				error
+			);
 		}
-
 	}
 
 	public async deleteUserImage(picture_id: string) {
 		try {
-			const res = this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(picture_id)
+			const res = this.db
+				.prepare<string>('DELETE FROM profile_pictures WHERE id = ?')
+				.run(picture_id);
 			if (res.changes) {
-				await this.imageRepo.deleteImageById(picture_id)
-			}
-			else {
-				throw new Error('picture_id is not in the database')
+				await this.imageRepo.deleteImageById(picture_id);
+			} else {
+				throw new Error('picture_id is not in the database');
 			}
 		} catch (error) {
-			throw new UserRepositoryError('Error occurs trying to delete image: ' + picture_id, error)
+			throw new UserRepositoryError('Error occurs trying to delete image: ' + picture_id, error);
 		}
-
-
 	}
-
 }
 
 export { UserRepository, UserRepositoryError, DuplicateEntryError };

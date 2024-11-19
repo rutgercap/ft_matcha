@@ -1,5 +1,5 @@
-import { faker } from "@faker-js/faker";
-import { generateIdFromEntropySize, type User } from "lucia";
+import { faker } from '@faker-js/faker';
+import { generateIdFromEntropySize, type User } from 'lucia';
 
 function anyUser(overrides: Partial<User> = {}): User {
 	const userId = generateIdFromEntropySize(10);
@@ -12,4 +12,4 @@ function anyUser(overrides: Partial<User> = {}): User {
 	};
 }
 
-export { anyUser};
+export { anyUser };

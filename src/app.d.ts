@@ -11,7 +11,7 @@ declare global {
 			userRepository: UserRepository;
 			user: User | null;
 			session: Session | null;
-			emailRepository: EmailRepository
+			emailRepository: EmailRepository;
 		}
 		// interface PageData {}
 		// interface PageState {}

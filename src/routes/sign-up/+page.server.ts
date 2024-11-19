@@ -8,7 +8,6 @@ import { z } from 'zod';
 import { DuplicateEntryError, UserRepository } from '$lib/userRepository';
 import type { EmailRepository } from '$lib/emailRepository';
 
-
 const signUpSchema = z.object({
 	username: z
 		.string()
@@ -45,11 +44,11 @@ export const actions: Actions = {
 		try {
 			await userRepository.createUser({ id, username, email }, password);
 			const verificationToken = emailRepository.createEmailVerificationToken(id, email);
-			const verificationLink = "http://localhost:3000/api/email-verification/" + verificationToken;
+			const verificationLink = 'http://localhost:3000/api/email-verification/' + verificationToken;
 
-			console.log('IN THE SIGN UP END-POINT: verification link = ', verificationLink)
+			console.log('IN THE SIGN UP END-POINT: verification link = ', verificationLink);
 			// TODO: this is where you send the link
-			const res = await emailRepository.verificationLinkTo(email, verificationLink)
+			const res = await emailRepository.verificationLinkTo(email, verificationLink);
 			const session = await lucia.createSession(id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies.set(sessionCookie.name, sessionCookie.value, {

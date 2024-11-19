@@ -13,7 +13,7 @@ const signInSchema = z.object({
 
 const emailSchema = z.object({
 	username: z.string().min(4).max(31),
-	email: z.string().email({ message: "Invalid email address" })
+	email: z.string().email({ message: 'Invalid email address' })
 });
 
 export const load: PageServerLoad = async ({ locals: { user } }) => {
@@ -52,11 +52,11 @@ export const actions: Actions = {
 			});
 		}
 
-		// this condition is in case the user clicked the reset password button 
+		// this condition is in case the user clicked the reset password button
 		// but then log in whitout changing the oldpswd
 		if (!user.passwordIsSet) {
-			const change = await emailRepository.deleteResetPasswordSessionByUserId(user.id)
-			userRepository.upsertPasswordIsSet(user.id, true)
+			const change = await emailRepository.deleteResetPasswordSessionByUserId(user.id);
+			userRepository.upsertPasswordIsSet(user.id, true);
 			await lucia.invalidateUserSessions(user.id);
 		}
 		const session = await lucia.createSession(user.id, {});
@@ -65,17 +65,14 @@ export const actions: Actions = {
 			path: '.',
 			...sessionCookie.attributes
 		});
-		if (user.emailIsSetup)
-			return redirect(302, '/');
-		else
-			return redirect(302, '/sign-up/auth-email');
+		if (user.emailIsSetup) return redirect(302, '/');
+		else return redirect(302, '/sign-up/auth-email');
 	},
 
 	forgot_pswd: async ({ request, cookies, locals: { userRepository, emailRepository } }) => {
-		console.log('IN THE FORGOT PSWD ACTION request: ')
 		const form = await superValidate(request, zod(emailSchema));
 		if (!form.valid) {
-			console.log('*************the form is not valid')
+			console.log('*************the form is not valid');
 			return fail(400, { form });
 		}
 
@@ -86,18 +83,27 @@ export const actions: Actions = {
 				status: 400
 			});
 		}
-		if (!(user.emailIsSetup)){
-			return message(form, 'your e-mail is not even verified bro you suck', {
-				status: 400
-			});
+		if (!user.emailIsSetup) {
+			return message(
+				form,
+				'your email has not been verified, you must contact service support at matchalover.serviceteam@gmail.com to unlock your profile',
+				{
+					status: 400
+				}
+			);
 		}
 		try {
-			const verificationToken = emailRepository.createResetPasswordToken(user.id, email, user.passwordHash);
-			const verificationLink = "http://localhost:3000/profile/edit-profile/reset-pswd/" + verificationToken;
-			const res_email = await emailRepository.verificationLinkTo(email, verificationLink)
-			const res = userRepository.upsertPasswordIsSet(user.id, false)
+			const verificationToken = emailRepository.createResetPasswordToken(
+				user.id,
+				email,
+				user.passwordHash
+			);
+			const verificationLink =
+				'http://localhost:3000/profile/edit-profile/reset-pswd/' + verificationToken;
+			const res_email = await emailRepository.resetLinkTo(email, verificationLink);
+			const res = userRepository.upsertPasswordIsSet(user.id, false);
 			if (!res.changes) {
-				return error(500, 'A problem occure invalidating the profile')
+				return error(500, 'A problem occure invalidating the profile');
 			}
 			const session = await lucia.createSession(user.id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
@@ -105,10 +111,14 @@ export const actions: Actions = {
 				path: '.',
 				...sessionCookie.attributes
 			});
-			console.log('reset password verification link: ', verificationLink)
-			return message(form, 'Email verified, we sent you a verification link to reset your password', { status: 418 });
+			console.log('reset password verification link: ', verificationLink);
+			return message(
+				form,
+				'Email verified, we sent you a verification link to reset your password',
+				{ status: 418 }
+			);
 		} catch (error) {
-			console.log('ERROR IN THE FORGOT PASSWORD ACTION: ', error)
+			console.log('ERROR IN THE FORGOT PASSWORD ACTION: ', error);
 			return message(form, 'Something went wrong on our side.\nPlease try again later.', {
 				status: 500
 			});

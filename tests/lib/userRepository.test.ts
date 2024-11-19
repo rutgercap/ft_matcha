@@ -6,7 +6,6 @@ import { itWithFixtures } from '../fixtures';
 import { Gender, SexualPreference, type ProfileInfo } from '$lib/domain/profile';
 import { anyUser } from '../testHelpers';
 
-
 function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 	return {
 		firstName: faker.person.firstName(),
@@ -38,15 +37,16 @@ describe('UserRepository', () => {
 
 		const found = await userRepository.profileInfoFor(savedUser.id);
 		// ignoring the image properties that are tested in the imageRepository
-		expect(found).toEqual(expect.objectContaining({
-			firstName: userProfile.firstName,
-			lastName: userProfile.lastName,
-			gender: userProfile.gender,
-			sexualPreference: userProfile.sexualPreference,
-			biography: userProfile.biography,
-			tags: userProfile.tags
-		  }));
-
+		expect(found).toEqual(
+			expect.objectContaining({
+				firstName: userProfile.firstName,
+				lastName: userProfile.lastName,
+				gender: userProfile.gender,
+				sexualPreference: userProfile.sexualPreference,
+				biography: userProfile.biography,
+				tags: userProfile.tags
+			})
+		);
 	});
 
 	itWithFixtures('should be able to update user profile', async ({ userRepository }) => {
@@ -61,14 +61,16 @@ describe('UserRepository', () => {
 		const found = await userRepository.profileInfoFor(user.id);
 
 		// ignoring the image properties that are tested in the imageRepository
-		expect(found).toEqual(expect.objectContaining({
-			firstName: userProfile.firstName,
-			lastName: userProfile.lastName,
-			gender: userProfile.gender,
-			sexualPreference: userProfile.sexualPreference,
-			biography: userProfile.biography,
-			tags: userProfile.tags
-		  }));
+		expect(found).toEqual(
+			expect.objectContaining({
+				firstName: userProfile.firstName,
+				lastName: userProfile.lastName,
+				gender: userProfile.gender,
+				sexualPreference: userProfile.sexualPreference,
+				biography: userProfile.biography,
+				tags: userProfile.tags
+			})
+		);
 	});
 
 	itWithFixtures('Setting new tags does not double tags', async ({ userRepository }) => {
@@ -81,14 +83,16 @@ describe('UserRepository', () => {
 
 		const found = await userRepository.profileInfoFor(user.id);
 		// ignoring the image properties that are tested in the imageRepository
-		expect(found).toEqual(expect.objectContaining({
-			firstName: userProfile.firstName,
-			lastName: userProfile.lastName,
-			gender: userProfile.gender,
-			sexualPreference: userProfile.sexualPreference,
-			biography: userProfile.biography,
-			tags: userProfile.tags
-		  }));
+		expect(found).toEqual(
+			expect.objectContaining({
+				firstName: userProfile.firstName,
+				lastName: userProfile.lastName,
+				gender: userProfile.gender,
+				sexualPreference: userProfile.sexualPreference,
+				biography: userProfile.biography,
+				tags: userProfile.tags
+			})
+		);
 	});
 
 	itWithFixtures(

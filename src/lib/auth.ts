@@ -41,6 +41,3 @@ declare module 'lucia' {
 		DatabaseUserAttributes: DatabaseUserAttributes;
 	}
 }
-
-
-

@@ -1,25 +1,22 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 
+	export let value;
+	export let closeComponent;
 
-    export let value;
-    export let closeComponent;
+	const dispatch = createEventDispatcher();
 
-    const dispatch = createEventDispatcher();
+	const handleSubmit = (event) => {
+		event.preventDefault(); // Prevent the default form submission
+		dispatch('submitForgotPassword'); // Emit the event with no additional data
+	};
 
-    const handleSubmit = (event) => {
-        event.preventDefault(); // Prevent the default form submission
-        dispatch('submitForgotPassword'); // Emit the event with no additional data
-    };
-
-    const close = () => {
-        closeComponent = false
-    }
+	const close = () => {
+		closeComponent = false;
+	};
 </script>
 
-<div
-	class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50"
->
+<div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
 	<div
 		class="relative bg-white w-full max-w-lg p-6 rounded-lg shadow-lg"
 		role="dialog"
@@ -29,10 +26,7 @@
 
 		<form on:submit={handleSubmit}>
 			<div class="mt-4">
-				<label
-					for="username"
-					class="block text-sm font-medium leading-6 text-gray-900"
-				>
+				<label for="username" class="block text-sm font-medium leading-6 text-gray-900">
 					Username
 				</label>
 				<div class="mt-2">
@@ -49,12 +43,7 @@
 			</div>
 
 			<div class="mt-4">
-				<label
-					for="email"
-					class="block text-sm font-medium leading-6 text-gray-900"
-				>
-					Email
-				</label>
+				<label for="email" class="block text-sm font-medium leading-6 text-gray-900"> Email </label>
 				<div class="mt-2">
 					<input
 						type="email"
@@ -86,4 +75,3 @@
 		</form>
 	</div>
 </div>
-

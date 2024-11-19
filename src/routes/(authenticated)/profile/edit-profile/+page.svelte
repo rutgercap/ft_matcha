@@ -8,29 +8,29 @@
 		resetForm: false
 	});
 
-	let all_url = ['/api/pics/' + $form.pictures_filenames[0] + `?t=${Date.now()}`,
-					'/api/pics/' + $form.pictures_filenames[1] + `?t=${Date.now()}`,
-					 '/api/pics/' + $form.pictures_filenames[2] + `?t=${Date.now()}`,
-					 '/api/pics/' + $form.pictures_filenames[3] + `?t=${Date.now()}`,
-					 '/api/pics/' + $form.pictures_filenames[4] + `?t=${Date.now()}`
-					]
+	let all_url = [
+		'/api/pics/' + $form.pictures_filenames[0] + `?t=${Date.now()}`,
+		'/api/pics/' + $form.pictures_filenames[1] + `?t=${Date.now()}`,
+		'/api/pics/' + $form.pictures_filenames[2] + `?t=${Date.now()}`,
+		'/api/pics/' + $form.pictures_filenames[3] + `?t=${Date.now()}`,
+		'/api/pics/' + $form.pictures_filenames[4] + `?t=${Date.now()}`
+	];
 
 	function triggerEachFileInput(idx) {
 		document.getElementById(`pictures-${idx}`).click(); // Simulate click on the hidden input
-
 	}
 
 	const handleEachFileInput = (idx, e) => {
 		if (!$form.pictures) {
-			$form.pictures = []
+			$form.pictures = [];
 		}
-    	$form.pictures[idx] = (e.currentTarget.files?.item(0) as File); // No need for 'as File' here
-		let reader = new FileReader();  // To read the file as a DataURL
-		reader.readAsDataURL($form.pictures[idx]);  // Convert the file to DataURL
+		$form.pictures[idx] = e.currentTarget.files?.item(0) as File; // No need for 'as File' here
+		let reader = new FileReader(); // To read the file as a DataURL
+		reader.readAsDataURL($form.pictures[idx]); // Convert the file to DataURL
 		reader.onload = (e) => {
 			all_url[idx] = e.target.result;
 		};
-  	};
+	};
 
 	const handleDeletePicture = (index) => {
 		// Check if the index is valid
@@ -42,30 +42,25 @@
 		let urlToDelete = all_url[index];
 
 		if (urlToDelete.startsWith('data:image/')) {
-			urlToDelete = all_url[index] = '/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`
-
+			urlToDelete = all_url[index] =
+				'/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`;
 		}
 		// Send a DELETE request to the server
 		fetch(urlToDelete, {
 			method: 'DELETE',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json'
 				// Add any necessary authorization headers
 				// 'Authorization': 'Bearer <your_token>'
-			},
-		})
-		.then(response => {
-			 if (response.status === 204 || response.headers.get('Content-Length') === '0') {
-				$form.pictures_filenames[index] = 'default2'
-				all_url[index] = '/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`
-        		return; // No content to return
-    		}
-
-		})
-
-	}
-
-
+			}
+		}).then((response) => {
+			if (response.status === 204 || response.headers.get('Content-Length') === '0') {
+				$form.pictures_filenames[index] = 'default2';
+				all_url[index] = '/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`;
+				return; // No content to return
+			}
+		});
+	};
 </script>
 
 <div class="max-w-3xl mx-auto">
@@ -201,11 +196,12 @@
 				</div>
 
 				<!-- Image upload field-->
-				<label for="pictures" class="block text-sm font-medium leading-6 text-gray-900">Profile pictures</label>
+				<label for="pictures" class="block text-sm font-medium leading-6 text-gray-900"
+					>Profile pictures</label
+				>
 
-				<div class="col-span-full profile-picture-row" >
+				<div class="col-span-full profile-picture-row">
 					{#each all_url as img_url, index}
-
 						<div class="profile-picture-container">
 							<input
 								id={`pictures-${index}`}
@@ -219,11 +215,7 @@
 							<!-- Display the image and make it clickable -->
 							<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
 							<div class="profile-picture-upload" on:click={() => triggerEachFileInput(index)}>
-								<img
-								src={img_url}
-								alt="profile"
-								class="profile-picture-preview"
-								/>
+								<img src={img_url} alt="profile" class="profile-picture-preview" />
 							</div>
 							<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
 							<div class="delete-icon" on:click={() => handleDeletePicture(index)}>
@@ -237,7 +229,6 @@
 								<span class="error">{errors.profileImage}</span>
 							{/if}
 						</div>
-
 					{/each}
 				</div>
 			</div>
@@ -269,43 +260,43 @@
 <style>
 	/* Flexbox to align images in a row */
 	.profile-picture-row {
-	display: flex;
-	gap: 10px; /* Space between images */
-	justify-content: flex-start;
+		display: flex;
+		gap: 10px; /* Space between images */
+		justify-content: flex-start;
 	}
 
 	.profile-picture-container {
-	display: flex;
-	flex-direction: column; /* Stack image and delete icon vertically */
-	align-items: center;
-	width: 140px; /* Set fixed width for each image container */
+		display: flex;
+		flex-direction: column; /* Stack image and delete icon vertically */
+		align-items: center;
+		width: 140px; /* Set fixed width for each image container */
 	}
 
 	.profile-picture-upload {
-	display: inline-block;
-	cursor: pointer;
-	width: 135px;  /* Set fixed width for the preview box */
-	height: 135px; /* Set fixed height for the preview box */
-	position: relative;
+		display: inline-block;
+		cursor: pointer;
+		width: 135px; /* Set fixed width for the preview box */
+		height: 135px; /* Set fixed height for the preview box */
+		position: relative;
 	}
 
 	/* Ensure all images are the same size and aspect ratio */
 	.profile-picture-preview {
-	width: 100%;
-	height: 100%;
-	object-fit: cover; /* Make sure the image covers the area uniformly */
-	border-radius: 10px; /* Add some rounding for a smooth look */
-	border: 1px solid #ddd; /* Optional border to highlight images */
+		width: 100%;
+		height: 100%;
+		object-fit: cover; /* Make sure the image covers the area uniformly */
+		border-radius: 10px; /* Add some rounding for a smooth look */
+		border: 1px solid #ddd; /* Optional border to highlight images */
 	}
 
 	/* Delete icon */
 	.delete-icon {
-	margin-top: 5px; /* Space between image and delete button */
-	cursor: pointer;
+		margin-top: 5px; /* Space between image and delete button */
+		cursor: pointer;
 	}
 
 	.delete-button {
-	width: 24px;
-	height: 24px;
+		width: 24px;
+		height: 24px;
 	}
 </style>

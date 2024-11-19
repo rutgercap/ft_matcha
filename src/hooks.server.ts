@@ -4,14 +4,13 @@ import { ImageRepository } from '$lib/imageRepository';
 import { EmailRepository } from '$lib/emailRepository';
 import { type Handle } from '@sveltejs/kit';
 import { lucia } from '$lib/auth';
-import { IMAGE_FOLDER } from "$env/static/private";
+import { IMAGE_FOLDER } from '$env/static/private';
 
 export const handle: Handle = async ({ event, resolve }) => {
-
 	const db = getDb();
-	const imageRepo = new ImageRepository(IMAGE_FOLDER, db)
+	const imageRepo = new ImageRepository(IMAGE_FOLDER, db);
 	event.locals.userRepository = new UserRepository(db, imageRepo);
-	event.locals.emailRepository = new EmailRepository(db)
+	event.locals.emailRepository = new EmailRepository(db);
 
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
 	if (!sessionId) {
@@ -19,7 +18,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.session = null;
 		return resolve(event);
 	}
-	
+
 	const { session, user } = await lucia.validateSession(sessionId);
 	if (session && session.fresh) {
 		const sessionCookie = lucia.createSessionCookie(session.id);

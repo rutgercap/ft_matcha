@@ -6,12 +6,13 @@
 
 	let { profileInfo } = data;
 
-	let all_url = ['/api/pics/' + profileInfo.pictures_filenames[0] + `?t=${Date.now()}`,
-					'/api/pics/' + profileInfo.pictures_filenames[1] + `?t=${Date.now()}`,
-					 '/api/pics/' + profileInfo.pictures_filenames[2] + `?t=${Date.now()}`,
-					 '/api/pics/' + profileInfo.pictures_filenames[3] + `?t=${Date.now()}`,
-					 '/api/pics/' + profileInfo.pictures_filenames[4] + `?t=${Date.now()}`
-					]
+	let all_url = [
+		'/api/pics/' + profileInfo.pictures_filenames[0] + `?t=${Date.now()}`,
+		'/api/pics/' + profileInfo.pictures_filenames[1] + `?t=${Date.now()}`,
+		'/api/pics/' + profileInfo.pictures_filenames[2] + `?t=${Date.now()}`,
+		'/api/pics/' + profileInfo.pictures_filenames[3] + `?t=${Date.now()}`,
+		'/api/pics/' + profileInfo.pictures_filenames[4] + `?t=${Date.now()}`
+	];
 </script>
 
 <div class="max-w-3xl md:mx-auto mx-4 mb-10">
@@ -35,40 +36,20 @@
 	<br />
 	<div class="mt-1 grid gap-4">
 		<div>
-			<img
-				class="h-auto max-w-full rounded-lg"
-				src={all_url[0]}
-				alt=""
-			/>
+			<img class="h-auto max-w-full rounded-lg" src={all_url[0]} alt="" />
 		</div>
 		<div class="grid grid-cols-4 gap-4">
 			<div>
-				<img
-					class="h-auto max-w-full rounded-lg"
-					src={all_url[1]}
-					alt=""
-				/>
+				<img class="h-auto max-w-full rounded-lg" src={all_url[1]} alt="" />
 			</div>
 			<div>
-				<img
-					class="h-auto max-w-full rounded-lg"
-					src={all_url[2]}
-					alt=""
-				/>
+				<img class="h-auto max-w-full rounded-lg" src={all_url[2]} alt="" />
 			</div>
 			<div>
-				<img
-					class="h-auto max-w-full rounded-lg"
-					src={all_url[3]}
-					alt=""
-				/>
+				<img class="h-auto max-w-full rounded-lg" src={all_url[3]} alt="" />
 			</div>
 			<div>
-				<img
-					class="h-auto max-w-full rounded-lg"
-					src={all_url[4]}
-					alt=""
-				/>
+				<img class="h-auto max-w-full rounded-lg" src={all_url[4]} alt="" />
 			</div>
 		</div>
 	</div>

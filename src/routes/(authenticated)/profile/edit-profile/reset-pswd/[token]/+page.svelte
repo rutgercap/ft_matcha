@@ -1,13 +1,10 @@
 <script lang="ts">
-import type { PageData } from "./$types";
-import { superForm } from 'sveltekit-superforms';
+	import type { PageData } from './$types';
+	import { superForm } from 'sveltekit-superforms';
 
-export let data: PageData;
+	export let data: PageData;
 
-const { enhance, form, errors, constraints, message } = superForm(data.form);
-
-console.log('dans le front, voici la data: ', $form)
-
+	const { enhance, form, errors, constraints, message } = superForm(data.form);
 </script>
 
 <div class="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -62,9 +59,8 @@ console.log('dans le front, voici la data: ', $form)
 				Reset Password
 			</button>
 		</div>
-        {#if $message}
-            <p class="mt-2 text-sm text-red-600">{$message}</p>
-        {/if}
+		{#if $message}
+			<p class="mt-2 text-sm text-red-600">{$message}</p>
+		{/if}
 	</form>
 </div>
-
