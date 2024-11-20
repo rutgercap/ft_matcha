@@ -61,8 +61,8 @@
 		<form class="space-y-6" method="POST" use:enhance action="?/sign_in">
 			<div>
 				<label for="username" class="block text-sm font-medium leading-6 text-gray-900"
-					>Username</label
-				>
+					>Username
+				</label>
 				<div class="mt-2">
 					<input
 						bind:value={$form.username}
@@ -86,6 +86,7 @@
 					</label>
 					<div class="text-sm">
 						<button
+							tabindex="-1"
 							type="button"
 							class="text-blue-600 hover:underline focus:outline-none"
 							on:click={openForgotPasswordModal}

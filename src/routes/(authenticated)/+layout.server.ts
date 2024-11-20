@@ -8,18 +8,19 @@ export const load: LayoutServerLoad = async ({ url, locals: { user } }) => {
 		redirect(302, '/sign-in');
 	}
 	const currentUser = user as User;
+	const id = currentUser.id;
 	if (user && !currentUser.emailIsSetup) redirect(302, '/sign-up/auth-email');
 	if (
 		user &&
 		!currentUser.passwordIsSet &&
-		!url.pathname.startsWith('/profile/edit-profile/reset-pswd')
+		!url.pathname.startsWith(`/profile/${id}/edit-profile/reset-pswd`)
 	) {
 		throw error(
 			401,
 			'You must reset your password by clicking the link we sent to your email adress'
 		);
 	}
-	if (user && !currentUser.profileIsSetup && !url.pathname.startsWith('/profile/edit-profile')) {
-		redirect(302, '/profile/edit-profile');
+	if (user && !currentUser.profileIsSetup && !url.pathname.startsWith(`/profile/${id}/edit-profile`)) {
+		redirect(302, `/profile/${id}/edit-profile`);
 	}
 };

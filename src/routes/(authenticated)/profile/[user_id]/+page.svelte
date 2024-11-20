@@ -1,10 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import _ from 'lodash';
+	import { page } from '$app/stores';
+
+	$: id = $page.params.user_id;
 
 	export let data: PageData;
 
-	let { profileInfo } = data;
+	let { profileInfo, isCurrentUserProfile } = data;
 
 	let all_url = [
 		'/api/pics/' + profileInfo.pictures_filenames[0] + `?t=${Date.now()}`,
@@ -24,9 +27,9 @@
 				{`${_.capitalize(profileInfo.firstName)} ${_.capitalize(profileInfo.lastName)}`}
 			</h2>
 		</div>
-		<div class="mt-4 flex md:ml-4 md:mt-0">
+		<div class="mt-4 flex md:ml-4 md:mt-0 {isCurrentUserProfile ? 'visible' : 'invisible'}">
 			<a
-				href="/profile/edit-profile"
+				href={`/profile/${id}/edit-profile`}
 				type="button"
 				class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
 				>Edit</a
@@ -53,7 +56,6 @@
 			</div>
 		</div>
 	</div>
-
 	<div class="mt-6 border-t border-gray-100">
 		<dl class="divide-y divide-gray-100">
 			<div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">

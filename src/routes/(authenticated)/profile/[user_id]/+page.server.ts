@@ -1,8 +1,8 @@
-import type { User } from 'lucia';
 import { error } from '@sveltejs/kit';
 import type { UserRepository } from '$lib/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
-import type { PageServerLoad } from './types';
+import type { PageServerLoad } from './$types';
+
 
 async function personalInfoFor(
 	userId: string,
@@ -19,15 +19,15 @@ async function personalInfoFor(
 
 export const load: PageServerLoad = async ({ locals: { user, userRepository}, params }) => {
 	const id = params.user_id;
-	const currentUser = user as User;
 	const maybeProfileInfo = await personalInfoFor(id, userRepository);
 	if (!maybeProfileInfo) {
 		error(404, {
 			message: 'Not found'
 		});
 	}
-	const profileInfo = maybeProfileInfo as ProfileInfo;
+	const currentUser = user;
 	return {
-		profileInfo
+		profileInfo: maybeProfileInfo,
+		isCurrentUserProfile: currentUser?.id === id,
 	};
 };

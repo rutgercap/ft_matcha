@@ -9,6 +9,9 @@
 		resetForm: false
 	});
 
+
+	const user = data.user;
+
 	let all_url = [
 		'/api/pics/' + $form.pictures_filenames[0] + `?t=${Date.now()}`,
 		'/api/pics/' + $form.pictures_filenames[1] + `?t=${Date.now()}`,
@@ -17,23 +20,23 @@
 		'/api/pics/' + $form.pictures_filenames[4] + `?t=${Date.now()}`
 	];
 
-	function triggerEachFileInput(idx) {
-		document.getElementById(`pictures-${idx}`).click(); 
+	function triggerEachFileInput(idx: number) {
+		document.getElementById(`pictures-${idx}`)?.click();
 	}
 
-	const handleEachFileInput = (idx, e) => {
+	const handleEachFileInput = (idx: number, e) => {
 		if (!$form.pictures) {
 			$form.pictures = [];
 		}
 		$form.pictures[idx] = e.currentTarget.files?.item(0);
-		let reader = new FileReader(); 
-		reader.readAsDataURL($form.pictures[idx]); 
+		let reader = new FileReader();
+		reader.readAsDataURL($form.pictures[idx]);
 		reader.onload = (e) => {
 			all_url[idx] = e.target.result;
 		};
 	};
 
-	const handleDeletePicture = (index) => {
+	const handleDeletePicture = (index: number) => {
 		// Check if the index is valid
 		if (index < 0 || index >= all_url.length) {
 			console.error('Invalid index');
@@ -235,7 +238,7 @@
 			{/if}
 		{/if}
 		<div class="mt-6 flex items-center justify-end gap-x-6">
-			<a href="/profile" type="button" class="text-sm font-semibold leading-6 text-gray-900"
+			<a href={`/profile/${user?.id}`} type="button" class="text-sm font-semibold leading-6 text-gray-900"
 				>Cancel</a
 			>
 			<button
@@ -252,10 +255,10 @@
 </div>
 
 <style>
-	/* Flexbox to align images in a row */
 	.profile-picture-row {
+		overflow-x: auto;
 		display: flex;
-		gap: 10px; /* Space between images */
+		gap: 10px;
 		justify-content: flex-start;
 	}
 

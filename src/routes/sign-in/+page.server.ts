@@ -101,7 +101,7 @@ export const actions: Actions = {
 				user.passwordHash
 			);
 			const verificationLink =
-				`${PUBLIC_BASE_URL}/profile/edit-profile/reset-pswd/` + verificationToken;
+				`${PUBLIC_BASE_URL}/profile/${user.id}/edit-profile/reset-pswd/` + verificationToken;
 			const res_email = await emailRepository.resetLinkTo(email, verificationLink);
 			const res = userRepository.upsertPasswordIsSet(user.id, false);
 			if (!res.changes) {

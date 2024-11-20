@@ -56,14 +56,16 @@
 					>
 						<span class="absolute -inset-0.5"></span>
 						<span class="sr-only">Open main menu</span>
-						<Icon src={Bars3} class=" {menuOpen ? 'hidden' : 'block'} block h-6 w-6" />
-						<Icon src={XMark} class=" {menuOpen ? 'block' : 'hidden'} block h-6 w-6" />
+						<Icon src={Bars3} class="{menuOpen ? 'hidden' : 'block'} block h-6 w-6" />
+						<Icon src={XMark} class="{menuOpen ? 'block' : 'hidden'} block h-6 w-6" />
 					</button>
 				</div>
-				<div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-					<a href="/" class="flex flex-shrink-0 items-center">
-						<Icon src={Heart} class="h-8 w-auto" />
-					</a>
+			{/if}
+			<div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+				<a href="/" class="flex flex-shrink-0 items-center">
+					<Icon src={Heart} class="h-8 w-auto" />
+				</a>
+				{#if user}
 					<div class="hidden sm:ml-6 sm:flex sm:space-x-8">
 						<!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
 						<a
@@ -74,8 +76,8 @@
 							>Profile</a
 						>
 					</div>
-				</div>
-			{/if}
+				{/if}
+			</div>
 			<div
 				class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
 			>
@@ -120,21 +122,23 @@
 							aria-labelledby="user-menu-button"
 							tabindex="-1"
 						>
-							<a
-								href="/profile"
-								class="hover:bg-gray-100 block px-4 py-2 text-sm text-gray-700"
-								role="menuitem"
-								tabindex="-1"
-								id="user-menu-item-0">Your Profile</a
-							>
-							<button
-								on:click={handleSignout}
-								class="block px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100 text-left"
-								role="menuitem"
-								tabindex="-1"
-								id="user-menu-item-1"
-								>Sign out
-							</button>
+							{#if user}
+								<a
+									href={`/profile/${user?.id}`}
+									class="hover:bg-gray-100 block px-4 py-2 text-sm text-gray-700"
+									role="menuitem"
+									tabindex="-1"
+									id="user-menu-item-0">Your Profile</a
+								>
+								<button
+									on:click={handleSignout}
+									class="block px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100 text-left"
+									role="menuitem"
+									tabindex="-1"
+									id="user-menu-item-1"
+									>Sign out
+								</button>
+							{/if}
 						</div>
 					</div>
 				{:else}
