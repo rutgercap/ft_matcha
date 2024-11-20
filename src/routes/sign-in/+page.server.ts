@@ -5,6 +5,8 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { verify } from '@node-rs/argon2';
 import { lucia } from '$lib/auth';
+import { PUBLIC_BASE_URL } from '$env/static/public';
+
 
 const signInSchema = z.object({
 	username: z.string().min(4).max(31),
@@ -99,7 +101,7 @@ export const actions: Actions = {
 				user.passwordHash
 			);
 			const verificationLink =
-				'http://localhost:3000/profile/edit-profile/reset-pswd/' + verificationToken;
+				`${PUBLIC_BASE_URL}/profile/edit-profile/reset-pswd/` + verificationToken;
 			const res_email = await emailRepository.resetLinkTo(email, verificationLink);
 			const res = userRepository.upsertPasswordIsSet(user.id, false);
 			if (!res.changes) {

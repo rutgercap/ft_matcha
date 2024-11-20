@@ -1,6 +1,6 @@
 import type { Actions } from './$types';
 import { isWithinExpirationDate } from 'oslo';
-import { message, superValidate } from 'sveltekit-superforms';
+import { PUBLIC_BASE_URL } from '$env/static/public';
 import { fail } from '@sveltejs/kit';
 
 export const actions: Actions = {
@@ -16,7 +16,7 @@ export const actions: Actions = {
 			return fail(400, { linkStillValid: 'Your previous link is still valid' });
 		} else {
 			const verificationToken = emailRepository.createEmailVerificationToken(user.id, user.email);
-			const verificationLink = 'http://localhost:3000/api/email-verification/' + verificationToken;
+			const verificationLink = `${PUBLIC_BASE_URL}/api/email-verification/` + verificationToken;
 			const res = await emailRepository.verificationLinkTo(user.email, verificationLink);
 			return {
 				success: true,
