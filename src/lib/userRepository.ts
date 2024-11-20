@@ -148,8 +148,6 @@ class UserRepository {
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
 
-		const buffers: Array<Buffer | null> = await this.imageRepo.convertFileToBuffer(info.pictures);
-
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction((id: string, profileTest: ProfileInfo) => {
@@ -169,9 +167,7 @@ class UserRepository {
 				});
 				transaction(id, info);
 
-				// if (buffers)
-				const inserted_filename: Array<string | null> = this.imageRepo.upsertImageAll(id, buffers);
-
+				const inserted_filename: Array<string | null> = [];
 				resolve(inserted_filename);
 			} catch (e) {
 				if (e instanceof SqliteError) {

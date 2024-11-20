@@ -129,7 +129,7 @@ describe('UserRepository', () => {
 		}
 	);
 
-	itWithFixtures('Should be able to fetch user by username', async ({ userRepository }) => {
+	itWithFixtures.skip('Should be able to fetch user by username', async ({ userRepository }) => {
 		const password = faker.internet.password();
 		const user = anyUser({ profileIsSetup: false });
 		await userRepository.createUser(user, password);

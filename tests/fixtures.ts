@@ -11,6 +11,9 @@ import { ImageRepository } from '$lib/imageRepository';
 import type { User } from 'lucia';
 import { anyUser } from './testHelpers';
 import { ProfileVisitRepository } from '$lib/profileVisitRepository';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 interface MyFixtures {
 	db: DatabaseType;
@@ -19,6 +22,7 @@ interface MyFixtures {
 	savedUser: User;
 	profileVisitRepository: ProfileVisitRepository;
 	savedUserFactory: (n: number, overrides: Partial<User>) => Promise<User[]>;
+	image: Buffer;
 }
 
 const IMAGE_FOLDER = './tests/lib/pictures-repo-test';
@@ -55,5 +59,13 @@ export const itWithFixtures = it.extend<MyFixtures>({
 			}));
 		};
 		use(createUser);
+	},
+	image: async ({}, use) => {
+		const __filename = fileURLToPath(import.meta.url);
+		const __dirname = dirname(__filename);
+
+		const imagePath = path.join(__dirname, 'test-image.jpg');
+		const image = fs.readFileSync(imagePath);
+		use(image);
 	}
 });
