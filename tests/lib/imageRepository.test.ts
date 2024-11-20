@@ -2,11 +2,9 @@ import { describe, expect } from 'vitest';
 import { itWithFixtures } from '../fixtures';
 import * as fs from 'fs';
 import {
-	ImageRepository,
 	ConstraintImageRepositoryError,
 	ImageRepositoryError
 } from '$lib/imageRepository';
-import path from 'path';
 
 describe('ImageRepository', () => {
 	itWithFixtures('should be able to save an image', async ({ savedUser, imageRepository }) => {

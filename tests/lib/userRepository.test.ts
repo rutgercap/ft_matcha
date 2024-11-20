@@ -1,7 +1,7 @@
 import { DuplicateEntryError } from '$lib/userRepository';
 import { describe, expect } from 'vitest';
 import { faker } from '@faker-js/faker';
-import { generateIdFromEntropySize, type User } from 'lucia';
+import { type User } from 'lucia';
 import { itWithFixtures } from '../fixtures';
 import { Gender, SexualPreference, type ProfileInfo } from '$lib/domain/profile';
 import { anyUser } from '../testHelpers';
