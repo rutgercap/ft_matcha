@@ -54,8 +54,8 @@ describe('ImageRepository', () => {
 		async ({ savedUser, imageRepository }) => {
 			try {
 				for (let i: number = 0; i < 7; i++) {
-					let image_inpt = await fs.promises.readFile('./profile-pictures/default.jpg');
-					let res1 = await imageRepository.upsertImage(savedUser.id, i, image_inpt);
+					const image_inpt = await fs.promises.readFile('./profile-pictures/default.jpg');
+					await imageRepository.upsertImage(savedUser.id, i, image_inpt);
 				}
 			} catch (error) {
 				expect(error).toBeInstanceOf(ConstraintImageRepositoryError);
@@ -92,7 +92,7 @@ describe('ImageRepository', () => {
 			imageRepository.upsertImageAll(savedUser.id, imageBuffer);
 
 			const image_filenames = imageRepository.allImageIdOnly(savedUser.id);
-			let found: Array<Buffer> = [];
+			const found: Array<Buffer> = [];
 			for (let i = 0; i < image_filenames.length; i++) {
 				found.push(await imageRepository.imageById(image_filenames[i]));
 			}

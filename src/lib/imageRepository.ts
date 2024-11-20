@@ -32,7 +32,7 @@ class ImageRepository {
 
 	public upsertImageAll(user_id: string, buffers: Array<Buffer | null>): Array<string | null> {
 		try {
-			let inserted_filename: Array<string | null> = [null, null, null, null, null];
+			const inserted_filename: Array<string | null> = [null, null, null, null, null];
 			for (let i = 0; i < MAX_PICTURES; i++) {
 				if (buffers[i]) inserted_filename[i] = this.upsertImage(user_id, i, buffers[i]);
 			}
@@ -56,7 +56,7 @@ class ImageRepository {
 		let result: null | any = null;
 		try {
 			result = sql.run(id, user_id, order);
-			let img_cnt = this.db
+			const img_cnt = this.db
 				.prepare<string>(
 					`SELECT count(*) AS cnt
                                                     FROM profile_pictures
