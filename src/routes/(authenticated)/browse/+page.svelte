@@ -1,28 +1,42 @@
+<script lang="ts">
+	export let data;
+
+	// console.log('IN THE BROWSING FRONT : ', data)
+	let users : any[]  = data.profiles;
+	let ids : any[] = data.ids
+
+</script>
+
 <div class="bg-white">
 	<div class="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-		<h2 class="text-2xl font-bold tracking-tight text-gray-900">Find you babe here</h2>
-		<div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-			<div class="group relative">
-				<img
-					src="https://tailwindui.com/plus/img/ecommerce-images/product-page-01-related-product-01.jpg"
-					alt="Front of men&#039;s Basic Tee in black."
-					class="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-80"
-				/>
-				<div class="mt-4 flex justify-between">
-					<div>
-						<h3 class="text-sm text-gray-700">
-							<a href="#">
-								<span aria-hidden="true" class="absolute inset-0"></span>
-								Basic Tee
-							</a>
-						</h3>
-						<p class="mt-1 text-sm text-gray-500">Black</p>
-					</div>
-					<p class="text-sm font-medium text-gray-900">$35</p>
-				</div>
-			</div>
-
-			<!-- More products... -->
-		</div>
+		<h2 class="text-2xl font-bold tracking-tight text-gray-900">Find your babe here</h2>
+		<ul class="mt-6 space-y-6">
+			{#if ids.length > 0}
+				{#each ids as id, index}
+					<li class="group flex items-center space-x-4 p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-300">
+						<img
+							src={`/api/pics/${users[index].id}`}
+							alt={id.id}
+							class="h-24 w-24 rounded-full bg-gray-200 object-cover"
+						/>
+						<div class="flex-1">
+							<h3 class="text-lg font-medium text-gray-900">
+								<a href={`/profile/${id.id}`} class="hover:underline">
+									{users[index].username}
+								</a>
+							</h3>
+							<p class="text-sm text-gray-500">{users[index].biography}</p>
+						</div>
+						<!-- Gender styling -->
+						<p class="text-xl font-bold"
+							style="color: {users[index].gender === 'man' ? '#0042ad' : '#ff0099'};">
+							{users[index].gender}
+						</p>
+					</li>
+				{/each}
+			{:else}
+				<p class="text-gray-500">No profiles found. Please try again later.</p>
+			{/if}
+		</ul>
 	</div>
 </div>

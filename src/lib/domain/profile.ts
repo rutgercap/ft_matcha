@@ -30,9 +30,16 @@ type ProfileInfo = {
 	pictures_filenames: string[];
 };
 
+type ReducedProfileInfo = {
+	userName: string;
+	biography: string;
+	gender: string;
+	picture: string;
+}
+
 function initials(profileInfo: ProfileInfo): string {
 	return (profileInfo.firstName[0] + profileInfo.lastName[0]).toUpperCase();
 }
 
 export { Gender, SexualPreference, isSexualPreference, isGender, initials };
-export type { ProfileInfo };
+export type { ProfileInfo, ReducedProfileInfo };
