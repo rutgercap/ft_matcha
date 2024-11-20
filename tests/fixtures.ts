@@ -10,12 +10,15 @@ import type { ImageRepository as ImageRepositoryType } from '$lib/imageRepositor
 import { ImageRepository } from '$lib/imageRepository';
 import type { User } from 'lucia';
 import { anyUser } from './testHelpers';
+import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 
 interface MyFixtures {
 	db: DatabaseType;
 	userRepository: UserRepositoryType;
 	imageRepository: ImageRepositoryType;
 	savedUser: User;
+	profileVisitRepository: ProfileVisitRepository;
+	savedUserFactory: (n: number, overrides: Partial<User>) => Promise<User[]>;
 }
 
 const IMAGE_FOLDER = './tests/lib/pictures-repo-test';
@@ -30,7 +33,6 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	},
 	imageRepository: async ({ db }, use) => {
 		const tempMigrationsDir = IMAGE_FOLDER;
-
 		await use(new ImageRepository(tempMigrationsDir, db));
 		temp.cleanupSync();
 	},
@@ -41,5 +43,17 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		const user = anyUser();
 		await userRepository.createUser(user, 'password');
 		await use(user);
+	},
+	profileVisitRepository: async ({ db }, use) => {
+		await use(new ProfileVisitRepository(db));
+	},
+	savedUserFactory: async ({ userRepository }, use) => {
+		const createUser = async (n: number, overrides: Partial<User> = {}) => {
+			return Promise.all(Array.from({ length: n }, async (_, i) => {
+				const user = anyUser(overrides);
+				return await userRepository.createUser(user, 'password');
+			}));
+		};
+		use(createUser);
 	}
 });
