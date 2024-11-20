@@ -84,7 +84,7 @@
 							{...$constraints.firstName}
 						/>
 					</div>
-					{#if $errors.firstName && $tainted}
+					{#if $errors.firstName && $tainted }
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.firstName}</p>
 					{/if}
 				</div>

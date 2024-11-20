@@ -5,12 +5,14 @@ import { EmailRepository } from '$lib/emailRepository';
 import { type Handle } from '@sveltejs/kit';
 import { lucia } from '$lib/auth';
 import { IMAGE_FOLDER } from '$env/static/private';
+import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
 	const imageRepo = new ImageRepository(IMAGE_FOLDER, db);
 	event.locals.userRepository = new UserRepository(db, imageRepo);
 	event.locals.emailRepository = new EmailRepository(db);
+	event.locals.profileVisitRepository = new ProfileVisitRepository(db);
 
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
 	if (!sessionId) {

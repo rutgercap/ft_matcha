@@ -182,6 +182,29 @@ class UserRepository {
 		});
 	}
 
+	public async allOtherUsers(id: string) {
+		interface UserId {
+			id: string;
+		}
+		return new Promise((resolve, reject) => {
+			try {
+				// this needs AND profile_is_setup = 1
+				const result = this.db
+					.prepare<string, UserId>(
+						`SELECT id
+   						FROM users 
+						WHERE id != ?`
+					)
+					.all(id)
+					.map((user) => user.id);
+				resolve(result);
+			} catch (e) {
+				console.log(e);
+				reject(new UserRepositoryError('Something went wrong fetching other users', e));
+			}
+		});
+	}
+
 	public user(id: string): Promise<User | null> {
 		return new Promise((resolve, reject) => {
 			try {

@@ -18,7 +18,7 @@ interface MyFixtures {
 	imageRepository: ImageRepositoryType;
 	savedUser: User;
 	profileVisitRepository: ProfileVisitRepository;
-	savedUserFactory: (n: number) => Promise<User[]>;
+	savedUserFactory: (n: number, overrides: Partial<User>) => Promise<User[]>;
 }
 
 const IMAGE_FOLDER = './tests/lib/pictures-repo-test';
@@ -48,9 +48,9 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(new ProfileVisitRepository(db));
 	},
 	savedUserFactory: async ({ userRepository }, use) => {
-		const createUser = async (n: number) => {
+		const createUser = async (n: number, overrides: Partial<User> = {}) => {
 			return Promise.all(Array.from({ length: n }, async (_, i) => {
-				const user = anyUser();
+				const user = anyUser(overrides);
 				return await userRepository.createUser(user, 'password');
 			}));
 		};

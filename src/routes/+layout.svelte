@@ -75,6 +75,13 @@
 								: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
 							>Profile</a
 						>
+						<a
+							href={`/browse`}
+							class="{isActive(url, 'browse')
+								? 'border-indigo-500 text-gray-900'
+								: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
+							>Browse</a
+						>
 					</div>
 				{/if}
 			</div>
@@ -130,6 +137,13 @@
 									tabindex="-1"
 									id="user-menu-item-0">Your Profile</a
 								>
+								<a
+									href={`/visits`}
+									class="hover:bg-gray-100 block px-4 py-2 text-sm text-gray-700"
+									role="menuitem"
+									tabindex="-1"
+									id="user-menu-item-0">Visits</a
+								>
 								<button
 									on:click={handleSignout}
 									class="block px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100 text-left"
@@ -171,6 +185,20 @@
 					? 'bg-indigo-50 border-indigo-500 text-indigo-700'
 					: 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
 				>Profile</a
+			>
+			<a
+				href={`/browse`}
+				class="block {isActive(url, 'browse')
+					? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+					: 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
+				>Browse</a
+			>
+			<a
+				href={`/profile/${user?.id}`}
+				class="block {isActive(url, 'visits')
+					? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+					: 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
+				>Visits</a
 			>
 			<button
 				on:click={handleSignout}

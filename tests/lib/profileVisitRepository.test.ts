@@ -8,7 +8,9 @@ describe("ProfileVisitRepository", () => {
         await profileVisitRepository.addVisit(users[0].id, users[1].id);
 
         const visits = await profileVisitRepository.profileVisitsForUser(users[1].id);
-        expect(visits).toEqual([users[0].id]);
+
+        const visitorIds = visits.map((visit) => visit.visitorId);
+        expect(visitorIds).toEqual([users[0].id]);
     });
 
     itWithFixtures("Adding page visit a second time should not error", async ({ profileVisitRepository, savedUserFactory, expect}) => {

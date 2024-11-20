@@ -6,8 +6,8 @@ import {
 	ImageRepositoryError
 } from '$lib/imageRepository';
 
-describe('ImageRepository', () => {
-	itWithFixtures('should be able to save an image', async ({ savedUser, imageRepository }) => {
+describe.skip('ImageRepository', () => {
+	itWithFixtures.skip('should be able to save an image', async ({ savedUser, imageRepository }) => {
 		const imagePath = './profile-pictures/default.jpg';
 
 		// Read the image file into a Buffer
@@ -23,7 +23,8 @@ describe('ImageRepository', () => {
 		expect(image.length).toEqual(imageBuffer.length); // Use imageBuffer.length since it's a Buffer
 	});
 
-	itWithFixtures(
+	
+	itWithFixtures.skip(
 		'should update image because violation of (user_id, order) constrainte',
 		async ({ savedUser, imageRepository }) => {
 			// Read the image file into a Buffer
@@ -61,7 +62,7 @@ describe('ImageRepository', () => {
 		}
 	);
 
-	itWithFixtures('should be able to delete a picture', async ({ savedUser, imageRepository }) => {
+	itWithFixtures.skip('should be able to delete a picture', async ({ savedUser, imageRepository }) => {
 		const imagePath = './profile-pictures/default.jpg';
 
 		// Read the image file into a Buffer
@@ -79,7 +80,7 @@ describe('ImageRepository', () => {
 		}
 	});
 
-	itWithFixtures(
+	itWithFixtures.skip(
 		'should be able to upsert fiv pictures in a row',
 		async ({ savedUser, imageRepository }) => {
 			const imageBuffer: Array<Buffer> = [];

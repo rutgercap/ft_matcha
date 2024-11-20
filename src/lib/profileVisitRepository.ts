@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3';
+import type { ToSnakeCase } from './commonTypes';
 
 class ProfileVisitRepositoryError extends Error {
 	exception: unknown;
@@ -10,7 +11,8 @@ class ProfileVisitRepositoryError extends Error {
 }
 
 interface ProfileVisit {
-	visitor_id: string;
+	visitorId: string;
+	visitTime: Date;
 }
 
 export class ProfileVisitRepository {
@@ -37,15 +39,21 @@ export class ProfileVisitRepository {
 		});
 	}
 
-	public async profileVisitsForUser(userId: string): Promise<string[]> {
-		const result = this.db.prepare<string[], ProfileVisit>(
-			`SELECT visitor_id FROM profile_visits WHERE visited_user_id = ?`
+	public async profileVisitsForUser(userId: string): Promise<ProfileVisit[]> {
+		const result = this.db.prepare<string[], ToSnakeCase<ProfileVisit>>(
+			`SELECT visitor_id, visit_time FROM profile_visits WHERE visited_user_id = ?`
 		);
 
 		return new Promise((resolve, reject) => {
 			try {
 				const rows = result.all(userId);
-				resolve(rows.map((row) => row.visitor_id));
+				resolve(rows.map((row) => {
+					const date = new Date(row.visit_time);
+					return {
+						visitorId: row.visitor_id,
+						visitTime: date
+					} as ProfileVisit;
+				}));
 			} catch (e) {
 				reject(
 					new ProfileVisitRepositoryError(

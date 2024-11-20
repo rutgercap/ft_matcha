@@ -15,6 +15,7 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
 		tags: [faker.lorem.word(), faker.lorem.word()],
 		pictures: [null, null, null, null, null],
+		pictures_filenames: [],
 		...overrides
 	};
 }
@@ -109,6 +110,22 @@ describe('UserRepository', () => {
 
 			found = (await userRepository.user(user.id)) as User;
 			expect(found.profileIsSetup).toBe(true);
+		}
+	);
+
+	itWithFixtures(
+		'Can get all other user profiles',
+		async ({ userRepository, savedUserFactory }) => {
+			const profile = anyUserProfile();
+			const users = await savedUserFactory(3, {});
+			const thisUser = users[0];
+			const others = users.slice(1);
+			others.forEach(async (user) => await userRepository.upsertPersonalInfo(user.id, profile));
+
+			const found = await userRepository.allOtherUsers(thisUser.id);
+
+			expect(found).toHaveLength(others.length);
+			expect(found).toEqual(expect.arrayContaining(others.map((user) => user.id)));
 		}
 	);
 
