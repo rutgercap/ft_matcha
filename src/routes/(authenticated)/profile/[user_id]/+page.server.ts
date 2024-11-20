@@ -1,15 +1,15 @@
 import type { User } from 'lucia';
-import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import type { UserRepository } from '$lib/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
+import type { PageServerLoad } from './types';
 
 async function personalInfoFor(
-	user: User,
+	userId: string,
 	userRepository: UserRepository
 ): Promise<ProfileInfo | null> {
 	try {
-		return await userRepository.profileInfoFor(user.id);
+		return await userRepository.profileInfoFor(userId);
 	} catch {
 		error(500, {
 			message: 'Something went wrong.'
@@ -17,9 +17,10 @@ async function personalInfoFor(
 	}
 }
 
-export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {
+export const load: PageServerLoad = async ({ locals: { user, userRepository}, params }) => {
+	const id = params.user_id;
 	const currentUser = user as User;
-	const maybeProfileInfo = await personalInfoFor(currentUser, userRepository);
+	const maybeProfileInfo = await personalInfoFor(id, userRepository);
 	if (!maybeProfileInfo) {
 		error(404, {
 			message: 'Not found'

@@ -60,22 +60,22 @@
 						<Icon src={XMark} class=" {menuOpen ? 'block' : 'hidden'} block h-6 w-6" />
 					</button>
 				</div>
-			{/if}
-			<div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-				<a href="/" class="flex flex-shrink-0 items-center">
-					<Icon src={Heart} class="h-8 w-auto" />
-				</a>
-				<div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-					<!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-					<a
-						href="/profile"
-						class="{isActive(url, 'profile')
-							? 'border-indigo-500 text-gray-900'
-							: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
-						>Profile</a
-					>
+				<div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+					<a href="/" class="flex flex-shrink-0 items-center">
+						<Icon src={Heart} class="h-8 w-auto" />
+					</a>
+					<div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+						<!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
+						<a
+							href={`/profile/${user?.id}`}
+							class="{isActive(url, 'profile')
+								? 'border-indigo-500 text-gray-900'
+								: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
+							>Profile</a
+						>
+					</div>
 				</div>
-			</div>
+			{/if}
 			<div
 				class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
 			>
@@ -120,7 +120,6 @@
 							aria-labelledby="user-menu-button"
 							tabindex="-1"
 						>
-							<!-- Active: "bg-gray-100", Not Active: "" -->
 							<a
 								href="/profile"
 								class="hover:bg-gray-100 block px-4 py-2 text-sm text-gray-700"
@@ -162,9 +161,8 @@
 		aria-labelledby="user-menu-button"
 	>
 		<div class="space-y-1 pb-4 pt-2">
-			<!-- Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700" -->
 			<a
-				href="/profile"
+				href={`/profile/${user?.id}`}
 				class="block {isActive(url, 'profile')
 					? 'bg-indigo-50 border-indigo-500 text-indigo-700'
 					: 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"

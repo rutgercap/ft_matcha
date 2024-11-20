@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
+	import type { PageData } from './$types';
 
 	export let data: PageData;
 
@@ -17,16 +18,16 @@
 	];
 
 	function triggerEachFileInput(idx) {
-		document.getElementById(`pictures-${idx}`).click(); // Simulate click on the hidden input
+		document.getElementById(`pictures-${idx}`).click(); 
 	}
 
 	const handleEachFileInput = (idx, e) => {
 		if (!$form.pictures) {
 			$form.pictures = [];
 		}
-		$form.pictures[idx] = e.currentTarget.files?.item(0) as File; // No need for 'as File' here
-		let reader = new FileReader(); // To read the file as a DataURL
-		reader.readAsDataURL($form.pictures[idx]); // Convert the file to DataURL
+		$form.pictures[idx] = e.currentTarget.files?.item(0);
+		let reader = new FileReader(); 
+		reader.readAsDataURL($form.pictures[idx]); 
 		reader.onload = (e) => {
 			all_url[idx] = e.target.result;
 		};
@@ -45,19 +46,15 @@
 			urlToDelete = all_url[index] =
 				'/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`;
 		}
-		// Send a DELETE request to the server
 		fetch(urlToDelete, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json'
-				// Add any necessary authorization headers
-				// 'Authorization': 'Bearer <your_token>'
 			}
 		}).then((response) => {
 			if (response.status === 204 || response.headers.get('Content-Length') === '0') {
 				$form.pictures_filenames[index] = 'default2';
 				all_url[index] = '/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`;
-				return; // No content to return
 			}
 		});
 	};
@@ -69,9 +66,9 @@
 			<h2 class="text-base font-semibold leading-7 text-gray-900">Profile Information</h2>
 			<div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 				<div class="sm:col-span-3">
-					<label for="firstName" class="block text-sm font-medium leading-6 text-gray-900"
-						>First name</label
-					>
+					<label for="firstName" class="block text-sm font-medium leading-6 text-gray-900">
+						First name
+					</label>
 					<div class="mt-2">
 						<input
 							type="text"
@@ -84,7 +81,7 @@
 							{...$constraints.firstName}
 						/>
 					</div>
-					{#if $errors.firstName}
+					{#if $errors.firstName && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.firstName}</p>
 					{/if}
 				</div>
@@ -105,7 +102,7 @@
 							{...$constraints.lastName}
 						/>
 					</div>
-					{#if $errors.lastName}
+					{#if $errors.lastName && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.lastName}</p>
 					{/if}
 				</div>
@@ -128,7 +125,7 @@
 							<option value="other">Other</option>
 						</select>
 					</div>
-					{#if $errors.gender}
+					{#if $errors.gender && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.gender}</p>
 					{/if}
 				</div>
@@ -151,7 +148,7 @@
 							<option value="all">All</option>
 						</select>
 					</div>
-					{#if $errors.sexualPreference}
+					{#if $errors.sexualPreference && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.sexualPreference}</p>
 					{/if}
 				</div>
@@ -171,7 +168,7 @@
 						></textarea>
 					</div>
 					<p class="mt-3 text-sm leading-6 text-gray-600">Write a few sentences about yourself.</p>
-					{#if $errors.biography}
+					{#if $errors.biography && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.biography}</p>
 					{/if}
 				</div>
@@ -225,9 +222,6 @@
 									class="delete-button"
 								/>
 							</div>
-							{#if errors.profileImage}
-								<span class="error">{errors.profileImage}</span>
-							{/if}
 						</div>
 					{/each}
 				</div>
