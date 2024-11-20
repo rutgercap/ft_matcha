@@ -7,18 +7,11 @@ import type { User } from 'lucia';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageRepository } from './imageRepository';
 import { Buffer } from 'buffer';
+import type { ToSnakeCase } from './commonTypes';
 
 type UserWithPassword = User & { passwordHash: string };
 
 type UserWithoutProfileSetup = Omit<User, 'profileIsSetup' | 'emailIsSetup'>;
-
-type SnakeCase<S extends string> = S extends `${infer T}${infer U}`
-	? `${T extends Capitalize<T> ? '_' : ''}${Lowercase<T>}${SnakeCase<U>}`
-	: S;
-
-type ToSnakeCase<T> = {
-	[K in keyof T as SnakeCase<string & K>]: T[K];
-};
 
 class UserRepositoryError extends Error {
 	exception: unknown;

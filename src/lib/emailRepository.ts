@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import type { Database } from 'better-sqlite3';
 import { generateIdFromEntropySize } from 'lucia';
 import { TimeSpan, createDate } from 'oslo';
+import type { ToSnakeCase } from './commonTypes';
 
 class EmailRepositoryError extends Error {
 	exception: unknown;
@@ -11,6 +12,13 @@ class EmailRepositoryError extends Error {
 		this.name = 'EmailRepositoryError';
 		this.exception = exception;
 	}
+}
+
+interface EmailSession {
+	id: string;
+	expiresAt: number;
+	userId: string;
+	email: string;
 }
 
 class EmailRepository {
@@ -124,17 +132,17 @@ class EmailRepository {
 
 	public createEmailVerificationToken(userId: string, email: string): string {
 		// optionally invalidate all existing tokens
-		let res = this.deleteEmailSession(userId);
+		this.deleteEmailSession(userId);
 		const tokenId = generateIdFromEntropySize(25); // 40 characters long
-		let ret = this.insertEmailSession(userId, tokenId, email, createDate(new TimeSpan(3, 'm')));
+		this.insertEmailSession(userId, tokenId, email, createDate(new TimeSpan(3, 'm')));
 		return tokenId;
 	}
 
 	public createResetPasswordToken(userId: string, email: string, old_pswd: string): string {
 		// optionally invalidate all existing tokens
-		let res = this.deleteResetPasswordSession(userId);
+		this.deleteResetPasswordSession(userId);
 		const tokenId = generateIdFromEntropySize(25); // 40 characters long
-		let ret = this.insertResetPasswordSession(
+		this.insertResetPasswordSession(
 			userId,
 			tokenId,
 			email,
@@ -144,15 +152,18 @@ class EmailRepository {
 		return tokenId;
 	}
 
-	public emailSessionByUserId(userId: string) {
+	public emailSessionByUserId(userId: string): ToSnakeCase<EmailSession> | null {
 		try {
-			const sql = this.db.prepare<string>(`
+			const sql = this.db.prepare<string, ToSnakeCase<EmailSession>>(`
 				SELECT *
 				FROM email_sessions
 				WHERE user_id = ?
 				ORDER BY expires_at DESC
 				`);
 			const res = sql.get(userId);
+			if (!res) {
+				return null;
+			}
 			return res;
 		} catch (error) {
 			console.log('console log error from emailSessionByUserId', error);
@@ -241,7 +252,7 @@ class EmailRepository {
 		} catch (error) {
 			console.log('console log error from deleteResetPasswordSession', error);
 			throw new EmailRepositoryError(
-				'Error occurs trying to delete reset password session for user:' + id,
+				'Error occurs trying to delete reset password session for user:' + userId,
 				error
 			);
 		}
@@ -287,14 +298,13 @@ class EmailRepository {
 		}
 	}
 
-	public async updateEmailIsSetup(userId: string, val: Boolean) {
+	public async updateEmailIsSetup(userId: string, val: boolean) {
 		try {
 			const tmp: number = val ? 1 : 0;
-			const updateProfileSet = this.db.prepare<number, string>(
+			const updateProfileSet = this.db.prepare<[number, string]>(
 				'UPDATE users SET email_is_setup = ? WHERE id = ?'
 			);
-			const res = updateProfileSet.run(tmp, userId);
-			return res;
+			updateProfileSet.run(tmp, userId);
 		} catch (error) {
 			console.log('console log error from updateEmailIsSetup', error);
 			throw new EmailRepositoryError(
