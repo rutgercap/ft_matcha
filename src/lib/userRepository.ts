@@ -1,6 +1,6 @@
 import type { Database, RunResult } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
-import type { ProfileInfo } from './domain/profile';
+import type { ProfileInfo, ReducedProfileInfo } from './domain/profile';
 import { hash } from '@node-rs/argon2';
 import _ from 'lodash';
 import type { User } from 'lucia';
@@ -224,6 +224,25 @@ class UserRepository {
 				reject(new UserRepositoryError('Something went wrong fetching user for id: ' + id, e));
 			}
 		});
+	}
+
+	public reducedProfile(id:string): Promise<ReducedProfileInfo> {
+		return new Promise((resolve, reject) => {
+			try {
+				const sql = `
+					SELECT u.username, p.biography, p.gender, pp.id
+					FROM users AS u
+					INNER JOIN profile_info AS p ON u.id = p.user_id
+					INNER JOIN profile_pictures AS pp ON u.id = pp.user_id
+					WHERE u.id = ? AND pp.image_order = 0
+				`;
+
+				const res = this.db.prepare<string>(sql).get(id);
+				resolve(res);
+			} catch (error) {
+				reject(new UserRepositoryError('Something went wrong getting reducedProfile for user id: ' + id, error));
+			}
+		})
 	}
 
 	public upsertProfileIsSetup(userId: string, flag: boolean) {
