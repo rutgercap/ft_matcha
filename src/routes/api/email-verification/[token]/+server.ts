@@ -1,7 +1,4 @@
-import { UserRepository } from '$lib/userRepository';
-import { EmailRepository } from '$lib/emailRepository';
-import { fail, redirect } from '@sveltejs/kit';
-import type { RequestHandler } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { isWithinExpirationDate } from 'oslo';
 import { lucia } from '$lib/auth';
 import { error } from '@sveltejs/kit';

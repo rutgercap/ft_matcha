@@ -4,6 +4,7 @@ import { generateIdFromEntropySize } from 'lucia';
 import type { Actions, PageServerLoad } from './$types';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+import { PUBLIC_BASE_URL } from '$env/static/public';
 import { z } from 'zod';
 import { DuplicateEntryError, UserRepository } from '$lib/userRepository';
 import type { EmailRepository } from '$lib/emailRepository';
@@ -44,7 +45,7 @@ export const actions: Actions = {
 		try {
 			await userRepository.createUser({ id, username, email }, password);
 			const verificationToken = emailRepository.createEmailVerificationToken(id, email);
-			const verificationLink = 'http://localhost:3000/api/email-verification/' + verificationToken;
+			const verificationLink = `${PUBLIC_BASE_URL}/api/email-verification/` + verificationToken;
 
 			console.log('IN THE SIGN UP END-POINT: verification link = ', verificationLink);
 			// TODO: this is where you send the link

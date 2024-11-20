@@ -1,12 +1,16 @@
 <script lang="ts">
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
+	import type { PageData } from './$types';
 
 	export let data: PageData;
 
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
 		resetForm: false
 	});
+
+
+	const user = data.user;
 
 	let all_url = [
 		'/api/pics/' + $form.pictures_filenames[0] + `?t=${Date.now()}`,
@@ -16,23 +20,23 @@
 		'/api/pics/' + $form.pictures_filenames[4] + `?t=${Date.now()}`
 	];
 
-	function triggerEachFileInput(idx) {
-		document.getElementById(`pictures-${idx}`).click(); // Simulate click on the hidden input
+	function triggerEachFileInput(idx: number) {
+		document.getElementById(`pictures-${idx}`)?.click();
 	}
 
-	const handleEachFileInput = (idx, e) => {
+	const handleEachFileInput = (idx: number, e) => {
 		if (!$form.pictures) {
 			$form.pictures = [];
 		}
-		$form.pictures[idx] = e.currentTarget.files?.item(0) as File; // No need for 'as File' here
-		let reader = new FileReader(); // To read the file as a DataURL
-		reader.readAsDataURL($form.pictures[idx]); // Convert the file to DataURL
+		$form.pictures[idx] = e.currentTarget.files?.item(0);
+		let reader = new FileReader();
+		reader.readAsDataURL($form.pictures[idx]);
 		reader.onload = (e) => {
 			all_url[idx] = e.target.result;
 		};
 	};
 
-	const handleDeletePicture = (index) => {
+	const handleDeletePicture = (index: number) => {
 		// Check if the index is valid
 		if (index < 0 || index >= all_url.length) {
 			console.error('Invalid index');
@@ -45,19 +49,15 @@
 			urlToDelete = all_url[index] =
 				'/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`;
 		}
-		// Send a DELETE request to the server
 		fetch(urlToDelete, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json'
-				// Add any necessary authorization headers
-				// 'Authorization': 'Bearer <your_token>'
 			}
 		}).then((response) => {
 			if (response.status === 204 || response.headers.get('Content-Length') === '0') {
 				$form.pictures_filenames[index] = 'default2';
 				all_url[index] = '/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`;
-				return; // No content to return
 			}
 		});
 	};
@@ -69,9 +69,9 @@
 			<h2 class="text-base font-semibold leading-7 text-gray-900">Profile Information</h2>
 			<div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 				<div class="sm:col-span-3">
-					<label for="firstName" class="block text-sm font-medium leading-6 text-gray-900"
-						>First name</label
-					>
+					<label for="firstName" class="block text-sm font-medium leading-6 text-gray-900">
+						First name
+					</label>
 					<div class="mt-2">
 						<input
 							type="text"
@@ -84,7 +84,7 @@
 							{...$constraints.firstName}
 						/>
 					</div>
-					{#if $errors.firstName}
+					{#if $errors.firstName && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.firstName}</p>
 					{/if}
 				</div>
@@ -105,7 +105,7 @@
 							{...$constraints.lastName}
 						/>
 					</div>
-					{#if $errors.lastName}
+					{#if $errors.lastName && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.lastName}</p>
 					{/if}
 				</div>
@@ -128,7 +128,7 @@
 							<option value="other">Other</option>
 						</select>
 					</div>
-					{#if $errors.gender}
+					{#if $errors.gender && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.gender}</p>
 					{/if}
 				</div>
@@ -151,7 +151,7 @@
 							<option value="all">All</option>
 						</select>
 					</div>
-					{#if $errors.sexualPreference}
+					{#if $errors.sexualPreference && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.sexualPreference}</p>
 					{/if}
 				</div>
@@ -171,7 +171,7 @@
 						></textarea>
 					</div>
 					<p class="mt-3 text-sm leading-6 text-gray-600">Write a few sentences about yourself.</p>
-					{#if $errors.biography}
+					{#if $errors.biography && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.biography}</p>
 					{/if}
 				</div>
@@ -225,9 +225,6 @@
 									class="delete-button"
 								/>
 							</div>
-							{#if errors.profileImage}
-								<span class="error">{errors.profileImage}</span>
-							{/if}
 						</div>
 					{/each}
 				</div>
@@ -241,7 +238,7 @@
 			{/if}
 		{/if}
 		<div class="mt-6 flex items-center justify-end gap-x-6">
-			<a href="/profile" type="button" class="text-sm font-semibold leading-6 text-gray-900"
+			<a href={`/profile/${user?.id}`} type="button" class="text-sm font-semibold leading-6 text-gray-900"
 				>Cancel</a
 			>
 			<button
@@ -258,10 +255,10 @@
 </div>
 
 <style>
-	/* Flexbox to align images in a row */
 	.profile-picture-row {
+		overflow-x: auto;
 		display: flex;
-		gap: 10px; /* Space between images */
+		gap: 10px;
 		justify-content: flex-start;
 	}
 

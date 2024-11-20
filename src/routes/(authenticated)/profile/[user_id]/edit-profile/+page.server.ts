@@ -47,8 +47,9 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository } })
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals: { userRepository, user } }) => {
-		if (!user) {
+	default: async ({ request, locals: { userRepository, user }, params }) => {
+		const id = params.user_id;
+		if (!user || user.id !== id) {
 			return fail(401, { message: 'You must be signed in to update your profile' });
 		}
 		const form = await superValidate(request, zod(profileSchema));
