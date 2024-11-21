@@ -39,13 +39,13 @@
 	</div>
 	<br />
 	<div class="mt-1 grid gap-4">
-		<img alt="main" class="h-auto max-w-full rounded-lg" src={`/api/pics/${id}/0`} />
+		<img alt="main" class="h-auto max-w-full rounded-lg" src={`/api/pics/${id}/0?refresh=${Math.random()}`} />
 		<div class="grid grid-cols-4 gap-4">
 			{#each Array(4) as _, i}
 				<img
 					alt={`${i + 1}`}
 					class="h-auto max-w-full rounded-lg"
-					src={`/api/pics/${id}/${i + 1}`}
+					src={`/api/pics/${id}/${i + 1}?refresh=${Math.random()}`}
 				/>
 			{/each}
 		</div>
