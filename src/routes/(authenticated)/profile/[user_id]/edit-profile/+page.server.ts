@@ -34,7 +34,7 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository }, p
 		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
 		zod(profileSchema)
 	);
-	return { form };
+	return { form, user };
 };
 
 export const actions: Actions = {
