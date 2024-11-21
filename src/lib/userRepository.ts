@@ -128,7 +128,7 @@ class UserRepository {
 		});
 	}
 
-	async upsertPersonalInfo(
+	async upsertProfileInfo(
 		id: string,
 		info: ProfileWithoutPictures
 	): Promise<Array<string | null>> {
@@ -192,7 +192,6 @@ class UserRepository {
 					.map((user) => user.id);
 				resolve(result);
 			} catch (e) {
-				console.log(e);
 				reject(new UserRepositoryError('Something went wrong fetching other users', e));
 			}
 		});
@@ -245,7 +244,7 @@ class UserRepository {
 		});
 	}
 
-	public upsertProfileIsSetup(userId: string, flag: boolean) {
+	public updateProfileIsSetup(userId: string, flag: boolean) {
 		try {
 			const val = flag ? 1 : 0;
 			const sql = this.db.prepare<[number, string]>(
@@ -254,7 +253,6 @@ class UserRepository {
 			const res = sql.run(val, userId);
 			return res;
 		} catch (error) {
-			console.log('error in the userRepository:upsertProfileIsSetup:', error);
 			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error);
 		}
 	}

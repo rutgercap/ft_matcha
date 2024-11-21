@@ -6,12 +6,12 @@
 	import addToast from '$lib/toast/toastStore';
 
 	export let data: PageData;
+	$: user = data.user;
 
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
 		resetForm: false
 	});
 
-	const user = data.user!;
 	const maxPictures = 5;
 
 	function triggerEachFileInput(idx: number) {

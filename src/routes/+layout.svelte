@@ -21,6 +21,7 @@
 	export let data: LayoutData;
 	$: user = data.user;
 	$: initials = data.personalInfo ? getInitials(data.personalInfo) : 'XX';
+	console.log(user);
 
 	let menuOpen = false;
 
@@ -65,7 +66,7 @@
 	}
 </script>
 
-<nav class="bg-white z-49 shadow relative h-16">
+<nav class="bg-white z-50 shadow relative h-16">
 	<div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
 		<div class="relative flex h-16 justify-between">
 			{#if user}
@@ -308,7 +309,7 @@
 <!-- Global notification live region, render this permanently at the end of the document -->
 <div
 	aria-live="assertive"
-	class="pointer-events-none z-50 fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6"
+	class="pointer-events-none z-51 fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6"
 >
 	<div class="flex w-full flex-col items-center space-y-4 sm:items-end">
 		{#each $toasts as toast}
@@ -324,7 +325,7 @@
 								<Icon src={CheckCircle} class="size-8 text-green-400" />
 							{:else if toast.type === 'error'}
 								<Icon src={ExclamationTriangle} class="size-8 text-red-400" />
-							{:else}
+							{:else if toast.type === 'info'}
 								<Icon src={InformationCircle} class="size-8 text-yellow-400" />
 							{/if}
 						</div>
