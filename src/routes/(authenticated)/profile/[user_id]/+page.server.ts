@@ -10,7 +10,8 @@ async function personalInfoFor(
 ): Promise<ProfileInfo | null> {
 	try {
 		return await userRepository.profileInfoFor(userId);
-	} catch {
+	} catch (e) {
+		console.error(e);
 		error(500, {
 			message: 'Something went wrong.'
 		});

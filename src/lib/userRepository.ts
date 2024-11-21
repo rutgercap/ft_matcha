@@ -13,6 +13,8 @@ type UserWithPassword = User & { passwordHash: string };
 
 type UserWithoutProfileSetup = Omit<User, 'profileIsSetup' | 'emailIsSetup'>;
 
+type ProfileWithoutPictures = Omit<ProfileInfo, 'uploadedPictures'>;
+
 class UserRepositoryError extends Error {
 	exception: unknown;
 	constructor(message: string, exception: unknown) {
@@ -127,7 +129,7 @@ class UserRepository {
 		});
 	}
 
-	async upsertPersonalInfo(id: string, info: ProfileInfo): Promise<Array<string | null>> {
+	async upsertPersonalInfo(id: string, info: ProfileWithoutPictures ): Promise<Array<string | null>> {
 		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
 			`
 				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography)
@@ -149,7 +151,7 @@ class UserRepository {
 
 		return new Promise((resolve, reject) => {
 			try {
-				const transaction = this.db.transaction((id: string, profileTest: ProfileInfo) => {
+				const transaction = this.db.transaction((id: string, profileTest: ProfileWithoutPictures) => {
 					insertIntoProfile.run(
 						id,
 						profileTest.firstName,
@@ -355,6 +357,14 @@ class UserRepository {
 	public async userImage(userId: string, order: number): Promise<Buffer | null> {	
 		try {
 			return await this.imageRepo.image(userId, order);
+		} catch (error) {
+			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
+		}
+	}
+
+	public async saveUserImage(userId: string, order: number, image: Buffer): Promise<number> {	
+		try {
+			return await this.imageRepo.upsertImage(userId, order, image);
 		} catch (error) {
 			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
 		}
