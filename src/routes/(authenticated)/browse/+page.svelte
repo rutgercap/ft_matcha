@@ -1,10 +1,10 @@
 <script lang="ts">
+	import type { ReducedProfileInfo } from '$lib/domain/profile.js';
+
 	export let data;
 
-	// console.log('IN THE BROWSING FRONT : ', data)
-	let users : any[]  = data.profiles;
-	let ids : any[] = data.ids
-
+	let users : ReducedProfileInfo[]  = data.profiles;
+	let ids : string[] = data.ids
 </script>
 
 <div class="bg-white">
@@ -13,26 +13,27 @@
 		<ul class="mt-6 space-y-6">
 			{#if ids.length > 0}
 				{#each ids as id, index}
+				<a href={`/profile/${id}`}>
 					<li class="group flex items-center space-x-4 p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-300">
 						<img
-							src={`/api/pics/${users[index].id}`}
-							alt={id.id}
+							src={`/api/pics/${id}/0`}
+							alt={id}
 							class="h-24 w-24 rounded-full bg-gray-200 object-cover"
 						/>
 						<div class="flex-1">
 							<h3 class="text-lg font-medium text-gray-900">
-								<a href={`/profile/${id.id}`} class="hover:underline">
+								<a href={`/profile/${id}`} class="hover:underline">
 									{users[index].username}
 								</a>
 							</h3>
 							<p class="text-sm text-gray-500">{users[index].biography}</p>
 						</div>
-						<!-- Gender styling -->
 						<p class="text-xl font-bold"
 							style="color: {users[index].gender === 'man' ? '#0042ad' : '#ff0099'};">
 							{users[index].gender}
 						</p>
 					</li>
+				</a>
 				{/each}
 			{:else}
 				<p class="text-gray-500">No profiles found. Please try again later.</p>
