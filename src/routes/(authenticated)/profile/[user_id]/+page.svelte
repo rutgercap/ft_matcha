@@ -3,9 +3,8 @@
 	import _ from 'lodash';
 	import { page } from '$app/stores';
 
-	
 	export let data: PageData;
-	
+
 	$: id = $page.params.user_id;
 	$: profileInfo = data.profileInfo;
 	$: isCurrentUserProfile = data.isCurrentUserProfile;

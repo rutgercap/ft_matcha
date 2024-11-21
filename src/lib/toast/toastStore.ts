@@ -28,7 +28,7 @@ export default ({ type, message, extraInformation, dismissible, timeout }: Toast
 		message,
 		extraInformation: extraInformation ?? '',
 		dismissible: dismissible ?? true,
-		timeout: timeout ?? 3000,
+		timeout: timeout ?? 3000
 	};
 
 	toasts.update((all) => [toast, ...all]);

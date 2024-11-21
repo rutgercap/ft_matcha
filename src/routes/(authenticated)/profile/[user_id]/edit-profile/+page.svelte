@@ -6,7 +6,7 @@
 	import addToast from '$lib/toast/toastStore';
 
 	export let data: PageData;
-	$: user = data.personalInfo;
+	$: user = data.user;
 
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
 		resetForm: false
@@ -74,7 +74,6 @@
 <div class="max-w-3xl mx-auto">
 	<div class="space-y-10">
 		<h2 class="text-base font-semibold leading-7 text-gray-900">Profile Information</h2>
-
 		<div class="col-span-full profile-picture-row">
 			{#each Array(maxPictures) as _, i}
 				<div class="profile-picture-container">
