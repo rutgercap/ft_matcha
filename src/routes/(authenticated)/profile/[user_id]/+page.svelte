@@ -2,12 +2,29 @@
 	import type { PageData } from './$types';
 	import _ from 'lodash';
 	import { page } from '$app/stores';
+	import { Heart, Icon } from 'svelte-hero-icons';
+	import addToast from '$lib/toast/toastStore';
 
 	export let data: PageData;
 
 	$: id = $page.params.user_id;
 	$: profileInfo = data.profileInfo;
 	$: isCurrentUserProfile = data.isCurrentUserProfile;
+	$: likedByCurrentUser = data.likedByCurrentUser;
+
+	async function likeProfile() {
+		try {
+			const response = await fetch(`/api/like/${id}`, {
+				method: 'POST'
+			});
+			if (response.ok) {
+				const result: { isLiked: boolean } = await response.json();
+				likedByCurrentUser = result.isLiked;
+			}
+		} catch (error) {
+			addToast({ message: 'Something went wrong liking profile', type: 'error' });
+		}
+	}
 </script>
 
 <div class="max-w-3xl md:mx-auto mx-4 mb-10">
@@ -30,9 +47,10 @@
 			{:else}
 				<button
 					type="button"
+					on:click={likeProfile}
 					class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
 				>
-					Like
+					<Icon class="h-5 w-5" src={Heart} solid={likedByCurrentUser} />
 				</button>
 			{/if}
 		</div>

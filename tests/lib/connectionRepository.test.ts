@@ -7,12 +7,39 @@ describe('ConnectionRepository', () => {
 		async ({ connectionRepository, savedUserFactory }) => {
 			const users = await savedUserFactory(2, {});
 
-			await connectionRepository.likeUser(users[0].id, users[1].id);
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
 
 			const userLikes = await connectionRepository.likes(users[0].id);
 			expect(userLikes).toEqual([users[1].id]);
 			const userLikedBy = await connectionRepository.userLikedBy(users[1].id);
 			expect(userLikedBy).toEqual([users[0].id]);
+		}
+	);
+
+	itWithFixtures(
+		'Should be able to unlike a user',
+		async ({ connectionRepository, savedUserFactory }) => {
+			const users = await savedUserFactory(2, {});
+
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
+
+			const userLikes = await connectionRepository.likes(users[0].id);
+			expect(userLikes).toEqual([]);
+		}
+	);
+
+	itWithFixtures(
+		'Should be able to fetch if user is liked by another user',
+		async ({ connectionRepository, savedUserFactory }) => {
+			const users = await savedUserFactory(2, {});
+
+			const before = await connectionRepository.isLikedBy(users[1].id, users[0].id);
+			expect(before).toBe(false);
+
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
+			const found = await connectionRepository.isLikedBy(users[1].id, users[0].id);
+			expect(found).toBe(true);
 		}
 	);
 
@@ -24,8 +51,37 @@ describe('ConnectionRepository', () => {
 			const before = await connectionRepository.matchStatus(users[0].id, users[1].id);
 			expect(before).toBeNull();
 
-			await connectionRepository.likeUser(users[0].id, users[1].id);
-			await connectionRepository.likeUser(users[1].id, users[0].id);
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
+			await connectionRepository.flipLikeUser(users[1].id, users[0].id);
+
+			const matchStatus = await connectionRepository.matchStatus(users[0].id, users[1].id);
+			expect(matchStatus!.status).toEqual('MATCHED');
+		}
+	);
+
+	itWithFixtures(
+		'unliking a match should remove the match',
+		async ({ connectionRepository, savedUserFactory }) => {
+			const users = await savedUserFactory(2, {});
+
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
+			await connectionRepository.flipLikeUser(users[1].id, users[0].id);
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
+
+			const matchStatus = await connectionRepository.matchStatus(users[0].id, users[1].id);
+			expect(matchStatus!.status).toEqual('UNMATCHED');
+		}
+	);
+
+	itWithFixtures(
+		're-liking a lost match should add the match back',
+		async ({ connectionRepository, savedUserFactory }) => {
+			const users = await savedUserFactory(2, {});
+
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
+			await connectionRepository.flipLikeUser(users[1].id, users[0].id);
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
+			await connectionRepository.flipLikeUser(users[0].id, users[1].id);
 
 			const matchStatus = await connectionRepository.matchStatus(users[0].id, users[1].id);
 			expect(matchStatus!.status).toEqual('MATCHED');
