@@ -1,5 +1,5 @@
 export type MatchStatus = {
 	userOne: string;
 	userTwo: string;
-	status: 'MATCH' | 'BLOCKED' | 'UNMATCHED';
+	status: 'MATCHED' | 'BLOCKED' | 'UNMATCHED';
 };

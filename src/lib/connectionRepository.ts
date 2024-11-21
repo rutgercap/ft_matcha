@@ -37,7 +37,7 @@ export class ConnectionRepository {
 					const maybeLikeId = didUserAlreadyLike.get(userId, likedUserId);
 					if (!maybeLikeId) {
 						insertLike.run(userId, likedUserId);
-						const otherUserLike = didOtherUserLike.run(likedUserId, userId);
+						const otherUserLike = didOtherUserLike.get(likedUserId, userId);
 						if (otherUserLike) {
 							insertMatch.run(userId, likedUserId);
 						}
@@ -107,20 +107,53 @@ export class ConnectionRepository {
 			try {
 				const result = this.db
 					.prepare<
-						[string, string],
+						[string, string, string, string],
 						{ status: string }
-					>('SELECT status FROM connections WHERE user_id_1 = ? AND user_id_2 = ?')
-					.get(userId, otherUserId);
+					>('SELECT status FROM connections WHERE (user_id_1 = ? AND user_id_2 = ?) OR (user_id_1 = ? AND user_id_2 = ?)')
+					.get(userId, otherUserId, otherUserId, userId);
 				if (!result) {
 					resolve(null);
 				}
 				resolve({
 					userOne: userId,
 					userTwo: otherUserId,
-					status: result!.status as 'MATCH' | 'BLOCKED'
+					status: result!.status as 'MATCHED' | 'BLOCKED'
 				});
 			} catch (e) {
+				console.error(e);
 				reject(new ConnectionRepositoryError('Failed to fetch match status'));
+			}
+		});
+	}
+
+	public async matchesForUser(id: string): Promise<MatchStatus[]> {
+		return new Promise((resolve, reject) => {
+			try {
+				const result = this.db
+					.prepare<
+						[string, string],
+						{ status: string; user_id_1: string; user_id_2: string }
+					>(`SELECT status, user_id_1, user_id_2 FROM connections WHERE user_id_1 = ? OR user_id_2 = ? AND status = 'MATCHED'`)
+					.all(id, id);
+					console.log(result);
+				const mapped = result.map((row) => {
+					if (row.user_id_1 === id) {
+						return {
+							userOne: row.user_id_1,
+							userTwo: row.user_id_2,
+							status: row.status as 'MATCHED' | 'BLOCKED' | 'UNMATCHED'
+						};
+					}
+					return {
+						userOne: row.user_id_2,
+						userTwo: row.user_id_1,
+						status: row.status as 'MATCHED' | 'BLOCKED' | 'UNMATCHED'
+					};
+				});
+				resolve(mapped);
+			} catch (e) {
+				console.error(e);
+				reject(new ConnectionRepositoryError('Failed to fetch matches'));
 			}
 		});
 	}
