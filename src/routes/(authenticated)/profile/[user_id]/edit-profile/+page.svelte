@@ -83,7 +83,11 @@
 						class="hidden"
 					/>
 					<button class="profile-picture-upload" on:click={() => triggerEachFileInput(i)}>
-						<img alt="profile" class="profile-picture-preview" src={`/api/pics/${user.id}/${i}?refreshKey=${refreshKeys[i]}`} />
+						<img
+							alt="profile"
+							class="profile-picture-preview"
+							src={`/api/pics/${user.id}/${i}?refreshKey=${refreshKeys[i]}`}
+						/>
 					</button>
 					<button class="delete-icon" on:click={() => handleDeletePicture(i)}>
 						<Icon src={Trash} class="h-8 w-auto" />
@@ -260,30 +264,30 @@
 
 	.profile-picture-container {
 		display: flex;
-		flex-direction: column; 
+		flex-direction: column;
 		align-items: center;
-		width: 140px; 
+		width: 140px;
 		overflow: hidden;
 	}
 
 	.profile-picture-upload {
 		display: inline-block;
 		cursor: pointer;
-		width: 135px; 
-		height: 135px; 
+		width: 135px;
+		height: 135px;
 		position: relative;
 	}
 
 	.profile-picture-preview {
 		width: 100%;
 		height: 100%;
-		object-fit: cover; 
-		border-radius: 10px; 
-		border: 1px solid #ddd; 
+		object-fit: cover;
+		border-radius: 10px;
+		border: 1px solid #ddd;
 	}
 
 	.delete-icon {
-		margin-top: 5px; 
+		margin-top: 5px;
 		cursor: pointer;
 	}
 

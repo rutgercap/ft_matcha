@@ -30,7 +30,7 @@ export class ConnectionRepository {
 						insertMatch.run(userId, likedUserId);
 					}
 				});
-                transaction(userId, likedUserId);
+				transaction(userId, likedUserId);
 				resolve();
 			} catch (e) {
 				reject(new ConnectionRepositoryError('Failed to like user'));

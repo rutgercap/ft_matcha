@@ -1,5 +1,5 @@
 export type MatchStatus = {
-    userOne: string;
-    userTwo: string;
-    status: 'MATCH' | 'BLOCKED';
-}
+	userOne: string;
+	userTwo: string;
+	status: 'MATCH' | 'BLOCKED';
+};

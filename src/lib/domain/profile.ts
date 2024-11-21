@@ -33,7 +33,7 @@ type ReducedProfileInfo = {
 	username: string;
 	biography: string;
 	gender: string;
-}
+};
 
 function initials(profileInfo: ProfileInfo): string {
 	return (profileInfo.firstName[0] + profileInfo.lastName[0]).toUpperCase();

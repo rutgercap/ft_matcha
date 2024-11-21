@@ -7,7 +7,6 @@ import { verify } from '@node-rs/argon2';
 import { lucia } from '$lib/auth';
 import { PUBLIC_BASE_URL } from '$env/static/public';
 
-
 const signInSchema = z.object({
 	username: z.string().min(4).max(31),
 	password: z.string().min(6).max(255)

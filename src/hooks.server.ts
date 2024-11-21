@@ -15,7 +15,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.userRepository = new UserRepository(db, imageRepo);
 	event.locals.emailRepository = new EmailRepository(db, transporter);
 	event.locals.profileVisitRepository = new ProfileVisitRepository(db);
-	event.locals.browsingRepository = new BrowsingRepository(db)
+	event.locals.browsingRepository = new BrowsingRepository(db);
 
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
 	if (!sessionId) {

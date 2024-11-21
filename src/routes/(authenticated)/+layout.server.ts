@@ -20,7 +20,11 @@ export const load: LayoutServerLoad = async ({ url, locals: { user } }) => {
 			'You must reset your password by clicking the link we sent to your email adress'
 		);
 	}
-	if (user && !currentUser.profileIsSetup && !url.pathname.startsWith(`/profile/${id}/edit-profile`)) {
+	if (
+		user &&
+		!currentUser.profileIsSetup &&
+		!url.pathname.startsWith(`/profile/${id}/edit-profile`)
+	) {
 		redirect(302, `/profile/${id}/edit-profile`);
 	}
 };

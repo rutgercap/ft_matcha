@@ -1,6 +1,5 @@
-import type { ReducedProfileInfo } from "./domain/profile";
+import type { ReducedProfileInfo } from './domain/profile';
 import type { Database } from 'better-sqlite3';
-
 
 class BrowsingRepositoryError extends Error {
 	exception: unknown;
@@ -11,16 +10,12 @@ class BrowsingRepositoryError extends Error {
 	}
 }
 
-class BrowsingRepository{
-
-	constructor(private db: Database) {
-	}
+class BrowsingRepository {
+	constructor(private db: Database) {}
 
 	public allIdExcept(userId: string) {
 		try {
-			const sql = this.db.prepare<string>(
-				"SELECT id FROM users where id != ?"
-			);
+			const sql = this.db.prepare<string>('SELECT id FROM users where id != ?');
 			const res = sql.all(userId);
 			return res;
 		} catch (error) {
@@ -31,7 +26,6 @@ class BrowsingRepository{
 			);
 		}
 	}
-};
-
+}
 
 export { BrowsingRepository, BrowsingRepositoryError };

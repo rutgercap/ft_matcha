@@ -3,7 +3,6 @@ import { error } from '@sveltejs/kit';
 import fs from 'fs';
 import path from 'path';
 
-
 export async function GET({ params, locals: { userRepository } }) {
 	const user_id = params.user_id;
 	const order = Number(params.order);
@@ -15,8 +14,8 @@ export async function GET({ params, locals: { userRepository } }) {
 		const image = await userRepository.userImage(user_id, order);
 		if (!image) {
 			const imagePath = path.resolve('static/default_profile_picture.jpg');
-			const defaultImage = fs.readFileSync(imagePath); 
-			const mimeType = 'image/jpg'; 
+			const defaultImage = fs.readFileSync(imagePath);
+			const mimeType = 'image/jpg';
 			return new Response(defaultImage, {
 				headers: {
 					'Content-Type': mimeType,

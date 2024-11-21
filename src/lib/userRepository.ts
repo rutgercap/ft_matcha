@@ -128,7 +128,10 @@ class UserRepository {
 		});
 	}
 
-	async upsertPersonalInfo(id: string, info: ProfileWithoutPictures ): Promise<Array<string | null>> {
+	async upsertPersonalInfo(
+		id: string,
+		info: ProfileWithoutPictures
+	): Promise<Array<string | null>> {
 		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
 			`
 				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography)
@@ -150,21 +153,23 @@ class UserRepository {
 
 		return new Promise((resolve, reject) => {
 			try {
-				const transaction = this.db.transaction((id: string, profileTest: ProfileWithoutPictures) => {
-					insertIntoProfile.run(
-						id,
-						profileTest.firstName,
-						profileTest.lastName,
-						profileTest.gender.toString(),
-						profileTest.sexualPreference.toString(),
-						profileTest.biography
-					);
-					updateProfileSet.run(id);
-					deleteTags.run(id);
-					profileTest.tags.forEach((tag) => {
-						insertTag.run(uuidv4(), id, tag);
-					});
-				});
+				const transaction = this.db.transaction(
+					(id: string, profileTest: ProfileWithoutPictures) => {
+						insertIntoProfile.run(
+							id,
+							profileTest.firstName,
+							profileTest.lastName,
+							profileTest.gender.toString(),
+							profileTest.sexualPreference.toString(),
+							profileTest.biography
+						);
+						updateProfileSet.run(id);
+						deleteTags.run(id);
+						profileTest.tags.forEach((tag) => {
+							insertTag.run(uuidv4(), id, tag);
+						});
+					}
+				);
 				transaction(id, info);
 				const inserted_filename: Array<string | null> = [];
 				resolve(inserted_filename);
@@ -178,7 +183,7 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
-					.prepare<string, {id: string}>(
+					.prepare<string, { id: string }>(
 						`SELECT id
    						FROM users
 						WHERE id != ? AND profile_is_setup = 1`
@@ -214,7 +219,7 @@ class UserRepository {
 		});
 	}
 
-	public reducedProfile(id:string): Promise<ReducedProfileInfo | null> {
+	public reducedProfile(id: string): Promise<ReducedProfileInfo | null> {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
@@ -230,9 +235,14 @@ class UserRepository {
 				const camelCaseObject = _.mapKeys(res, (__, key) => _.camelCase(key)) as any;
 				resolve(camelCaseObject as ReducedProfileInfo);
 			} catch (error) {
-				reject(new UserRepositoryError('Something went wrong getting reducedProfile for user id: ' + id, error));
+				reject(
+					new UserRepositoryError(
+						'Something went wrong getting reducedProfile for user id: ' + id,
+						error
+					)
+				);
 			}
-		})
+		});
 	}
 
 	public upsertProfileIsSetup(userId: string, flag: boolean) {
@@ -328,7 +338,7 @@ class UserRepository {
 		}
 	}
 
-	public async deleteUserImage(userId: string, order: number): Promise<void>{	
+	public async deleteUserImage(userId: string, order: number): Promise<void> {
 		try {
 			await this.imageRepo.deleteImage(userId, order);
 		} catch (error) {
@@ -336,7 +346,7 @@ class UserRepository {
 		}
 	}
 
-	public async userImage(userId: string, order: number): Promise<Buffer | null> {	
+	public async userImage(userId: string, order: number): Promise<Buffer | null> {
 		try {
 			return await this.imageRepo.image(userId, order);
 		} catch (error) {
@@ -344,7 +354,7 @@ class UserRepository {
 		}
 	}
 
-	public async saveUserImage(userId: string, order: number, image: Buffer): Promise<number> {	
+	public async saveUserImage(userId: string, order: number, image: Buffer): Promise<number> {
 		try {
 			return await this.imageRepo.upsertImage(userId, order, image);
 		} catch (error) {
