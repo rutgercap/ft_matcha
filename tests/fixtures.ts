@@ -15,6 +15,7 @@ import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { ConnectionRepository } from '$lib/connectionRepository';
 
 interface MyFixtures {
 	db: DatabaseType;
@@ -25,6 +26,7 @@ interface MyFixtures {
 	profileVisitRepository: ProfileVisitRepository;
 	savedUserFactory: (n: number, overrides: Partial<User>) => Promise<User[]>;
 	image: Buffer;
+	connectionRepository: ConnectionRepository;
 }
 
 const IMAGE_FOLDER = './tests/lib/pictures-repo-test';
@@ -74,5 +76,8 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		const imagePath = path.join(__dirname, 'test-image.jpg');
 		const image = fs.readFileSync(imagePath);
 		use(image);
-	}
+	},
+	connectionRepository: async ({ db }, use) => {
+		use(new ConnectionRepository(db));
+	}	
 });

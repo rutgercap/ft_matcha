@@ -19,21 +19,34 @@
 				{`${_.capitalize(profileInfo.firstName)} ${_.capitalize(profileInfo.lastName)}`}
 			</h2>
 		</div>
-		<div class="mt-4 flex md:ml-4 md:mt-0 {isCurrentUserProfile ? 'visible' : 'invisible'}">
-			<a
-				href={`/profile/${id}/edit-profile`}
-				type="button"
-				class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-				>Edit</a
-			>
+		<div class="mt-4 flex md:ml-4 md:mt-0">
+			{#if isCurrentUserProfile}
+				<a
+					href={`/profile/${id}/edit-profile`}
+					type="button"
+					class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+					>Edit</a
+				>
+			{:else}
+				<button
+					type="button"
+					class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+				>
+					Like
+				</button>
+			{/if}
 		</div>
 	</div>
 	<br />
 	<div class="mt-1 grid gap-4">
-			<img alt="main" class="h-auto max-w-full rounded-lg" src={`/api/pics/${id}/0`}/>
+		<img alt="main" class="h-auto max-w-full rounded-lg" src={`/api/pics/${id}/0`} />
 		<div class="grid grid-cols-4 gap-4">
 			{#each Array(4) as _, i}
-					<img alt={`${i + 1}`} class="h-auto max-w-full rounded-lg" src={`/api/pics/${id}/${i + 1}`}/>
+				<img
+					alt={`${i + 1}`}
+					class="h-auto max-w-full rounded-lg"
+					src={`/api/pics/${id}/${i + 1}`}
+				/>
 			{/each}
 		</div>
 	</div>
