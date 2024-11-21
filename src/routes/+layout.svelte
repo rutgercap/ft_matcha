@@ -21,7 +21,6 @@
 	export let data: LayoutData;
 	$: user = data.user;
 	$: initials = data.personalInfo ? getInitials(data.personalInfo) : 'XX';
-	console.log(user);
 
 	let menuOpen = false;
 
