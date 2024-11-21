@@ -39,4 +39,12 @@ describe('ImageRepository', () => {
 		const found = await imageRepository.image(savedUser.id, 0);
 		expect(found).toBeNull();
 	});
+
+	itWithFixtures('should be able to get uploaded image orders', async ({ savedUser, imageRepository, image}) => {
+		await imageRepository.upsertImage(savedUser.id, 0, image);
+
+		const found = await imageRepository.listImages(savedUser.id);
+
+		expect(found).toStrictEqual([0]);
+	});
 });

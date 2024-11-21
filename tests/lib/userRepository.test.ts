@@ -16,7 +16,7 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
 		tags: [faker.lorem.word(), faker.lorem.word()],
 		pictures: [null, null, null, null, null],
-		pictures_filenames: [],
+		uploadedPictures: [],
 		...overrides
 	};
 }
