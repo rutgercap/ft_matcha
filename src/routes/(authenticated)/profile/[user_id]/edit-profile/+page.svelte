@@ -6,7 +6,7 @@
 	import addToast from '$lib/toast/toastStore';
 
 	export let data: PageData;
-	$: user = data.personalInfo;
+	$: user = data.user;
 
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
 		resetForm: false

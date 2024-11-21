@@ -128,10 +128,7 @@ class UserRepository {
 		});
 	}
 
-	async upsertProfileInfo(
-		id: string,
-		info: ProfileWithoutPictures
-	): Promise<Array<string | null>> {
+	async upsertProfileInfo(id: string, info: ProfileWithoutPictures): Promise<Array<string | null>> {
 		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
 			`
 				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography)
