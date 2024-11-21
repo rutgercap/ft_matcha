@@ -30,10 +30,9 @@ type ProfileInfo = {
 };
 
 type ReducedProfileInfo = {
-	userName: string;
+	username: string;
 	biography: string;
 	gender: string;
-	picture: string;
 }
 
 function initials(profileInfo: ProfileInfo): string {

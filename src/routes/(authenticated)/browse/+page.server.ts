@@ -1,32 +1,14 @@
-import { error, redirect } from '@sveltejs/kit';
-import { UserRepository } from '$lib/userRepository';
-import type { ProfileInfo } from '$lib/domain/profile';
-import type { Action, PageServerLoad } from './$types';
+import { redirect } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+import type { ReducedProfileInfo } from '$lib/domain/profile';
 
-
-interface IdObject {
-    id: string;
-}
-
-export const load: PageServerLoad = async ({ locals: { user, userRepository, browsingRepository}, params }) => {
+export const load: PageServerLoad = async ({ locals: { user, userRepository } }) => {
 	if (!user) {
 		throw redirect(401, '/login');
 	}
-
-	const ids: IdObject[] = browsingRepository.allIdExcept(user.id)
-	console.log(user.id)
-
-	console
-	const profiles = await Promise.all(
-		ids.map((idObj: IdObject) => userRepository.reducedProfile(idObj.id))
-	);
+	const ids = await userRepository.allOtherUsers(user.id);
+	const profiles = (
+		await Promise.all(ids.map(async (id) => await userRepository.reducedProfile(id)))
+	).filter(Boolean) as ReducedProfileInfo[];
 	return { profiles, ids };
-
-
 };
-
-// export const action: Action = {
-// 	default: async ({ params, request, cookies, locals: { user, userRepository, emailRepository }}) => {
-
-// 	}
-// }

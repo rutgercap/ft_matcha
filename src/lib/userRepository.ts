@@ -113,7 +113,6 @@ class UserRepository {
 						`
 					)
 					.get(id);
-				const pictures = this.imageRepo.listImages(id);
 				if (!result) {
 					resolve(null);
 				} else {
@@ -175,18 +174,14 @@ class UserRepository {
 		});
 	}
 
-	public async allOtherUsers(id: string) {
-		interface UserId {
-			id: string;
-		}
+	public async allOtherUsers(id: string): Promise<string[]> {
 		return new Promise((resolve, reject) => {
 			try {
-				// this needs AND profile_is_setup = 1
 				const result = this.db
-					.prepare<string, UserId>(
+					.prepare<string, {id: string}>(
 						`SELECT id
    						FROM users
-						WHERE id != ?`
+						WHERE id != ? AND profile_is_setup = 1`
 					)
 					.all(id)
 					.map((user) => user.id);
@@ -219,19 +214,21 @@ class UserRepository {
 		});
 	}
 
-	public reducedProfile(id:string): Promise<ReducedProfileInfo> {
+	public reducedProfile(id:string): Promise<ReducedProfileInfo | null> {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
-					SELECT u.username, p.biography, p.gender, pp.id
+					SELECT u.username, p.biography, p.gender
 					FROM users AS u
 					INNER JOIN profile_info AS p ON u.id = p.user_id
-					INNER JOIN profile_pictures AS pp ON u.id = pp.user_id
-					WHERE u.id = ? AND pp.image_order = 0
+					WHERE u.id = ? 
 				`;
-
-				const res = this.db.prepare<string>(sql).get(id);
-				resolve(res);
+				const res = this.db.prepare<string, ToSnakeCase<ReducedProfileInfo>>(sql).get(id);
+				if (!res) {
+					resolve(null);
+				}
+				const camelCaseObject = _.mapKeys(res, (__, key) => _.camelCase(key)) as any;
+				resolve(camelCaseObject as ReducedProfileInfo);
 			} catch (error) {
 				reject(new UserRepositoryError('Something went wrong getting reducedProfile for user id: ' + id, error));
 			}
