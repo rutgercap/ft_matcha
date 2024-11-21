@@ -64,9 +64,17 @@
 </script>
 
 <div class="max-w-3xl mx-auto">
+	
 	<form class="px-4 mb-8" method="POST" use:enhance enctype="multipart/form-data">
 		<div class="space-y-10">
-			<h2 class="text-base font-semibold leading-7 text-gray-900">Profile Information</h2>
+			<div class="flex items-center justify-between">
+				<h2 class="text-base font-semibold leading-7 text-gray-900">Profile Information</h2>
+				<a href="/profile/{user.id}/edit-profile/change-email"
+					class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+				>
+					Edit private info
+				</a>
+			</div>
 			<div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 				<div class="sm:col-span-3">
 					<label for="firstName" class="block text-sm font-medium leading-6 text-gray-900">

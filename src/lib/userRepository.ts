@@ -1,4 +1,4 @@
-import type { Database } from 'better-sqlite3';
+import type { Database, RunResult } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
 import type { ProfileInfo } from './domain/profile';
 import { hash } from '@node-rs/argon2';
@@ -296,7 +296,24 @@ class UserRepository {
 		});
 	}
 
-	public async updateUserPswd(userId: string, password: string) {
+
+	public updateUserEmail(userId: string, email: string) : RunResult {
+		try {
+			const sql = this.db.prepare<[string, string]>(
+				`UPDATE users SET email = ? WHERE id = ?`
+			);
+			const res = sql.run(email, userId);
+			return res;
+		} catch (error) {
+			console.log('error occur at updateUserEmail: ', error);
+			throw new UserRepositoryError(
+				'error occur trying to update new email for user:' + userId,
+				error
+			);
+		}
+	}
+
+	public async updateUserPswd(userId: string, password: string) : Promise<RunResult>{
 		try {
 			const passwordHash = await hash(password, {
 				memoryCost: 19456,
