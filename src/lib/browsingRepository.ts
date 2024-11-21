@@ -19,7 +19,6 @@ class BrowsingRepository {
 			const res = sql.all(userId);
 			return res;
 		} catch (error) {
-			console.log('error occur at allIdExcept: ', error);
 			throw new BrowsingRepositoryError(
 				'error occur trying to get browsing list for user:' + userId,
 				error

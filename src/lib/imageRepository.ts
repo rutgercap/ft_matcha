@@ -89,7 +89,6 @@ class ImageRepository {
 			}
 			fs.unlinkSync(this.destination + `/${user_id}_${order}.jpg`);
 		} catch (error) {
-			console.log(error);
 			throw new ImageRepositoryError('Error trying delete the image', error);
 		}
 	}

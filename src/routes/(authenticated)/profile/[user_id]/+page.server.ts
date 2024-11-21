@@ -3,14 +3,13 @@ import type { UserRepository } from '$lib/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
 import type { PageServerLoad } from './$types';
 
-async function personalInfoFor(
+async function profileInfoFor(
 	userId: string,
 	userRepository: UserRepository
 ): Promise<ProfileInfo | null> {
 	try {
 		return await userRepository.profileInfoFor(userId);
 	} catch (e) {
-		console.error(e);
 		error(500, {
 			message: 'Something went wrong.'
 		});
@@ -25,9 +24,9 @@ export const load: PageServerLoad = async ({
 		throw redirect(401, '/login');
 	}
 	const id = params.user_id;
-	const maybeProfileInfo = await personalInfoFor(id, userRepository);
+	const maybeProfileInfo = await profileInfoFor(id, userRepository);
 	if (!maybeProfileInfo) {
-		error(404, {
+		throw error(404, {
 			message: 'Not found'
 		});
 	}
@@ -38,7 +37,7 @@ export const load: PageServerLoad = async ({
 		profileVisitRepository.addVisit(user.id, id);
 	}
 	return {
-		profileInfo: maybeProfileInfo,
+		profileInfo: maybeProfileInfo as ProfileInfo,
 		isCurrentUserProfile
 	};
 };

@@ -3,11 +3,12 @@
 	import _ from 'lodash';
 	import { page } from '$app/stores';
 
-	$: id = $page.params.user_id;
-
+	
 	export let data: PageData;
-
-	let { profileInfo, isCurrentUserProfile } = data;
+	
+	$: id = $page.params.user_id;
+	$: profileInfo = data.profileInfo;
+	$: isCurrentUserProfile = data.isCurrentUserProfile;
 </script>
 
 <div class="max-w-3xl md:mx-auto mx-4 mb-10">
@@ -39,7 +40,11 @@
 	</div>
 	<br />
 	<div class="mt-1 grid gap-4">
-		<img alt="main" class="h-auto max-w-full rounded-lg" src={`/api/pics/${id}/0?refresh=${Math.random()}`} />
+		<img
+			alt="main"
+			class="h-auto max-w-full rounded-lg"
+			src={`/api/pics/${id}/0?refresh=${Math.random()}`}
+		/>
 		<div class="grid grid-cols-4 gap-4">
 			{#each Array(4) as _, i}
 				<img

@@ -46,7 +46,6 @@ export class ConnectionRepository {
 					.all(id);
 				resolve(result.map((row) => row.liker_id));
 			} catch (e) {
-				console.log(e);
 				reject(new ConnectionRepositoryError('Failed to fetch users who liked user'));
 			}
 		});

@@ -15,7 +15,6 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
 		tags: [faker.lorem.word(), faker.lorem.word()],
-		pictures: [null, null, null, null, null],
 		uploadedPictures: [],
 		...overrides
 	};
@@ -35,7 +34,7 @@ describe('UserRepository', () => {
 	itWithFixtures('should be able to set user profile', async ({ userRepository, savedUser }) => {
 		const userProfile = anyUserProfile();
 
-		await userRepository.upsertPersonalInfo(savedUser.id, userProfile);
+		await userRepository.upsertProfileInfo(savedUser.id, userProfile);
 
 		const found = await userRepository.profileInfoFor(savedUser.id);
 		// ignoring the image properties that are tested in the imageRepository
@@ -55,10 +54,10 @@ describe('UserRepository', () => {
 		const userProfile = anyUserProfile();
 		const user = anyUser({ profileIsSetup: true });
 		await userRepository.createUser(user, faker.internet.password());
-		await userRepository.upsertPersonalInfo(user.id, userProfile);
+		await userRepository.upsertProfileInfo(user.id, userProfile);
 
 		userProfile.biography = 'I am a new person';
-		await userRepository.upsertPersonalInfo(user.id, userProfile);
+		await userRepository.upsertProfileInfo(user.id, userProfile);
 
 		const found = await userRepository.profileInfoFor(user.id);
 
@@ -81,7 +80,7 @@ describe('UserRepository', () => {
 		await userRepository.createUser(user, faker.internet.password());
 
 		userProfile.tags = ['tag1000'];
-		await userRepository.upsertPersonalInfo(user.id, userProfile);
+		await userRepository.upsertProfileInfo(user.id, userProfile);
 
 		const found = await userRepository.profileInfoFor(user.id);
 		// ignoring the image properties that are tested in the imageRepository
@@ -107,7 +106,7 @@ describe('UserRepository', () => {
 			expect(found.profileIsSetup).toBe(false);
 
 			const userProfile = anyUserProfile();
-			await userRepository.upsertPersonalInfo(user.id, userProfile);
+			await userRepository.upsertProfileInfo(user.id, userProfile);
 
 			found = (await userRepository.user(user.id)) as User;
 			expect(found.profileIsSetup).toBe(true);
@@ -121,7 +120,7 @@ describe('UserRepository', () => {
 			const users = await savedUserFactory(3, {});
 			const thisUser = users[0];
 			const others = users.slice(1);
-			others.forEach(async (user) => await userRepository.upsertPersonalInfo(user.id, profile));
+			others.forEach(async (user) => await userRepository.upsertProfileInfo(user.id, profile));
 
 			const found = await userRepository.allOtherUsers(thisUser.id);
 
