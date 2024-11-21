@@ -111,13 +111,12 @@ class UserRepository {
 						`
 					)
 					.get(id);
-				const pictures: Array<string> = this.imageRepo.allImageIdOnly(id);
+				const pictures = this.imageRepo.listImages(id);
 				if (!result) {
 					resolve(null);
 				} else {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
 					camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
-					camelCaseObject.pictures_filenames = pictures;
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
@@ -166,13 +165,9 @@ class UserRepository {
 					});
 				});
 				transaction(id, info);
-
 				const inserted_filename: Array<string | null> = [];
 				resolve(inserted_filename);
 			} catch (e) {
-				if (e instanceof SqliteError) {
-					reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));
-				}
 				reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));
 			}
 		});
@@ -213,7 +208,7 @@ class UserRepository {
 				if (!result) {
 					resolve(null);
 				}
-				const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key)) as any;
+				const camelCaseObject = _.mapKeys(result, (__, key) => _.camelCase(key)) as any;
 				camelCaseObject.profileIsSetup = camelCaseObject.profileIsSetup === 0 ? false : true;
 				resolve(camelCaseObject as User);
 			} catch (e) {
@@ -334,18 +329,19 @@ class UserRepository {
 		}
 	}
 
-	public async deleteUserImage(picture_id: string) {
+	public async deleteUserImage(userId: string, order: number): Promise<void>{	
 		try {
-			const res = this.db
-				.prepare<string>('DELETE FROM profile_pictures WHERE id = ?')
-				.run(picture_id);
-			if (res.changes) {
-				await this.imageRepo.deleteImageById(picture_id);
-			} else {
-				throw new Error('picture_id is not in the database');
-			}
+			await this.imageRepo.deleteImage(userId, order);
 		} catch (error) {
-			throw new UserRepositoryError('Error occurs trying to delete image: ' + picture_id, error);
+			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
+		}
+	}
+
+	public async userImage(userId: string, order: number): Promise<Buffer | null> {	
+		try {
+			return await this.imageRepo.image(userId, order);
+		} catch (error) {
+			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
 		}
 	}
 }
