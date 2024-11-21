@@ -2,8 +2,8 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
 	import type { PageData } from './$types';
-
 	import { Icon, Trash } from 'svelte-hero-icons';
+	import addToast from '$lib/toast/toastStore';
 
 	export let data: PageData;
 
@@ -18,7 +18,7 @@
 		document.getElementById(`pictures-${idx}`)?.click();
 	}
 
-	const refreshKeys = [0, 1, 2, 3, 4];
+	const refreshKeys = [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()];
 
 	async function uploadPicture(
 		idx: number,
@@ -40,11 +40,13 @@
 				body: formData
 			});
 			if (response.ok) {
-				refreshKeys[idx]++;
+				refreshKeys[idx] = Math.random();
 			} else {
+				addToast({ message: 'Something went wrong uploading picture', type: 'error' });
 				console.error('Failed to upload file:', response.statusText);
 			}
 		} catch (error) {
+			addToast({ message: 'Something went wrong uploading picture', type: 'error' });
 			console.error('Error uploading file:', error);
 		}
 	}
@@ -57,11 +59,13 @@
 				method: 'DELETE'
 			});
 			if (result.ok) {
-				refreshKeys[index]++;
+				refreshKeys[index] = Math.random();
 			} else {
+				addToast({ message: 'Something went wrong deleting picture', type: 'error' });
 				console.error('Failed to delete picture:', result.statusText);
 			}
 		} catch (e) {
+			addToast({ message: 'Something went wrong deleting picture', type: 'error' });
 			console.error('Error deleting picture:', e);
 		}
 	}
