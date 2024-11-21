@@ -47,4 +47,9 @@ describe('ImageRepository', () => {
 
 		expect(found).toStrictEqual([0]);
 	});
+
+
+	itWithFixtures('Does not error if deleting non existing image', async ({ savedUser, imageRepository, }) => {
+		const found = await imageRepository.deleteImage(savedUser.id, 0);
+	});
 });

@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import type { Database } from 'better-sqlite3';
 import { generateIdFromEntropySize } from 'lucia';
 import { TimeSpan, createDate } from 'oslo';
+import type { Transporter } from 'nodemailer';
 import type { ToSnakeCase } from './commonTypes';
 
 class EmailRepositoryError extends Error {
@@ -21,25 +22,40 @@ interface EmailSession {
 	email: string;
 }
 
-class EmailRepository {
-	transporter;
-	constructor(private db: Database) {
-		this.transporter = nodemailer.createTransport({
-			host: 'smtp.gmail.com',
-			port: 587,
-			secure: false,
-			auth: {
-				user: GOOGLE_EMAIL,
-				pass: APP_PASSWORD
-			}
-		});
-		this.transporter.verify(function (error: any, success: any) {
-			if (error) {
-				console.error(error);
-				throw new EmailRepositoryError('Error occur trying to instaciate mail service', error);
-			}
-		});
+// singleton instance
+let transporter: Transporter | null = null;
+
+export function getTransporter(): Transporter {
+	if (!transporter) {
+		transporter = createTransporter();
 	}
+	return transporter;
+}
+
+function createTransporter(): Transporter {
+	const transporter = nodemailer.createTransport({
+		host: 'smtp.gmail.com',
+		port: 587,
+		secure: false,
+		auth: {
+			user: GOOGLE_EMAIL,
+			pass: APP_PASSWORD
+		}
+	});
+	transporter.verify(function (error: any, success: any) {
+		if (error) {
+			console.error(error);
+			throw new EmailRepositoryError('Error occur trying to instaciate mail service', error);
+		}
+	});
+	return transporter;
+}
+
+class EmailRepository {
+	constructor(
+		private db: Database,
+		private transporter: Transporter
+	) {}
 
 	public async verificationLinkTo(email: string, link: string) {
 		const body = `

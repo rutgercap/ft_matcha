@@ -8,14 +8,6 @@
 	export let data: PageData;
 
 	let { profileInfo, isCurrentUserProfile } = data;
-
-	let all_url = [
-		'/api/pics/' + profileInfo.uploadedPictures[0] + `?t=${Date.now()}`,
-		'/api/pics/' + profileInfo.uploadedPictures[1] + `?t=${Date.now()}`,
-		'/api/pics/' + profileInfo.uploadedPictures[2] + `?t=${Date.now()}`,
-		'/api/pics/' + profileInfo.uploadedPictures[3] + `?t=${Date.now()}`,
-		'/api/pics/' + profileInfo.uploadedPictures[4] + `?t=${Date.now()}`
-	];
 </script>
 
 <div class="max-w-3xl md:mx-auto mx-4 mb-10">
@@ -38,22 +30,11 @@
 	</div>
 	<br />
 	<div class="mt-1 grid gap-4">
-		<div>
-			<img class="h-auto max-w-full rounded-lg" src={all_url[0]} alt="" />
-		</div>
+			<img alt="main" class="h-auto max-w-full rounded-lg" src={`/api/pics/${id}/0`}/>
 		<div class="grid grid-cols-4 gap-4">
-			<div>
-				<img class="h-auto max-w-full rounded-lg" src={all_url[1]} alt="" />
-			</div>
-			<div>
-				<img class="h-auto max-w-full rounded-lg" src={all_url[2]} alt="" />
-			</div>
-			<div>
-				<img class="h-auto max-w-full rounded-lg" src={all_url[3]} alt="" />
-			</div>
-			<div>
-				<img class="h-auto max-w-full rounded-lg" src={all_url[4]} alt="" />
-			</div>
+			{#each Array(4) as _, i}
+					<img alt={`${i + 1}`} class="h-auto max-w-full rounded-lg" src={`/api/pics/${id}/${i + 1}`}/>
+			{/each}
 		</div>
 	</div>
 	<div class="mt-6 border-t border-gray-100">

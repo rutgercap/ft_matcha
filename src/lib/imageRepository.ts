@@ -79,11 +79,14 @@ class ImageRepository {
 
 	public async deleteImage(user_id: string, order: number) {
 		try {
-			this.db
+			const result = this.db
 				.prepare<
 					[string, number]
 				>('DELETE FROM profile_pictures WHERE user_id = ? AND image_order = ?')
 				.run(user_id, order);
+			if (result.changes === 0) {
+				return;
+			}
 			fs.unlinkSync(this.destination + `/${user_id}_${order}.jpg`);
 		} catch (error) {
 			console.log(error);
