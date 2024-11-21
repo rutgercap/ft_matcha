@@ -47,13 +47,15 @@ export class ProfileVisitRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const rows = result.all(userId);
-				resolve(rows.map((row) => {
-					const date = new Date(row.visit_time);
-					return {
-						visitorId: row.visitor_id,
-						visitTime: date
-					} as ProfileVisit;
-				}));
+				resolve(
+					rows.map((row) => {
+						const date = new Date(row.visit_time);
+						return {
+							visitorId: row.visitor_id,
+							visitTime: date
+						} as ProfileVisit;
+					})
+				);
 			} catch (e) {
 				reject(
 					new ProfileVisitRepositoryError(

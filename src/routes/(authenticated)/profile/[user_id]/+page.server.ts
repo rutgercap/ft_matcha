@@ -3,7 +3,6 @@ import type { UserRepository } from '$lib/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
 import type { PageServerLoad } from './$types';
 
-
 async function personalInfoFor(
 	userId: string,
 	userRepository: UserRepository
@@ -18,10 +17,13 @@ async function personalInfoFor(
 	}
 }
 
-export const load: PageServerLoad = async ({ locals: { user, userRepository, profileVisitRepository}, params }) => {
+export const load: PageServerLoad = async ({
+	locals: { user, userRepository, profileVisitRepository },
+	params
+}) => {
 	if (!user) {
 		throw redirect(401, '/login');
-	}	
+	}
 	const id = params.user_id;
 	const maybeProfileInfo = await personalInfoFor(id, userRepository);
 	if (!maybeProfileInfo) {
@@ -37,6 +39,6 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository, pro
 	}
 	return {
 		profileInfo: maybeProfileInfo,
-		isCurrentUserProfile,
+		isCurrentUserProfile
 	};
 };

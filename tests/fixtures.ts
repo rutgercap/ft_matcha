@@ -62,10 +62,12 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	},
 	savedUserFactory: async ({ userRepository }, use) => {
 		const createUser = async (n: number, overrides: Partial<User> = {}) => {
-			return Promise.all(Array.from({ length: n }, async (_, i) => {
-				const user = anyUser(overrides);
-				return await userRepository.createUser(user, 'password');
-			}));
+			return Promise.all(
+				Array.from({ length: n }, async (_, i) => {
+					const user = anyUser(overrides);
+					return await userRepository.createUser(user, 'password');
+				})
+			);
 		};
 		use(createUser);
 	},
@@ -79,5 +81,5 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	},
 	connectionRepository: async ({ db }, use) => {
 		use(new ConnectionRepository(db));
-	}	
+	}
 });
