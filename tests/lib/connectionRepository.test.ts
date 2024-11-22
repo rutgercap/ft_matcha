@@ -6,7 +6,7 @@ describe('ConnectionRepository', () => {
 	itWithFixtures(
 		'Should be able to like a user',
 		async ({ connectionRepository, savedUserFactory }) => {
-			const [currentUser, targetUser]= await savedUserFactory(2, {});
+			const [currentUser, targetUser] = await savedUserFactory(2, {});
 
 			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
 
@@ -20,7 +20,7 @@ describe('ConnectionRepository', () => {
 	itWithFixtures(
 		'One sided like should not result in match',
 		async ({ connectionRepository, savedUserFactory }) => {
-			const [currentUser, targetUser]= await savedUserFactory(2, {});
+			const [currentUser, targetUser] = await savedUserFactory(2, {});
 
 			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
 
@@ -32,7 +32,7 @@ describe('ConnectionRepository', () => {
 	itWithFixtures(
 		'Should be able to unlike a user',
 		async ({ connectionRepository, savedUserFactory }) => {
-			const [currentUser, targetUser]= await savedUserFactory(2, {});
+			const [currentUser, targetUser] = await savedUserFactory(2, {});
 
 			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
 			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
@@ -47,7 +47,7 @@ describe('ConnectionRepository', () => {
 	itWithFixtures(
 		'Should be able to fetch if user is liked by another user',
 		async ({ connectionRepository, savedUserFactory }) => {
-			const [currentUser, targetUser]= await savedUserFactory(2, {});
+			const [currentUser, targetUser] = await savedUserFactory(2, {});
 
 			const before = await connectionRepository.isLikedBy(currentUser.id, targetUser.id);
 			expect(before).toBe(false);
@@ -61,7 +61,7 @@ describe('ConnectionRepository', () => {
 	itWithFixtures(
 		'Two users liking each other should result in match',
 		async ({ connectionRepository, savedUserFactory }) => {
-			const [currentUser, targetUser]= await savedUserFactory(2, {});
+			const [currentUser, targetUser] = await savedUserFactory(2, {});
 
 			const before = await connectionRepository.matchStatus(currentUser.id, targetUser.id);
 			expect(before).toBeNull();
@@ -98,7 +98,7 @@ describe('ConnectionRepository', () => {
 	itWithFixtures(
 		'matches for user does not return unmatched matches',
 		async ({ connectionRepository, savedUserFactory }) => {
-			const [currentUser, targetUser ]= await savedUserFactory(2, {});
+			const [currentUser, targetUser] = await savedUserFactory(2, {});
 			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
 			await connectionRepository.flipLikeUser(targetUser.id, currentUser.id);
 			await connectionRepository.flipLikeUser(targetUser.id, currentUser.id);

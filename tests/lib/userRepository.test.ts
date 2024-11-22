@@ -38,7 +38,7 @@ describe('UserRepository', () => {
 
 		const found = await userRepository.profileInfoFor(savedUser.id);
 
-		const {userId: id , ...rest} = found!;
+		const { userId: id, ...rest } = found!;
 		expect(rest).toEqual(userProfile);
 	});
 
