@@ -33,7 +33,7 @@ async function isLikedByCurrentUser(
 
 export const load: PageServerLoad = async ({
 	locals: { user: currentUser, userRepository, profileVisitRepository, connectionRepository },
-	params,
+	params
 }) => {
 	if (!currentUser) {
 		throw redirect(401, '/login');
@@ -51,7 +51,11 @@ export const load: PageServerLoad = async ({
 		isCurrentUserProfile = true;
 	} else {
 		profileVisitRepository.addVisit(currentUser.id, profileId);
-		likedByCurrentUser = await isLikedByCurrentUser(currentUser.id, profileId, connectionRepository);
+		likedByCurrentUser = await isLikedByCurrentUser(
+			currentUser.id,
+			profileId,
+			connectionRepository
+		);
 	}
 	return {
 		profileInfo: maybeProfileInfo,

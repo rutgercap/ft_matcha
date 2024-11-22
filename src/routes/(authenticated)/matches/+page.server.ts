@@ -2,7 +2,8 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({
-	locals: { user, connectionRepository, userRepository }, depends
+	locals: { user, connectionRepository, userRepository },
+	depends
 }) => {
 	depends('app:matches');
 	if (!user) {
@@ -19,6 +20,6 @@ export const load: PageServerLoad = async ({
 	return {
 		matchPreviews,
 		likedProfilePreviews,
-		likedByProfilePreviews,
+		likedByProfilePreviews
 	};
 };
