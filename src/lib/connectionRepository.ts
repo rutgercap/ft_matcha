@@ -11,7 +11,7 @@ export class ConnectionRepositoryError extends Error {
 export class ConnectionRepository {
 	constructor(private db: Database) {}
 
-	public async flipLikeUser(userId: string, likedUserId: string): Promise<boolean> {
+	public async flipLikeUser(userId: string, targetId: string): Promise<boolean> {
 		const didUserAlreadyLike = this.db.prepare<[string, string], { id: number }>(
 			'SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?'
 		);
@@ -33,25 +33,24 @@ export class ConnectionRepository {
 		const deleteLike = this.db.prepare<number>('DELETE FROM likes WHERE id = ?');
 		return new Promise((resolve, reject) => {
 			try {
-				const transaction = this.db.transaction((userId: string, likedUserId: string) => {
-					const maybeLikeId = didUserAlreadyLike.get(userId, likedUserId);
+				const transaction = this.db.transaction((userId: string, targetId: string) => {
+					const maybeLikeId = didUserAlreadyLike.get(userId, targetId);
 					if (!maybeLikeId) {
-						insertLike.run(userId, likedUserId);
-						const otherUserLike = didOtherUserLike.get(likedUserId, userId);
+						insertLike.run(userId, targetId);
+						const otherUserLike = didOtherUserLike.get(targetId, userId);
 						if (otherUserLike) {
-							insertMatch.run(userId, likedUserId);
+							insertMatch.run(userId, targetId);
 						}
 						return true;
 					} else {
 						deleteLike.run(maybeLikeId.id);
-						setUnmatched.run(userId, likedUserId, likedUserId, userId);
+						setUnmatched.run(userId, targetId, targetId, userId);
 						return false;
 					}
 				});
-				const isLiked = transaction(userId, likedUserId);
+				const isLiked = transaction(userId, targetId);
 				resolve(isLiked);
 			} catch (e) {
-				console.log(e);
 				reject(new ConnectionRepositoryError('Failed to like user'));
 			}
 		});
@@ -70,7 +69,7 @@ export class ConnectionRepository {
 		});
 	}
 
-	public async isLikedBy(targetId: string, userId: string): Promise<boolean> {
+	public async isLikedBy(userId: string, targetId: string): Promise<boolean> {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
@@ -120,7 +119,6 @@ export class ConnectionRepository {
 					status: result!.status as 'MATCHED' | 'BLOCKED'
 				});
 			} catch (e) {
-				console.error(e);
 				reject(new ConnectionRepositoryError('Failed to fetch match status'));
 			}
 		});
@@ -133,9 +131,8 @@ export class ConnectionRepository {
 					.prepare<
 						[string, string],
 						{ status: string; user_id_1: string; user_id_2: string }
-					>(`SELECT status, user_id_1, user_id_2 FROM connections WHERE user_id_1 = ? OR user_id_2 = ? AND status = 'MATCHED'`)
+					>(`SELECT status, user_id_1, user_id_2 FROM connections WHERE (user_id_1 = ? OR user_id_2 = ?) AND status = 'MATCHED'`)
 					.all(id, id);
-				console.log(result);
 				const mapped = result.map((row) => {
 					if (row.user_id_1 === id) {
 						return {
@@ -152,7 +149,6 @@ export class ConnectionRepository {
 				});
 				resolve(mapped);
 			} catch (e) {
-				console.error(e);
 				reject(new ConnectionRepositoryError('Failed to fetch matches'));
 			}
 		});
