@@ -135,7 +135,7 @@ export class ConnectionRepository {
 						{ status: string; user_id_1: string; user_id_2: string }
 					>(`SELECT status, user_id_1, user_id_2 FROM connections WHERE user_id_1 = ? OR user_id_2 = ? AND status = 'MATCHED'`)
 					.all(id, id);
-					console.log(result);
+				console.log(result);
 				const mapped = result.map((row) => {
 					if (row.user_id_1 === id) {
 						return {

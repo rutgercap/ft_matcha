@@ -1,12 +1,17 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../visits/$types';
 
-export const load: PageServerLoad = async ({ locals: { user, profileVisitRepository } }) => {
+export const load: PageServerLoad = async ({
+	locals: { user, connectionRepository, userRepository }
+}) => {
 	if (!user) {
 		throw redirect(401, '/login');
 	}
-	const profileVisits = await profileVisitRepository.profileVisitsForUser(user.id);
+	const matches = await connectionRepository.matchesForUser(user.id);
+	const profilePreviews = userRepository.profilePreviews(matches.map((match) => match.userTwo));
+
 	return {
-		profileVisits
+		matches,
+		profilePreviews
 	};
 };
