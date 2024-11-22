@@ -60,7 +60,7 @@ describe('ImageRepository', () => {
 	itWithFixtures(
 		'Does not error if deleting non existing image',
 		async ({ savedUser, imageRepository }) => {
-			const found = await imageRepository.deleteImage(savedUser.id, 0);
+			await imageRepository.deleteImage(savedUser.id, 0);
 		}
 	);
 });

@@ -63,7 +63,7 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	savedUserFactory: async ({ userRepository }, use) => {
 		const createUser = async (n: number, overrides: Partial<User> = {}) => {
 			return Promise.all(
-				Array.from({ length: n }, async (_, i) => {
+				Array.from({ length: n }, async () => {
 					const user = anyUser(overrides);
 					return await userRepository.createUser(user, 'password');
 				})
