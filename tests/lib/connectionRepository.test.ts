@@ -84,13 +84,17 @@ describe('ConnectionRepository', () => {
 
 			const matches = await connectionRepository.matchesForUser(users[0].id);
 
-			const expected: MatchStatus = {userOne: users[0].id, userTwo: users[1].id, status: 'MATCHED'};
+			const expected: MatchStatus = {
+				userOne: users[0].id,
+				userTwo: users[1].id,
+				status: 'MATCHED'
+			};
 			expect(matches).toStrictEqual([expected]);
 		}
 	);
 
 	itWithFixtures(
-		'unliking a match should remove the match',
+		'unliking a user should remove the match',
 		async ({ connectionRepository, savedUserFactory }) => {
 			const users = await savedUserFactory(2, {});
 

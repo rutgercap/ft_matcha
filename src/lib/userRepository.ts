@@ -13,7 +13,13 @@ type UserWithPassword = User & { passwordHash: string };
 
 type UserWithoutProfileSetup = Omit<User, 'profileIsSetup' | 'emailIsSetup'>;
 
-type ProfileWithoutPictures = Omit<ProfileInfo, 'uploadedPictures'>;
+type ProfileWithoutPicturesAndId = Omit<ProfileInfo, 'uploadedPictures' | 'userId'>;
+
+type ProfilePreview = {
+	userId: string;
+	firstName: string;
+	lastName: string;
+};
 
 class UserRepositoryError extends Error {
 	exception: unknown;
@@ -99,6 +105,30 @@ class UserRepository {
 		});
 	}
 
+	async profilePreviews(ids: string[]): Promise<ProfilePreview[]> {
+		const getProfilePreview = this.db.prepare<string, ToSnakeCase<ProfilePreview>>(
+			`SELECT user_id, first_name, last_name 
+			FROM profile_info 
+			WHERE user_id = ?`
+		);
+		return new Promise((resolve, reject) => {
+			try {
+				const transaction = this.db.transaction((ids: string[]) => {
+					return ids.map((id) => getProfilePreview.get(id)).filter((result) => result != null);
+				});
+				const result = transaction(ids);
+				const mapped = result.map((res) => {
+					const camelCaseObject = _.mapKeys(res, (value, key) => _.camelCase(key));
+					return camelCaseObject as ProfilePreview;
+				});
+				resolve(mapped);
+			} catch (e) {
+				console.log(e);
+				reject(new UserRepositoryError('Something went wrong fetching profile previews', e));
+			}
+		});
+	}
+
 	async profileInfoFor(id: string): Promise<ProfileInfo | null> {
 		return new Promise((resolve, reject) => {
 			try {
@@ -128,7 +158,10 @@ class UserRepository {
 		});
 	}
 
-	async upsertProfileInfo(id: string, info: ProfileWithoutPictures): Promise<Array<string | null>> {
+	async upsertProfileInfo(
+		id: string,
+		info: ProfileWithoutPicturesAndId
+	): Promise<Array<string | null>> {
 		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
 			`
 				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography)
@@ -151,7 +184,7 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction(
-					(id: string, profileTest: ProfileWithoutPictures) => {
+					(id: string, profileTest: ProfileWithoutPicturesAndId) => {
 						insertIntoProfile.run(
 							id,
 							profileTest.firstName,
@@ -374,4 +407,9 @@ class UserRepository {
 }
 
 export { UserRepository, UserRepositoryError, DuplicateEntryError };
-export type { UserWithPassword, UserWithoutProfileSetup };
+export type {
+	UserWithPassword,
+	UserWithoutProfileSetup,
+	ProfileWithoutPicturesAndId,
+	ProfilePreview
+};

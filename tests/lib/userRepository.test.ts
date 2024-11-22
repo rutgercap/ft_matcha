@@ -1,4 +1,5 @@
 import { DuplicateEntryError } from '$lib/userRepository';
+import type { ProfileWithoutPicturesAndId } from '$lib/userRepository';
 import { describe, expect } from 'vitest';
 import { faker } from '@faker-js/faker';
 import { type User } from 'lucia';
@@ -7,7 +8,7 @@ import { itWithFixtures } from '../fixtures';
 import { Gender, SexualPreference, type ProfileInfo } from '$lib/domain/profile';
 import { anyUser } from '../testHelpers';
 
-function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
+function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileWithoutPicturesAndId {
 	return {
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
@@ -15,7 +16,6 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
 		tags: [faker.lorem.word(), faker.lorem.word()],
-		uploadedPictures: [],
 		...overrides
 	};
 }
@@ -37,17 +37,9 @@ describe('UserRepository', () => {
 		await userRepository.upsertProfileInfo(savedUser.id, userProfile);
 
 		const found = await userRepository.profileInfoFor(savedUser.id);
-		// ignoring the image properties that are tested in the imageRepository
-		expect(found).toEqual(
-			expect.objectContaining({
-				firstName: userProfile.firstName,
-				lastName: userProfile.lastName,
-				gender: userProfile.gender,
-				sexualPreference: userProfile.sexualPreference,
-				biography: userProfile.biography,
-				tags: userProfile.tags
-			})
-		);
+
+		const {userId: id , ...rest} = found!;
+		expect(rest).toEqual(userProfile);
 	});
 
 	itWithFixtures('should be able to update user profile', async ({ userRepository }) => {
@@ -128,6 +120,23 @@ describe('UserRepository', () => {
 			expect(found).toEqual(expect.arrayContaining(others.map((user) => user.id)));
 		}
 	);
+
+	itWithFixtures('Can get profile previews', async ({ userRepository, savedUserFactory }) => {
+		const profile = anyUserProfile();
+		const users = await savedUserFactory(3, {});
+		users.forEach((user) => userRepository.upsertProfileInfo(user.id, profile));
+
+		const preview = await userRepository.profilePreviews(users.map((user) => user.id));
+
+		const expected = users.map((user) => {
+			return {
+				userId: user.id,
+				firstName: profile.firstName,
+				lastName: profile.lastName
+			};
+		});
+		expect(preview).toStrictEqual(expected);
+	});
 
 	itWithFixtures('Should be able to fetch user by username', async ({ userRepository }) => {
 		const password = faker.internet.password();

@@ -20,6 +20,7 @@ enum SexualPreference {
 }
 
 type ProfileInfo = {
+	userId: string;
 	firstName: string;
 	lastName: string;
 	gender: Gender;
