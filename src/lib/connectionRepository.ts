@@ -50,7 +50,7 @@ export class ConnectionRepository {
 				});
 				const isLiked = transaction(userId, targetId);
 				resolve(isLiked);
-			} catch (e) {
+			} catch {
 				reject(new ConnectionRepositoryError('Failed to like user'));
 			}
 		});
@@ -63,7 +63,7 @@ export class ConnectionRepository {
 					.prepare<string, { liker_id: string }>('SELECT liker_id FROM likes WHERE liked_id = ?')
 					.all(id);
 				resolve(result.map((row) => row.liker_id));
-			} catch (e) {
+			} catch {
 				reject(new ConnectionRepositoryError('Failed to fetch users who liked user'));
 			}
 		});
@@ -82,7 +82,7 @@ export class ConnectionRepository {
 					resolve(false);
 				}
 				resolve(true);
-			} catch (e) {
+			} catch {
 				reject(new ConnectionRepositoryError('Failed to check if user is liked by another user'));
 			}
 		});
@@ -95,7 +95,7 @@ export class ConnectionRepository {
 					.prepare<string, { liked_id: string }>('SELECT liked_id FROM likes WHERE liker_id = ?')
 					.all(id);
 				resolve(result.map((row) => row.liked_id));
-			} catch (e) {
+			} catch {
 				reject(new ConnectionRepositoryError('Failed to fetch likes'));
 			}
 		});
@@ -118,7 +118,7 @@ export class ConnectionRepository {
 					userTwo: otherUserId,
 					status: result!.status as 'MATCHED' | 'BLOCKED'
 				});
-			} catch (e) {
+			} catch {
 				reject(new ConnectionRepositoryError('Failed to fetch match status'));
 			}
 		});
@@ -148,7 +148,7 @@ export class ConnectionRepository {
 					};
 				});
 				resolve(mapped);
-			} catch (e) {
+			} catch {
 				reject(new ConnectionRepositoryError('Failed to fetch matches'));
 			}
 		});

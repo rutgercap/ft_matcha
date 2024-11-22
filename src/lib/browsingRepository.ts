@@ -1,4 +1,3 @@
-import type { ReducedProfileInfo } from './domain/profile';
 import type { Database } from 'better-sqlite3';
 
 class BrowsingRepositoryError extends Error {

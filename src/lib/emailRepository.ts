@@ -42,7 +42,7 @@ function createTransporter(): Transporter {
 			pass: APP_PASSWORD
 		}
 	});
-	transporter.verify(function (error: any, success: any) {
+	transporter.verify(function (error: any) {
 		if (error) {
 			console.error(error);
 			throw new EmailRepositoryError('Error occur trying to instaciate mail service', error);

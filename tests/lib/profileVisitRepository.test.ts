@@ -5,7 +5,7 @@ describe('ProfileVisitRepository', () => {
 	itWithFixtures(
 		'should be able to add a visit',
 		async ({ profileVisitRepository, savedUserFactory, expect }) => {
-			const users = await savedUserFactory(2);
+			const users = await savedUserFactory(2, {});
 
 			await profileVisitRepository.addVisit(users[0].id, users[1].id);
 
@@ -18,8 +18,8 @@ describe('ProfileVisitRepository', () => {
 
 	itWithFixtures(
 		'Adding page visit a second time should not error',
-		async ({ profileVisitRepository, savedUserFactory, expect }) => {
-			const users = await savedUserFactory(2);
+		async ({ profileVisitRepository, savedUserFactory }) => {
+			const users = await savedUserFactory(2, {});
 
 			await profileVisitRepository.addVisit(users[0].id, users[1].id);
 			await profileVisitRepository.addVisit(users[0].id, users[1].id);

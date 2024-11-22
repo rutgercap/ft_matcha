@@ -37,7 +37,8 @@ describe('UserRepository', () => {
 
 		const found = await userRepository.profileInfoFor(savedUser.id);
 
-		const { userId: id, ...rest } = found!;
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { userId, ...rest } = found!;
 		expect(rest).toEqual(userProfile);
 	});
 

@@ -14,7 +14,7 @@
 			<p class="text-sm text-gray-500">No matches yet. Loser!</p>
 		{:else}
 			<ul role="list" class="divide-y divide-gray-100">
-				{#each matchPreviews as match, i}
+				{#each matchPreviews as match}
 					<li class="flex items-center border px-4 rounded-xl justify-between gap-x-6 py-5">
 						<div class="flex min-w-0 gap-x-4">
 							<img
@@ -44,7 +44,7 @@
 			<p class="text-sm text-gray-500">Nobody likes you! Loser.</p>
 		{:else}
 			<ul role="list" class="divide-y divide-gray-100">
-				{#each likedByProfilePreviews as profile, i}
+				{#each likedByProfilePreviews as profile}
 					<li class="flex items-center border px-4 rounded-xl justify-between gap-x-6 py-5">
 						<div class="flex min-w-0 gap-x-4">
 							<img
@@ -69,7 +69,7 @@
 			<p class="text-sm text-gray-500">You didn't like anyone yet.</p>
 		{:else}
 			<ul role="list" class="divide-y divide-gray-100">
-				{#each likedProfilePreviews as profile, i}
+				{#each likedProfilePreviews as profile}
 					<li class="flex items-center border px-4 rounded-xl justify-between gap-x-6 py-5">
 						<div class="flex min-w-0 gap-x-4">
 							<img
