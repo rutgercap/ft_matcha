@@ -123,7 +123,6 @@ class UserRepository {
 				});
 				resolve(mapped);
 			} catch (e) {
-				console.log(e);
 				reject(new UserRepositoryError('Something went wrong fetching profile previews', e));
 			}
 		});

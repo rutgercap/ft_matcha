@@ -23,7 +23,7 @@ async function isLikedByCurrentUser(
 	connectionRepository: ConnectionRepository
 ): Promise<boolean> {
 	try {
-		return await connectionRepository.isLikedBy(targetId, currentUserId);
+		return await connectionRepository.isLikedBy(currentUserId, targetId);
 	} catch (e) {
 		error(500, {
 			message: 'Something went wrong.'
@@ -32,14 +32,14 @@ async function isLikedByCurrentUser(
 }
 
 export const load: PageServerLoad = async ({
-	locals: { user, userRepository, profileVisitRepository, connectionRepository },
-	params
+	locals: { user: currentUser, userRepository, profileVisitRepository, connectionRepository },
+	params,
 }) => {
-	if (!user) {
+	if (!currentUser) {
 		throw redirect(401, '/login');
 	}
-	const id = params.user_id;
-	const maybeProfileInfo = await profileInfoFor(id, userRepository);
+	const profileId = params.user_id;
+	const maybeProfileInfo = await profileInfoFor(profileId, userRepository);
 	if (!maybeProfileInfo) {
 		throw error(404, {
 			message: 'Not found'
@@ -47,11 +47,11 @@ export const load: PageServerLoad = async ({
 	}
 	let isCurrentUserProfile = false;
 	let likedByCurrentUser = false;
-	if (user.id === id) {
+	if (currentUser.id === profileId) {
 		isCurrentUserProfile = true;
 	} else {
-		profileVisitRepository.addVisit(user.id, id);
-		likedByCurrentUser = await isLikedByCurrentUser(id, user.id, connectionRepository);
+		profileVisitRepository.addVisit(currentUser.id, profileId);
+		likedByCurrentUser = await isLikedByCurrentUser(currentUser.id, profileId, connectionRepository);
 	}
 	return {
 		profileInfo: maybeProfileInfo,

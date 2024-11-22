@@ -1,15 +1,15 @@
 import { error } from '@sveltejs/kit';
 
-export async function POST({ params, locals: { user, connectionRepository } }) {
-	const user_id = params.user_id;
-	if (!user) {
+export async function POST({ params, locals: { user: currentUser, connectionRepository } }) {
+	const targetId = params.user_id;
+	if (!currentUser) {
 		throw error(403, 'Forbidden');
 	}
-	if (user_id === user.id) {
+	if (targetId === currentUser.id) {
 		throw error(400, 'Cannot like self');
 	}
 	try {
-		const isLiked = await connectionRepository.flipLikeUser(user.id, user_id);
+		const isLiked = await connectionRepository.flipLikeUser(currentUser.id, targetId);
 		return new Response(JSON.stringify({ isLiked }), { status: 200 });
 	} catch (error) {
 		console.error(error);

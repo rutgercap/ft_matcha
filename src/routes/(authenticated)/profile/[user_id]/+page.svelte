@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { Heart, Icon } from 'svelte-hero-icons';
 	import addToast from '$lib/toast/toastStore';
+	import { invalidate } from '$app/navigation';
 
 	export let data: PageData;
 
@@ -18,6 +19,7 @@
 				method: 'POST'
 			});
 			if (response.ok) {
+				invalidate('app:matches');
 				const result: { isLiked: boolean } = await response.json();
 				likedByCurrentUser = result.isLiked;
 			}
