@@ -230,7 +230,7 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
-					SELECT u.username, p.biography, p.gender, pp.id
+					SELECT u.username, p.biography, p.gender, pp.id AS picture
 					FROM users AS u
 					INNER JOIN profile_info AS p ON u.id = p.user_id
 					INNER JOIN profile_pictures AS pp ON u.id = pp.user_id

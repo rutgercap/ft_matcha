@@ -17,6 +17,7 @@ export const actions: Actions = {
 		} else {
 			const verificationToken = emailRepository.createEmailVerificationToken(user.id, user.email);
 			const verificationLink = `${PUBLIC_BASE_URL}/api/email-verification/` + verificationToken;
+			console.log('In the resend email verif form: verification link: ', verificationLink)
 			const res = await emailRepository.verificationLinkTo(user.email, verificationLink);
 			return {
 				success: true,

@@ -35,6 +35,10 @@ type ReducedProfileInfo = {
 	biography: string;
 	gender: string;
 	picture: string;
+	age: number;
+    fameRate: number;
+    localisation: number;
+	mask: boolean;
 }
 
 function initials(profileInfo: ProfileInfo): string {
