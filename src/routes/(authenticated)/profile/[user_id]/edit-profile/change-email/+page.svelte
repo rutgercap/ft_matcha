@@ -5,12 +5,6 @@
 	export let data: PageData;
 
 	const { enhance, form, errors, constraints, message } = superForm(data.form);
-
-    console.log('In the front : ', form)
-    console.log('In the front : ', errors)
-    console.log('In the front : ', constraints)
-    console.log('In the front : ', message)
-
 </script>
 
 <div class="sm:mx-auto sm:w-full sm:max-w-sm">

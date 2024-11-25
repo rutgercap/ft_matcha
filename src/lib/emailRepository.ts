@@ -298,14 +298,13 @@ class EmailRepository {
 		}
 	}
 
-	public updateEmailIsSetup(userId: string, val: boolean) : RunResult {
+	public async updateEmailIsSetup(userId: string, val: boolean) {
 		try {
 			const tmp: number = val ? 1 : 0;
 			const updateProfileSet = this.db.prepare<[number, string]>(
 				'UPDATE users SET email_is_setup = ? WHERE id = ?'
 			);
 			const res = updateProfileSet.run(tmp, userId);
-			return res
 		} catch (error) {
 			console.log('console log error from updateEmailIsSetup', error);
 			throw new EmailRepositoryError(
