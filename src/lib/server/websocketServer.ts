@@ -6,12 +6,24 @@ let server: WebsocketServer | null = null;
 
 export class WebsocketServer {
 	private _server: Server;
-	connections: Map<string, ServerSocket> = new Map();
+	private connections: Map<string, ServerSocket> = new Map();
 	currentId = 0;
 
 	constructor(server: Server) {
 		this._server = server;
+		this.authMiddleWare();
 		this.saveConnections();
+	}
+
+	private authMiddleWare() {
+		this._server.use((socket, next) => {
+			const token = socket.handshake.auth.token;
+			if (!token) {
+				return next(new Error('Authentication error'));
+			}
+			console.log('token', token);
+			next();
+		});
 	}
 
 	private saveConnections() {

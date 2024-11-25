@@ -32,23 +32,4 @@ describe('NotificationService', () => {
 			expect(notificationClient.notifications()).toEqual([{ type: 'hello', message: 'world' }]);
 		}
 	);
-
-	itWithFixtures(
-		'Should not be able to connect if not authenticated',
-		async ({ clientSocket, notificationService, notificationClient }) => {
-			await waitUntilConnected(clientSocket);
-			await new Promise((resolve, reject) => {
-				notificationClient.subscribe((notification) => {
-					try {
-						expect(notification).toEqual({ type: 'hello', message: 'world' });
-						resolve(null);
-					} catch {
-						reject(new Error(`Received unexpected message: ${JSON.stringify(notification)}`));
-					}
-				});
-				notificationService.sendNotification('0', 'hello', 'world');
-			});
-			expect(notificationClient.notifications()).toEqual([{ type: 'hello', message: 'world' }]);
-		}
-	);
 });

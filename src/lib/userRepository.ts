@@ -300,7 +300,10 @@ class UserRepository {
 		}
 	}
 
-	public async createUser(user: UserWithoutProfileSetup, password: string): Promise<User> {
+	public async createUser(
+		user: UserWithoutProfileSetup,
+		password: string
+	): Promise<UserWithoutProfileSetup> {
 		const passwordHash = await hash(password, {
 			memoryCost: 19456,
 			timeCost: 2,
@@ -310,17 +313,18 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
-					.prepare<[string, string, string, string], ToSnakeCase<UserWithPassword>>(
+					.prepare<[string, string, string, string], ToSnakeCase<UserWithoutProfileSetup>>(
 						`INSERT INTO users (id, email, username, password_hash)
 						VALUES (?, ?, ?, ?)
-						RETURNING id, email, username, profile_is_setup;`
+						RETURNING id, email, username;`
 					)
 					.get(user.id, user.email, user.username, passwordHash);
-				if (result !== undefined) {
-					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
-					resolve(camelCaseObject as unknown as User);
+				if (!result) {
+					return reject(
+						new UserRepositoryError(`Something went wrong creating user: ${user.email}`, null)
+					);
 				}
-				reject(new UserRepositoryError(`Something went wrong creating user: ${user.email}`, null));
+				resolve(result);
 			} catch (e) {
 				if (e instanceof SqliteError) {
 					if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {

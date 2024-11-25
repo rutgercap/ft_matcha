@@ -1,6 +1,9 @@
 import runMigrations, { MIGRATIONS_PATH } from '$lib/database/database';
 import { io, type Socket as ClientSocket } from 'socket.io-client';
-import type { UserRepository as UserRepositoryType } from '$lib/userRepository';
+import type {
+	UserRepository as UserRepositoryType,
+	UserWithoutProfileSetup
+} from '$lib/userRepository';
 import path from 'path';
 import { UserRepository } from '$lib/userRepository';
 import Database from 'better-sqlite3';
@@ -24,6 +27,7 @@ import { NoticiationService } from '$lib/server/notificationService';
 import type { HttpServer } from 'vite';
 import type { AddressInfo } from 'net';
 import { WebsocketServer } from '$lib/server/websocketServer';
+import { AuthService } from '$lib/server/authService';
 
 interface MyFixtures {
 	db: DatabaseType;
@@ -32,7 +36,7 @@ interface MyFixtures {
 	emailRepository: EmailRepositoryType;
 	savedUser: User;
 	profileVisitRepository: ProfileVisitRepository;
-	savedUserFactory: (n: number, overrides: Partial<User>) => Promise<User[]>;
+	savedUserFactory: (n: number, overrides?: Partial<User>) => Promise<UserWithoutProfileSetup[]>;
 	image: Buffer;
 	connectionRepository: ConnectionRepository;
 	websocketServer: WebsocketServer;
@@ -40,7 +44,10 @@ interface MyFixtures {
 	notificationService: NoticiationService;
 	notificationClient: NotificationClient;
 	httpServer: HttpServer;
+	authService: AuthService;
 }
+
+export const DEFAULT_PASSWORD = 'password';
 
 export const itWithFixtures = it.extend<MyFixtures>({
 	db: async ({}, use) => {
@@ -76,7 +83,7 @@ export const itWithFixtures = it.extend<MyFixtures>({
 			return Promise.all(
 				Array.from({ length: n }, async () => {
 					const user = anyUser(overrides);
-					return await userRepository.createUser(user, 'password');
+					return await userRepository.createUser(user, DEFAULT_PASSWORD);
 				})
 			);
 		};
@@ -116,5 +123,9 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	},
 	notificationClient: async ({ clientSocket }, use) => {
 		await use(new NotificationClient(clientSocket));
+	},
+	authService: async ({ userRepository }, use) => {
+		const authService = new AuthService(userRepository);
+		await use(authService);
 	}
 });
