@@ -71,32 +71,17 @@ function sortByLocalization(array: SortingCriteria[] | ReducedProfileInfo[], ord
 	return (array);
 }
 
-function filterByAge(array: SortingCriteria[] | ReducedProfileInfo[], range: [number, number]) {
-	const apply = (value: SortingCriteria | ReducedProfileInfo, index: number, array: SortingCriteria[] | ReducedProfileInfo[]) => {
-		if (!(value.age >= range[0] && value.age <= range[1])) {
-			array[index].mask = false;
-		} else {
-			array[index].mask = false;
-		}
-	}
-	array.forEach(apply)
-	console.log('in filter: ', array)
-	return (array);
-}
-
-function filterByFameRating(array: SortingCriteria[] | ReducedProfileInfo[], range: [number, number]) {
-	const apply = (value: SortingCriteria | ReducedProfileInfo, index: number, array: SortingCriteria[] | ReducedProfileInfo[]) => {
-		if (!(value.fameRate >= range[0] && value.fameRate <= range[1])){
-			array[index].mask = false;
-		} else {
+function applyfilter(array: SortingCriteria[] | ReducedProfileInfo[], ageRange: [number, number], fameRange: [number, number]) {
+	const filter = (value: SortingCriteria | ReducedProfileInfo, index: number, array: SortingCriteria[] | ReducedProfileInfo[]) => {
+		if ((value.fameRate >= fameRange[0] && value.fameRate <= fameRange[1]) && (value.age >= ageRange[0] && value.age <= ageRange[1])) {
 			array[index].mask = true;
+		} else {
+			array[index].mask = false;
 		}
 	}
-	array.forEach(apply)
+	array.forEach(filter)
 	return (array);
 }
 
-
-
-export {sortByfameRate, sortByAge, sortByLocalization, filterByAge, filterByFameRating}
+export {sortByfameRate, sortByAge, sortByLocalization, applyfilter}
 export type { SortingCriteria }

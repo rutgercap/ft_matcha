@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let data;
-	import { sortByAge, sortByfameRate, sortByLocalization, filterByAge, filterByFameRating } from './sorting';
+	import { sortByAge, sortByfameRate, sortByLocalization, applyfilter } from './sorting';
 	import type { SortingCriteria, SortingInfo } from './sorting';
 	import SortAndFilter from '$lib/component/SortAndFilter.svelte';
 	import type { ReducedProfileInfo } from '$lib/domain/profile';
@@ -10,7 +10,7 @@
 	let ids: any[] = data.ids;
 
 	// I make a copy of the array to keep a reset option
-	let filteredUsers: ReducedProfileInfo[] | SortingCriteria[] = Array.from(users);
+	let filteredUsers: ReducedProfileInfo[] | SortingCriteria[] = structuredClone(users);
 
 	let isFilterPopupOpen = false; // Controls visibility of the popup
 
@@ -31,33 +31,21 @@
 			filteredUsers = sortByAge(filteredUsers, sortingCriteria.age.order);
 		}
 
-		if (sortingCriteria.age.range) {
-			console.log('age filter', filteredUsers)
-			filteredUsers = filterByAge(filteredUsers, sortingCriteria.age.range);
-		}
-
 		if (sortingCriteria.fameRate.order) {
 			filteredUsers = sortByfameRate(filteredUsers, sortingCriteria.fameRate.order);
-		}
-
-		if (sortingCriteria.fameRate.range) {
-			console.log('fame filter', filteredUsers)
-			filteredUsers = filterByFameRating(filteredUsers, sortingCriteria.fameRate.range);
 		}
 
 		if (sortingCriteria.localisation.order) {
 			filteredUsers = sortByLocalization(filteredUsers, sortingCriteria.localisation.order);
 		}
 
-		for (let i = 0; i < filteredUsers.length; i++) {
-			console.log('--> ', i, ':', filteredUsers[i].mask)
-		}
+		filteredUsers = applyfilter(filteredUsers, sortingCriteria.age.range, sortingCriteria.fameRate.range);
 		isFilterPopupOpen = false;
 	}
 
 	function resetList(event: CustomEvent) {
 		sortingCriteria = event.detail.sortingCriteria;
-		filteredUsers = Array.from(users);
+		filteredUsers = structuredClone(users);
 		isFilterPopupOpen = false;
 	}
 
@@ -80,7 +68,7 @@
 			<SortAndFilter
 				bind:closeComponent={isFilterPopupOpen}
 				on:applyFilters={applyFilters}
-				on:resetFilters={resetList}
+				on:resetList={resetList}
 				{sortingCriteria}
 			/>
 		{/if}
