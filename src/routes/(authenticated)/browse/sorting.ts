@@ -74,9 +74,10 @@ function sortByLocalization(array: SortingCriteria[] | ReducedProfileInfo[], ord
 function filterByAge(array: SortingCriteria[] | ReducedProfileInfo[], range: [number, number]) {
 	const apply = (value: SortingCriteria | ReducedProfileInfo, index: number, array: SortingCriteria[] | ReducedProfileInfo[]) => {
 		if (!(value.age >= range[0] && value.age <= range[1])) {
-			console.log('laaaaaaaaaaaaaaaaaaaaa1', index, range, value.age)
 			array[index].mask = false;
-		} 
+		} else {
+			array[index].mask = false;
+		}
 	}
 	array.forEach(apply)
 	console.log('in filter: ', array)
@@ -87,6 +88,8 @@ function filterByFameRating(array: SortingCriteria[] | ReducedProfileInfo[], ran
 	const apply = (value: SortingCriteria | ReducedProfileInfo, index: number, array: SortingCriteria[] | ReducedProfileInfo[]) => {
 		if (!(value.fameRate >= range[0] && value.fameRate <= range[1])){
 			array[index].mask = false;
+		} else {
+			array[index].mask = true;
 		}
 	}
 	array.forEach(apply)

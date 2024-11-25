@@ -17,6 +17,17 @@
 		dispatch('applyFilters', { sortingCriteria }); // Emit updated sorting criteria
 	};
 
+	const handleResetList = (event) => {
+		event.preventDefault();
+		sortingCriteria = {
+			age: { order: 'none', range: [18, 99] },
+			localisation: { order: 'none', country: '' },
+			fameRate: { order: 'none', range: [0, 1] }
+		};
+		dispatch('resetList', { sortingCriteria });
+		close()
+	};
+
 	// Close the popup
 	const close = () => {
 		closeComponent = false;
@@ -122,6 +133,13 @@
 
 			<!-- Buttons -->
 			<div class="mt-6 flex items-center justify-end gap-x-4">
+				<button
+					type="button"
+					class="inline-flex justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					on:click={handleResetList}
+					>
+					Reset
+				</button>
 				<button
 					type="button"
 					class="text-sm font-medium text-gray-600 hover:underline"

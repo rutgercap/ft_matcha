@@ -32,7 +32,7 @@
 		}
 
 		if (sortingCriteria.age.range) {
-			console.log('filtered', filteredUsers)
+			console.log('age filter', filteredUsers)
 			filteredUsers = filterByAge(filteredUsers, sortingCriteria.age.range);
 		}
 
@@ -41,6 +41,7 @@
 		}
 
 		if (sortingCriteria.fameRate.range) {
+			console.log('fame filter', filteredUsers)
 			filteredUsers = filterByFameRating(filteredUsers, sortingCriteria.fameRate.range);
 		}
 
@@ -48,10 +49,18 @@
 			filteredUsers = sortByLocalization(filteredUsers, sortingCriteria.localisation.order);
 		}
 
+		for (let i = 0; i < filteredUsers.length; i++) {
+			console.log('--> ', i, ':', filteredUsers[i].mask)
+		}
 		isFilterPopupOpen = false;
 	}
 
-	console.log("IN THE FRONT BROWSING PAGE:", users);
+	function resetList(event: CustomEvent) {
+		sortingCriteria = event.detail.sortingCriteria;
+		filteredUsers = Array.from(users);
+		isFilterPopupOpen = false;
+	}
+
 </script>
 
 <div class="bg-white">
@@ -71,6 +80,7 @@
 			<SortAndFilter
 				bind:closeComponent={isFilterPopupOpen}
 				on:applyFilters={applyFilters}
+				on:resetFilters={resetList}
 				{sortingCriteria}
 			/>
 		{/if}
