@@ -2,7 +2,7 @@ import type { JsonSerializable } from '$lib/types/jsonSerializable';
 import { createServer, type Server as HttpServer } from 'http';
 import { Server, type Socket as ServerSocket } from 'socket.io';
 
-let io: WebsocketServer | null = null;
+let server: WebsocketServer | null = null;
 
 export class WebsocketServer {
 	private _server: Server;
@@ -30,11 +30,11 @@ export class WebsocketServer {
 }
 
 export function websocketServer(httpServer?: HttpServer): WebsocketServer {
-	if (io) {
-		return io;
+	if (server) {
+		return server;
 	}
-	let _httpServer = httpServer ?? createServer();
-	const server = new Server(_httpServer);
-	const socketServer = new WebsocketServer(server);
-	return socketServer;
+	const _httpServer = httpServer ?? createServer();
+	const io = new Server(_httpServer);
+	server = new WebsocketServer(io);
+	return server;
 }

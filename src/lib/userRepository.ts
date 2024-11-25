@@ -7,11 +7,11 @@ import type { User } from 'lucia';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageRepository } from './imageRepository';
 import { Buffer } from 'buffer';
-import type { ToSnakeCase } from './commonTypes';
+import type { ToSnakeCase } from './types/snakeCase';
 
 type UserWithPassword = User & { passwordHash: string };
 
-type UserWithoutProfileSetup = Omit<User, 'profileIsSetup' | 'emailIsSetup'>;
+type UserWithoutProfileSetup = Omit<User, 'profileIsSetup' | 'emailIsSetup' | 'passwordIsSet'>;
 
 type ProfileWithoutPicturesAndId = Omit<ProfileInfo, 'uploadedPictures' | 'userId'>;
 

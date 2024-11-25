@@ -4,9 +4,6 @@ import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { isGender, isSexualPreference } from '$lib/domain/profile';
-import { MAX_F_SIZE } from '$env/static/private';
-
-const MAX_FILE_SIZE = Number(MAX_F_SIZE);
 
 const profileSchema = z.object({
 	firstName: z.string().min(1).max(255),
