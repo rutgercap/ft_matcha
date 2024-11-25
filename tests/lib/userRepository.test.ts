@@ -158,7 +158,7 @@ describe('UserRepository', () => {
 	itWithFixtures(
 		'should return DuplicateEntryError if username taken',
 		async ({ userRepository }) => {
-			const userName = faker.internet.userName();
+			const userName = faker.internet.username();
 			const password = faker.internet.password();
 			const userOne = anyUser({ username: userName, profileIsSetup: false });
 			const userTwo = anyUser({ username: userName, profileIsSetup: false });

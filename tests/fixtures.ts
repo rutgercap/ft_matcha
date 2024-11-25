@@ -1,4 +1,5 @@
 import runMigrations, { MIGRATIONS_PATH } from '$lib/database/database';
+import { io, type Socket as ClientSocket } from 'socket.io-client';
 import type { UserRepository as UserRepositoryType } from '$lib/userRepository';
 import path from 'path';
 import { UserRepository } from '$lib/userRepository';
@@ -16,6 +17,13 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { ConnectionRepository } from '$lib/connectionRepository';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { NotificationClient } from '$lib/notificationClient';
+import { NoticiationService } from '$lib/server/notificationService';
+import type { HttpServer } from 'vite';
+import type { AddressInfo } from 'net';
+import { WebsocketServer } from '$lib/server/websocketServer';
 
 interface MyFixtures {
 	db: DatabaseType;
@@ -27,9 +35,12 @@ interface MyFixtures {
 	savedUserFactory: (n: number, overrides: Partial<User>) => Promise<User[]>;
 	image: Buffer;
 	connectionRepository: ConnectionRepository;
+	websocketServer: WebsocketServer;
+	clientSocket: ClientSocket;
+	notificationService: NoticiationService;
+	notificationClient: NotificationClient;
+	httpServer: HttpServer;
 }
-
-const IMAGE_FOLDER = './tests/lib/pictures-repo-test';
 
 export const itWithFixtures = it.extend<MyFixtures>({
 	db: async ({}, use) => {
@@ -40,7 +51,7 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		temp.cleanupSync();
 	},
 	imageRepository: async ({ db }, use) => {
-		const tempMigrationsDir = IMAGE_FOLDER;
+		const tempMigrationsDir = temp.mkdirSync('images');
 		await use(new ImageRepository(tempMigrationsDir, db));
 		temp.cleanupSync();
 	},
@@ -81,5 +92,29 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	},
 	connectionRepository: async ({ db }, use) => {
 		use(new ConnectionRepository(db));
+	},
+	httpServer: async ({}, use) => {
+		const server = createServer();
+		server.listen();
+		await use(server);
+		server.close();
+	},
+	websocketServer: async ({ httpServer }, use) => {
+		const io = new Server(httpServer);
+		const server = new WebsocketServer(io);
+		await use(server);
+		io.close();
+	},
+	clientSocket: async ({ httpServer }, use) => {
+		const port = (httpServer.address() as AddressInfo).port;
+		const socket = io(`http://localhost:${port}`);
+		await use(socket);
+		socket.disconnect();
+	},
+	notificationService: async ({ websocketServer }, use) => {
+		await use(new NoticiationService(websocketServer));
+	},
+	notificationClient: async ({ clientSocket }, use) => {
+		await use(new NotificationClient(clientSocket));
 	}
 });

@@ -17,6 +17,15 @@ describe('ConnectionRepository', () => {
 		}
 	);
 
+	itWithFixtures.todo(
+		'Should get a notification when a user likes you',
+		async ({ connectionRepository, savedUserFactory }) => {
+			const [currentUser, targetUser] = await savedUserFactory(2, {});
+
+			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
+		}
+	);
+
 	itWithFixtures(
 		'One sided like should not result in match',
 		async ({ connectionRepository, savedUserFactory }) => {

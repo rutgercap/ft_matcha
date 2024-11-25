@@ -19,7 +19,7 @@ describe('ImageRepository', () => {
 		async ({ savedUser, imageRepository, image }) => {
 			await imageRepository.upsertImage(savedUser.id, 0, image);
 
-			expect(imageRepository.upsertImage(savedUser.id, 0, image)).rejects.toThrow(
+			await expect(imageRepository.upsertImage(savedUser.id, 0, image)).rejects.toThrow(
 				ImageRepositoryError
 			);
 		}
@@ -28,7 +28,7 @@ describe('ImageRepository', () => {
 	itWithFixtures(
 		'should throw an error when trying to save with higher order than 4',
 		async ({ savedUser, imageRepository, image }) => {
-			expect(imageRepository.upsertImage(savedUser.id, 5, image)).rejects.toThrow(
+			await expect(imageRepository.upsertImage(savedUser.id, 5, image)).rejects.toThrow(
 				ImageRepositoryError
 			);
 		}

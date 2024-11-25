@@ -51,7 +51,7 @@
 	}
 
 	export function fadeTranslate(
-		node: HTMLElement,
+		_: HTMLElement,
 		params: { duration: number; y: number }
 	): TransitionConfig {
 		return {
