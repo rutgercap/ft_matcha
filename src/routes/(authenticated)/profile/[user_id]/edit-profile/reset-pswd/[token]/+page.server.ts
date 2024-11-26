@@ -1,6 +1,6 @@
 import { zod } from 'sveltekit-superforms/adapters';
 import { message, superValidate } from 'sveltekit-superforms';
-import { fail, redirect, type Action } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { isWithinExpirationDate } from 'oslo';
 import { lucia } from '$lib/auth';
 import { error } from '@sveltejs/kit';
@@ -36,7 +36,7 @@ export const load: PageServerLoad = async ({ cookies, params, locals }) => {
 		throw error(404, 'Token is out of date, hit forgot password again');
 	}
 
-	const res = await emailRepository.updateEmailIsSetup(user.id, true);
+	const res = await locals.userRepository.updateEmailIsSetup(user.id, true);
 	const session = await lucia.createSession(user.id, {});
 	const sessionCookie = lucia.createSessionCookie(session.id);
 
@@ -92,7 +92,6 @@ export const actions: Actions = {
 				status: 500
 			});
 		}
-
 
 
 		redirect(302, '/');

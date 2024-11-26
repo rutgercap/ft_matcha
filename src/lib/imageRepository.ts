@@ -1,10 +1,6 @@
 import type { Database } from 'better-sqlite3';
-import { generateIdFromEntropySize } from 'lucia';
 import * as fs from 'fs';
-import * as path from 'path';
-import { MAX_PIC } from '$env/static/private';
-
-const MAX_PICTURES = Number(MAX_PIC);
+import { v4 as uuidv4 } from 'uuid';
 
 export class ImageRepositoryError extends Error {
 	exception: unknown;
@@ -15,14 +11,7 @@ export class ImageRepositoryError extends Error {
 	}
 }
 
-export class ConstraintImageRepositoryError extends Error {
-	exception: unknown;
-	constructor(message: string, exception: unknown) {
-		super(message);
-		this.name = 'ImageRepositoryError';
-		this.exception = exception;
-	}
-}
+export const MAX_PICTURES = 5;
 
 class ImageRepository {
 	constructor(
@@ -30,138 +19,57 @@ class ImageRepository {
 		private db: Database
 	) {}
 
-	public upsertImageAll(user_id: string, buffers: Array<Buffer | null>): Array<string | null> {
-		try {
-			const inserted_filename: Array<string | null> = [null, null, null, null, null];
-			for (let i = 0; i < MAX_PICTURES; i++) {
-				if (buffers[i]) inserted_filename[i] = this.upsertImage(user_id, i, buffers[i]);
-			}
-			return inserted_filename;
-		} catch (error) {
-			throw new ImageRepositoryError(
-				'Error occurs trying to upser all pictures for user:' + user_id,
-				error
-			);
+	public async upsertImage(userId: string, order: number, imageBuffer: Buffer): Promise<number> {
+		if (order < 0 || order >= MAX_PICTURES) {
+			throw new ImageRepositoryError('Image order out of range', null);
 		}
-	}
-
-	public upsertImage(user_id: string, order: number, imageBuffer: Buffer): string {
-		// Prepare the SQL query
-		let id = generateIdFromEntropySize(10);
-		const sql = this.db.prepare<string, string, number>(`
+		const id = uuidv4();
+		const sql = this.db.prepare<[string, string, number]>(`
             INSERT INTO profile_pictures (id, user_id, image_order)
             VALUES (?, ?, ?)
         `);
-
-		let result: null | any = null;
 		try {
-			result = sql.run(id, user_id, order);
-			const img_cnt = this.db
-				.prepare<string>(
-					`SELECT count(*) AS cnt
-                                                    FROM profile_pictures
-                                                    WHERE user_id = ?`
-				)
-				.get(user_id);
-			if (img_cnt.cnt > MAX_PICTURES) {
-				this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(id);
-				throw new ConstraintImageRepositoryError(
-					'Maximum image limit reach for user:' + user_id,
-					null
-				);
-			}
-		} catch (error: any) {
-			if (error.message.includes('UNIQUE constraint failed')) {
-				const sql = this.db.prepare<string, number>(`
-                    SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
-                    `);
-				result = sql.get(user_id, order);
-				id = result.id;
-			} else if (error instanceof ConstraintImageRepositoryError) {
-				throw error;
-			} else {
-				throw new ImageRepositoryError(
-					'Error occured trying to upsert image for user:' + user_id,
-					error
-				);
-			}
-		}
-
-		// Check if the insert was successful by checking the number of changes
-		if (result && (result.changes > 0 || result.id)) {
-			// If insert was successful, save the image to './user-pictures/' folder
-
-			// Ensure that the folder exists
-			const folderPath = this.destination;
-			if (!fs.existsSync(folderPath)) {
-				fs.mkdirSync(folderPath, { recursive: true });
-			}
-
-			// Define the file path where the image will be saved
-			const filePath = path.join(folderPath, `${id}.jpg`);
-
-			// Write the image file to the directory
-			fs.writeFile(filePath, imageBuffer, (err: any) => {
-				if (err) {
-					throw new ImageRepositoryError('Error saving image to:' + filePath, err);
-				}
-			});
-		} else {
-			throw new ImageRepositoryError(
-				'Insert operation failed or the row already existed without changes.',
-				null
-			);
-		}
-
-		/* result is of type {change: x, LastInsertedRow: y} */
-		return id;
-	}
-
-	public allImageIdOnly(user_id: string): Array<string> {
-		try {
-			const pictures: Array<string> = new Array<string>(
-				'default2',
-				'default2',
-				'default2',
-				'default2',
-				'default2'
-			);
-			for (let i = 0; i < MAX_PICTURES; i++) {
-				pictures[i] = this.imageIdOnly(user_id, i);
-			}
-			return pictures;
-		} catch (error) {
-			throw new ImageRepositoryError(
-				'Error trying to get all image filename for user:' + user_id,
-				error
-			);
-		}
-	}
-
-	public imageIdOnly(user_id: string, order: number): string {
-		try {
-			const sql = this.db.prepare<string, number>(`
-                SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
-                `);
-			const res = sql.get(user_id, order);
-			if (!res || !res.id) return 'default2';
-			return res.id;
+			sql.run(id, userId, order);
 		} catch (e) {
-			new ImageRepositoryError('Error trying to fetch the image id only from user_id and order', e);
+			throw new ImageRepositoryError('Error trying to insert image into profile_pictures table', e);
+		}
+		try {
+			const filePath = this.destination + `/${userId}_${order}.jpg`;
+			const writeStream = fs.createWriteStream(filePath);
+			await new Promise((resolve, reject) => {
+				writeStream.on('finish', resolve);
+				writeStream.on('error', reject);
+				writeStream.write(imageBuffer);
+				writeStream.end();
+			});
+		} catch (e) {
+			throw new ImageRepositoryError('Error trying to write image to disk', e);
+		}
+		return order;
+	}
+
+	public async listImages(userId: string): Promise<number[]> {
+		try {
+			const sql = this.db.prepare<[string], { image_order: number }>(`
+				SELECT image_order FROM profile_pictures WHERE user_id = ?
+			`);
+			return sql.all(userId).map((row) => row.image_order);
+		} catch (error) {
+			throw new ImageRepositoryError('Error trying to list images', error);
 		}
 	}
 
-	public async image(user_id: string, order: number): Promise<Buffer | null> {
+	public async image(userId: string, order: number): Promise<Buffer | null> {
 		try {
-			const sql = this.db.prepare<string, number>(`
+			const sql = this.db.prepare<[string, number], { id: string }>(`
                 SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
                 `);
-			const res = sql.get(user_id, order);
-			let test: Buffer | null = null;
-			if (res && res.id) {
-				test = this.imageById(res.id);
+			const id = sql.get(userId, order)?.id;
+			if (!id) {
+				return null;
 			}
-			return test;
+			const filePath = this.destination + `/${userId}_${order}.jpg`;
+			return fs.readFileSync(filePath);
 		} catch (error) {
 			throw new ImageRepositoryError(
 				'Error trying to fetch the image from user_id and order',
@@ -170,53 +78,20 @@ class ImageRepository {
 		}
 	}
 
-	public async imageById(id: string): Promise<Buffer | null> {
-		const filePath = this.destination + `/${id}.jpg`; // Construct the file path
-		try {
-			const imageBuffer = await fs.promises.readFile(filePath); // Read the file into a Buffer
-			return imageBuffer; // Return the Buffer
-		} catch (error) {
-			// Handle the case where the file does not exist or another error occurs
-			throw new ImageRepositoryError('Error trying to read image:' + filePath, error);
-		}
-	}
 	public async deleteImage(user_id: string, order: number) {
 		try {
-			const sql = this.db.prepare<string, number>(`
-                SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
-                `);
-			const res = sql.get(user_id, order);
-
-			this.db.prepare<string>('DELETE FROM profile_pictures WHERE id = ?').run(res.id);
-			await this.deleteImageById(res.id);
+			const result = this.db
+				.prepare<
+					[string, number]
+				>('DELETE FROM profile_pictures WHERE user_id = ? AND image_order = ?')
+				.run(user_id, order);
+			if (result.changes === 0) {
+				return;
+			}
+			fs.unlinkSync(this.destination + `/${user_id}_${order}.jpg`);
 		} catch (error) {
-			throw new ImageRepositoryError(
-				'Error trying to fetch the image for deletion from user_id and order',
-				error
-			);
+			throw new ImageRepositoryError('Error trying delete the image', error);
 		}
-	}
-
-	public async deleteImageById(id: string): Promise<void> {
-		const filePath = this.destination + `/${id}.jpg`; // Construct the file path
-		try {
-			await fs.promises.unlink(filePath); // Delete the file
-			console.log(`Image ${filePath} deleted successfully.`); // Log successful deletion
-		} catch (error) {
-			// Handle the case where the file does not exist or another error occurs
-			throw new ImageRepositoryError('Error trying to delete image:' + filePath, error);
-		}
-	}
-
-	public async convertFileToBuffer(files: Array<File | null>): Array<File, null> {
-		const buffers: Array<Buffer | null> = [null, null, null, null, null];
-		try {
-			for (let i = 0; i < MAX_PICTURES; i++)
-				if (files[i]) buffers[i] = Buffer.from(await files[i].arrayBuffer());
-		} catch (error) {
-			throw new ImageRepositoryError('Error occurs trying to convert Files to Buffer', error);
-		}
-		return buffers;
 	}
 }
 

@@ -1,18 +1,25 @@
 import { getDb } from '$lib/database/database';
 import { UserRepository } from '$lib/userRepository';
 import { ImageRepository } from '$lib/imageRepository';
-import { EmailRepository } from '$lib/emailRepository';
+import { EmailRepository, getTransporter } from '$lib/emailRepository';
 import { type Handle } from '@sveltejs/kit';
 import { lucia } from '$lib/auth';
 import { IMAGE_FOLDER } from '$env/static/private';
 import { ProfileVisitRepository } from '$lib/profileVisitRepository';
+import { BrowsingRepository } from '$lib/browsingRepository';
+import { ConnectionRepository } from '$lib/connectionRepository';
+import { AuthService } from '$lib/server/authService';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
+	const transporter = getTransporter();
 	const imageRepo = new ImageRepository(IMAGE_FOLDER, db);
 	event.locals.userRepository = new UserRepository(db, imageRepo);
-	event.locals.emailRepository = new EmailRepository(db);
+	event.locals.emailRepository = new EmailRepository(db, transporter);
 	event.locals.profileVisitRepository = new ProfileVisitRepository(db);
+	event.locals.browsingRepository = new BrowsingRepository(db);
+	event.locals.connectionRepository = new ConnectionRepository(db);
+	event.locals.authService = new AuthService(event.locals.userRepository, lucia);
 
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
 	if (!sessionId) {

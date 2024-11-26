@@ -1,4 +1,4 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { verify } from '@node-rs/argon2';
 import { lucia } from '$lib/auth';
 import { PUBLIC_BASE_URL } from '$env/static/public';
-
+import { AuthService, AuthServiceError } from '$lib/server/authService';
 
 const signInSchema = z.object({
 	username: z.string().min(4).max(31),
@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ locals: { user } }) => {
 };
 
 export const actions: Actions = {
-	sign_in: async ({ request, cookies, locals: { userRepository, emailRepository } }) => {
+	sign_in: async ({ request, cookies, locals: { authService } }) => {
 		const form = await superValidate(request, zod(signInSchema));
 		if (!form.valid) {
 			return fail(400, { form });
@@ -35,23 +35,27 @@ export const actions: Actions = {
 
 		const { username, password } = form.data;
 
-		const user = await userRepository.userByUsername(username);
-		if (!user) {
-			return message(form, 'Incorrect username or password', {
-				status: 400
+		try {
+			const sessionCookie = await authService.signIn(username, password);
+			cookies.set(sessionCookie.name, sessionCookie.value, {
+				path: '.',
+				...sessionCookie.attributes
 			});
-		}
-
-		const validPassword = await verify(user.passwordHash, password, {
-			memoryCost: 19456,
-			timeCost: 2,
-			outputLen: 32,
-			parallelism: 1
-		});
-		if (!validPassword) {
-			return message(form, 'Incorrect username or password', {
-				status: 400
-			});
+		} catch (e) {
+			if (!(e instanceof AuthServiceError)) {
+				return message(form, 'Something went wrong logging you in. Try again later.', {
+					status: 500
+				});
+			}
+			if (e.type === 'INCORRECT_USERNAME_OR_PASSWORD') {
+				return message(form, 'Incorrect username or password', {
+					status: 400
+				});
+			} else {
+				return message(form, 'Something went wrong logging you in. Try again later.', {
+					status: 500
+				});
+			}
 		}
 
 		// this condition is in case the user clicked the reset password button
@@ -69,8 +73,8 @@ export const actions: Actions = {
 		});
 		if (user.emailIsSetup) return redirect(302, '/');
 		else return redirect(302, '/sign-up/auth-email');
+		return redirect(302, '/');
 	},
-
 	forgot_pswd: async ({ request, cookies, locals: { userRepository, emailRepository } }) => {
 		const form = await superValidate(request, zod(emailSchema));
 		if (!form.valid) {
