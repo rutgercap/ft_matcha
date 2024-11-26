@@ -1,13 +1,13 @@
 import type { Database } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
-import type { ProfileInfo, ReducedProfileInfo } from './domain/profile';
+import type { ProfileInfo, ReducedProfileInfo } from '../domain/profile';
 import { hash } from '@node-rs/argon2';
 import _ from 'lodash';
 import type { User } from 'lucia';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageRepository } from './imageRepository';
 import { Buffer } from 'buffer';
-import type { ToSnakeCase } from './types/snakeCase';
+import type { ToSnakeCase } from '../types/snakeCase';
 
 type UserWithPassword = User & { passwordHash: string };
 

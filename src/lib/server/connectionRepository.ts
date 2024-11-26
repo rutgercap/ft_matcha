@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3';
-import type { MatchStatus } from './domain/match';
+import type { MatchStatus } from '../domain/match';
 
 export class ConnectionRepositoryError extends Error {
 	constructor(message: string) {

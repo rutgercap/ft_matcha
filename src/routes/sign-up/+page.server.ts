@@ -6,7 +6,7 @@ import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { PUBLIC_BASE_URL } from '$env/static/public';
 import { z } from 'zod';
-import { DuplicateEntryError } from '$lib/userRepository';
+import { DuplicateEntryError } from '$lib/server/userRepository';
 
 const signUpSchema = z.object({
 	username: z
@@ -43,7 +43,7 @@ export const actions: Actions = {
 
 		try {
 			await userRepository.createUser({ id, username, email }, password);
-			await emailRepository.emailVerification(id, email)
+			await emailRepository.emailVerification(id, email);
 			const session = await lucia.createSession(id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies.set(sessionCookie.name, sessionCookie.value, {

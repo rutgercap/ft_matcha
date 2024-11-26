@@ -1,13 +1,13 @@
 import { getDb } from '$lib/database/database';
-import { UserRepository } from '$lib/userRepository';
-import { ImageRepository } from '$lib/imageRepository';
+import { UserRepository } from '$lib/server/userRepository';
+import { ImageRepository } from '$lib/server/imageRepository';
 import { EmailRepository, getTransporter } from '$lib/emailRepository';
 import { type Handle } from '@sveltejs/kit';
 import { lucia } from '$lib/auth';
 import { IMAGE_FOLDER } from '$env/static/private';
 import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import { BrowsingRepository } from '$lib/browsingRepository';
-import { ConnectionRepository } from '$lib/connectionRepository';
+import { ConnectionRepository } from '$lib/server/connectionRepository';
 import { AuthService } from '$lib/server/authService';
 
 export const handle: Handle = async ({ event, resolve }) => {

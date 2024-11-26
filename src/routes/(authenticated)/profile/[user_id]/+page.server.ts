@@ -1,8 +1,8 @@
 import { error, redirect } from '@sveltejs/kit';
-import type { UserRepository } from '$lib/userRepository';
+import type { UserRepository } from '$lib/server/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
 import type { PageServerLoad } from './$types';
-import type { ConnectionRepository } from '$lib/connectionRepository';
+import type { ConnectionRepository } from '$lib/server/connectionRepository';
 
 async function profileInfoFor(
 	userId: string,

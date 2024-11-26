@@ -1,4 +1,4 @@
-import type { UserRepository } from '$lib/userRepository';
+import type { UserRepository } from '$lib/server/userRepository';
 import { verify } from '@node-rs/argon2';
 import type { Cookie, Lucia, Session, User } from 'lucia';
 

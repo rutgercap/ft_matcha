@@ -3,22 +3,22 @@ import { io, type Socket as ClientSocket } from 'socket.io-client';
 import type {
 	UserRepository as UserRepositoryType,
 	UserWithoutProfileSetup
-} from '$lib/userRepository';
+} from '$lib/server/userRepository';
 import path from 'path';
-import { UserRepository } from '$lib/userRepository';
+import { UserRepository } from '$lib/server/userRepository';
 import Database from 'better-sqlite3';
 import type { Database as DatabaseType } from 'better-sqlite3';
 import temp from 'temp';
 import { it } from 'vitest';
-import type { ImageRepository as ImageRepositoryType } from '$lib/imageRepository';
-import { ImageRepository } from '$lib/imageRepository';
+import type { ImageRepository as ImageRepositoryType } from '$lib/server/imageRepository';
+import { ImageRepository } from '$lib/server/imageRepository';
 import type { Lucia, User } from 'lucia';
 import { anyUser } from './testHelpers';
 import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { ConnectionRepository } from '$lib/connectionRepository';
+import { ConnectionRepository } from '$lib/server/connectionRepository';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { NotificationClient } from '$lib/notificationClient';

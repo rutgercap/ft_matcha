@@ -1,6 +1,6 @@
 import type { User } from 'lucia';
 import type { LayoutServerLoad } from './$types';
-import type { UserRepository } from '$lib/userRepository';
+import type { UserRepository } from '$lib/server/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
 import { error } from '@sveltejs/kit';
 
