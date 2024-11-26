@@ -14,7 +14,8 @@
 		"test:integration": "playwright test",
 		"test:unit": "vitest --run",
 		"db:reset": "tsx src/lib/database/reset.ts",
-		"db:migrate": "tsx src/lib/database/migrateUp.ts"
+		"db:migrate": "tsx src/lib/database/migrateUp.ts",
+		"script:fake_users": "tsx src/lib/scripts/fake_users.ts"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^9.0.1",
