@@ -4,6 +4,7 @@
 	import type { PageData } from './$types';
 	import { Icon, Trash } from 'svelte-hero-icons';
 	import addToast from '$lib/toast/toastStore';
+	import { MAX_PICTURES } from '$lib/imageRepository';
 
 	export let data: PageData;
 	$: user = data.user;
@@ -12,11 +13,7 @@
 		resetForm: false
 	});
 
-	const maxPictures = 5;
-
-	function triggerEachFileInput(idx: number) {
-		document.getElementById(`pictures-${idx}`)?.click();
-	}
+	const maxPictures = MAX_PICTURES;
 
 	const refreshKeys = [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()];
 
@@ -93,13 +90,13 @@
 						accept="image/png, image/jpeg, image/jpg"
 						class="hidden"
 					/>
-					<button class="profile-picture-upload" on:click={() => triggerEachFileInput(i)}>
+					<div class="profile-picture-upload">
 						<img
 							alt="profile"
 							class="profile-picture-preview"
 							src={`/api/pics/${user.id}/${i}?refreshKey=${refreshKeys[i]}`}
 						/>
-					</button>
+					</div >
 					<button class="delete-icon" on:click={() => handleDeletePicture(i)}>
 						<Icon src={Trash} class="h-8 w-auto" />
 					</button>

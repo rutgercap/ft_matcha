@@ -66,8 +66,7 @@ export const actions: Actions = {
 			path: '.',
 			...sessionCookie.attributes
 		});
-		if (user.emailIsSetup) return redirect(302, '/');
-		else return redirect(302, '/sign-up/auth-email');
+		return redirect(302, '/');
 	},
 
 	forgot_pswd: async ({ request, cookies, locals: { userRepository, emailRepository } }) => {
