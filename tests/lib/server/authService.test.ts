@@ -14,27 +14,27 @@ describe('AuthService', () => {
 		}
 	);
 
-    itWithFixtures(
-		'should return session cookie if the user exists', 
+	itWithFixtures(
+		'should return session cookie if the user exists',
 		async ({ authService, savedUserFactory }) => {
-            const users = await savedUserFactory(1);
-            const user = users[0];
+			const users = await savedUserFactory(1);
+			const user = users[0];
 
 			const cookie = await authService.signIn(user.username, DEFAULT_PASSWORD);
 
-            expect(cookie).instanceOf(Cookie);
+			expect(cookie).instanceOf(Cookie);
 		}
 	);
 
 	itWithFixtures(
-		'should be able to verify the session cookie', 
+		'should be able to verify the session cookie',
 		async ({ authService, lucia, savedUserFactory }) => {
-            const users = await savedUserFactory(1);
-            const user = users[0];
+			const users = await savedUserFactory(1);
+			const user = users[0];
 			const cookie = await authService.signIn(user.username, DEFAULT_PASSWORD);
 			const { session } = await lucia.validateSession(cookie.value);
 
-            expect(session).toBeTruthy();
+			expect(session).toBeTruthy();
 		}
 	);
 });

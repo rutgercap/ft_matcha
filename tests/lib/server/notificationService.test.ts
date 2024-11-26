@@ -21,6 +21,7 @@ async function getConnectedUser(socket: ClientSocket, lucia: Lucia): Promise<Use
 }
 
 describe('NotificationService', () => {
+	// keep the notificationservice to keep server alive
 	itWithFixtures(
 		'Should be able to send notification',
 		async ({ clientSocket, notificationService, notificationClient, lucia }) => {
@@ -38,6 +39,22 @@ describe('NotificationService', () => {
 				notificationService.sendNotification(user.id, 'hello', 'world');
 			});
 			expect(notificationClient.notifications()).toEqual([{ type: 'hello', message: 'world' }]);
+		}
+	);
+
+	// keep the notificationservice to keep server alive
+	itWithFixtures(
+		'Should not receive notifications after session is invalidated',
+		async ({ clientSocket, notificationService, notificationClient, lucia }) => {
+			await waitUntilConnected(clientSocket);
+			const user = await getConnectedUser(clientSocket, lucia);
+			const token = (clientSocket.auth as { token: string }).token;
+
+			await lucia.invalidateSession(token);
+			notificationService.sendNotification(user.id, 'hello', 'world');
+
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			expect(notificationClient.notifications()).toEqual([]);
 		}
 	);
 });

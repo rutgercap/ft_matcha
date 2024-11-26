@@ -8,11 +8,17 @@ import { lucia } from '../auth';
 let server: WebsocketServer | null = null;
 
 export class WebsocketServer {
+	// userId to socket
 	private connections: Map<string, ServerSocket> = new Map();
+	private sessionTokenToUserId: Map<string, string> = new Map();
 	currentId = 0;
 
-	constructor(private server: Server, private lucia: Lucia) {
+	constructor(
+		private server: Server,
+		private lucia: Lucia
+	) {
 		this.authMiddleWare();
+		this.removeDisconnectedUser();
 	}
 
 	private authMiddleWare() {
@@ -21,17 +27,40 @@ export class WebsocketServer {
 			if (!token) {
 				return next(new Error('Authentication error'));
 			}
-			const {session, user }= await this.lucia.validateSession(token)
+			const { session, user } = await this.lucia.validateSession(token);
 			if (!session) {
 				return next(new Error('Authentication error'));
 			}
 			this.connections.set(user.id, socket);
+			this.sessionTokenToUserId.set(token, user.id);
 			next();
 		});
 	}
 
+	private removeDisconnectedUser() {
+		this.server.on('disconnect', (socket) => {
+			const id = socket.handshake.auth.id;
+			const userId = this.sessionTokenToUserId.get(id);
+			if (userId) {
+				this.connections.delete(userId);
+			}
+			this.sessionTokenToUserId.delete(id);
+		});
+	}
+
 	public sendMessageToUser(id: string, eventName: string, content: JsonSerializable) {
-		this.connections.get(id)?.emit(eventName, content);
+		const connection = this.connections.get(id);
+		if (!connection) {
+			return;
+		}
+		const token = connection.handshake.auth.token as string;
+		this.lucia.validateSession(token).then(({ session }) => {
+			if (!session) {
+				this.connections.delete(id);
+				return;
+			}
+			connection.emit(eventName, content);
+		});
 	}
 }
 
