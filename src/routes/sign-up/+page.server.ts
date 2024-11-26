@@ -6,8 +6,7 @@ import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { PUBLIC_BASE_URL } from '$env/static/public';
 import { z } from 'zod';
-import { DuplicateEntryError, UserRepository } from '$lib/userRepository';
-import type { EmailRepository } from '$lib/emailRepository';
+import { DuplicateEntryError } from '$lib/userRepository';
 
 const signUpSchema = z.object({
 	username: z

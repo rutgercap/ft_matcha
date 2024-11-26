@@ -20,14 +20,20 @@ enum SexualPreference {
 }
 
 type ProfileInfo = {
+	userId: string;
 	firstName: string;
 	lastName: string;
 	gender: Gender;
 	sexualPreference: SexualPreference;
 	biography: string;
 	tags: string[];
-	pictures: File[] | null[];
-	pictures_filenames: string[];
+	uploadedPictures: number[];
+};
+
+type ReducedProfileInfo = {
+	username: string;
+	biography: string;
+	gender: string;
 };
 
 function initials(profileInfo: ProfileInfo): string {
@@ -35,4 +41,4 @@ function initials(profileInfo: ProfileInfo): string {
 }
 
 export { Gender, SexualPreference, isSexualPreference, isGender, initials };
-export type { ProfileInfo };
+export type { ProfileInfo, ReducedProfileInfo };

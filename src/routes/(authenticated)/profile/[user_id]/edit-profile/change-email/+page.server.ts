@@ -22,12 +22,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-	new_email: async ({
-		request,
-		locals: { user, userRepository, emailRepository }
-	}) => {
+	new_email: async ({ request, locals: { user, userRepository, emailRepository } }) => {
 		const newemail = await superValidate(request, zod(newEmail));
-
 
 		if (!newemail) {
 			return fail(400, { newemail });
@@ -39,12 +35,13 @@ export const actions: Actions = {
 			});
 		}
 
-		if (newemail.data.new_email == user.email) {
+		if (newemail.data.new_email == user!.email) {
 			return message(newemail, 'new email must be different from the previous one', {
 				status: 400
 			});
 		}
-		try {
+
+    try {
 			await userRepository.updateUserEmail(user.id, newemail.data.new_email);
 			await emailRepository.emailVerification(user.id, newemail.data.new_email)
 		} catch (error) {
@@ -52,6 +49,7 @@ export const actions: Actions = {
 				status: 500
 			});
 		}
+
 		redirect(302, '/sign-up/auth-email');
 	}
 };
