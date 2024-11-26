@@ -57,22 +57,6 @@ export const actions: Actions = {
 				});
 			}
 		}
-
-		// this condition is in case the user clicked the reset password button
-		// but then log in whitout changing the oldpswd
-		if (!user.passwordIsSet) {
-			const change = await emailRepository.deleteResetPasswordSessionByUserId(user.id);
-			emailRepository.upsertPasswordIsSet(user.id, true);
-			await lucia.invalidateUserSessions(user.id);
-		}
-		const session = await lucia.createSession(user.id, {});
-		const sessionCookie = lucia.createSessionCookie(session.id);
-		cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '.',
-			...sessionCookie.attributes
-		});
-		if (user.emailIsSetup) return redirect(302, '/');
-		else return redirect(302, '/sign-up/auth-email');
 		return redirect(302, '/');
 	},
 	forgot_pswd: async ({ request, cookies, locals: { userRepository, emailRepository } }) => {
