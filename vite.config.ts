@@ -18,5 +18,10 @@ export default defineConfig({
 	plugins: [sveltekit(), webSocketServer],
 	test: {
 		include: ['tests/**/*.{test,spec}.{js,ts}']
+	},
+	build: {
+		rollupOptions: {
+			external: [/^src\/lib\/server/] 
+		}
 	}
 });

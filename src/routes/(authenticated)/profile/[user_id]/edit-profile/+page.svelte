@@ -4,7 +4,6 @@
 	import type { PageData } from './$types';
 	import { Icon, Trash } from 'svelte-hero-icons';
 	import addToast from '$lib/toast/toastStore';
-	import { MAX_PICTURES } from '$lib/imageRepository';
 
 	export let data: PageData;
 	$: user = data.user;
@@ -13,7 +12,7 @@
 		resetForm: false
 	});
 
-	const maxPictures = MAX_PICTURES;
+	const maxPictures = 5;
 
 	const refreshKeys = [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()];
 

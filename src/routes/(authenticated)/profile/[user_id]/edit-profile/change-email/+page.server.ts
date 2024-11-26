@@ -1,10 +1,9 @@
 import { zod } from 'sveltekit-superforms/adapters';
 import { message, superValidate } from 'sveltekit-superforms';
-import { fail, redirect, type Action } from '@sveltejs/kit';
+import { fail, redirect, } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { z } from 'zod';
-import { UserRepositoryError } from '$lib/userRepository';
 
 const newEmail = z.object({
 	new_email: z.string().email({ message: 'Invalid email address' }),
@@ -42,9 +41,9 @@ export const actions: Actions = {
 			});
 		}
 
-    try {
+		try {
 			await userRepository.updateUserEmail(user.id, newemail.data.new_email);
-			await emailRepository.emailVerification(user.id, newemail.data.new_email)
+			await emailRepository.emailVerification(user.id, newemail.data.new_email);
 		} catch (error) {
 			return message(newemail, 'Something went wrong updating your email', {
 				status: 500

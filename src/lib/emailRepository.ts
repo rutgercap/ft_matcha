@@ -58,31 +58,35 @@ class EmailRepository {
 		private transporter: Transporter
 	) {}
 
-	public async emailVerification(userId:string, email:string) {
+	public async emailVerification(userId: string, email: string) {
 		try {
 			await this.updateEmailIsSetup(userId, false);
-			const token = this.createEmailVerificationToken(userId, email)
+			const token = this.createEmailVerificationToken(userId, email);
 			const link = `${PUBLIC_BASE_URL}/api/email-verification/` + token;
 			const res = await this.verificationLinkTo(email, link);
-			console.log('in emailVerification: verificationLink = ', link)
+			console.log('in emailVerification: verificationLink = ', link);
 		} catch (error) {
-			throw new EmailRepositoryError('Something went wrong doing emailVerification procedure for: ' + email, error)
+			throw new EmailRepositoryError(
+				'Something went wrong doing emailVerification procedure for: ' + email,
+				error
+			);
 		}
 	}
 
-	public async passwordVerification(userId:string, email:string, passwordHash:string) {
+	public async passwordVerification(userId: string, email: string, passwordHash: string) {
 		try {
 			await this.upsertPasswordIsSet(userId, false);
 			const verificationToken = this.createResetPasswordToken(userId, email, passwordHash);
-			const verificationLink =`${PUBLIC_BASE_URL}/profile/${userId}/edit-profile/reset-pswd/` + verificationToken;
+			const verificationLink =
+				`${PUBLIC_BASE_URL}/profile/${userId}/edit-profile/reset-pswd/` + verificationToken;
 			const res_email = await this.resetLinkTo(email, verificationLink);
-			console.log('in passwordVerification: verificationLink = ', verificationLink)
-
+			console.log('in passwordVerification: verificationLink = ', verificationLink);
 		} catch (error) {
-			throw new EmailRepositoryError('Something went wrong doing passwordVerification procedure for: ' + email, error)
+			throw new EmailRepositoryError(
+				'Something went wrong doing passwordVerification procedure for: ' + email,
+				error
+			);
 		}
-
-
 	}
 
 	public async verificationLinkTo(email: string, link: string) {
@@ -182,7 +186,10 @@ class EmailRepository {
 			this.insertEmailSession(userId, tokenId, email, createDate(new TimeSpan(3, 'm')));
 			return tokenId;
 		} catch (error) {
-			throw new EmailRepositoryError('Something went wrong creating the email verification token for: ' + email, error)
+			throw new EmailRepositoryError(
+				'Something went wrong creating the email verification token for: ' + email,
+				error
+			);
 		}
 	}
 
@@ -199,7 +206,10 @@ class EmailRepository {
 			);
 			return tokenId;
 		} catch (error) {
-			throw new EmailRepositoryError('Something went wrong creating the password verification token for:' + email, error)
+			throw new EmailRepositoryError(
+				'Something went wrong creating the password verification token for:' + email,
+				error
+			);
 		}
 	}
 
@@ -348,7 +358,7 @@ class EmailRepository {
 			);
 		}
 	}
-  
+
 	public async updateEmailIsSetup(userId: string, val: boolean) {
 		try {
 			const tmp: number = val ? 1 : 0;

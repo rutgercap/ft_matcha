@@ -1,6 +1,6 @@
 import { describe, expect } from 'vitest';
 import { itWithFixtures } from '../fixtures';
-import { ImageRepositoryError } from '$lib/imageRepository';
+import { ImageRepositoryError } from '$lib/server/imageRepository';
 
 describe('ImageRepository', () => {
 	itWithFixtures(

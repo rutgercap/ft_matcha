@@ -1,5 +1,5 @@
-import { DuplicateEntryError } from '$lib/userRepository';
-import type { ProfileWithoutPicturesAndId, UserWithPassword } from '$lib/userRepository';
+import { DuplicateEntryError } from '$lib/server/userRepository';
+import type { ProfileWithoutPicturesAndId, UserWithPassword } from '$lib/server/userRepository';
 import { describe, expect } from 'vitest';
 import { faker } from '@faker-js/faker';
 import { type User } from 'lucia';
