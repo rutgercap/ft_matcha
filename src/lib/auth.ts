@@ -1,14 +1,49 @@
-import { Lucia } from 'lucia';
+import { Lucia, type Adapter } from 'lucia';
 import { BetterSqlite3Adapter } from '@lucia-auth/adapter-sqlite';
-import { dev } from '$app/environment';
 import { getDb } from './database/database';
+import type { Database } from 'better-sqlite3';
 
-const db = getDb();
+export function adapter(db: Database) {
+	const adapter = new BetterSqlite3Adapter(db, {
+		user: 'users',
+		session: 'sessions'
+	});
+	return adapter;
+}
 
-const adapter = new BetterSqlite3Adapter(db, {
-	user: 'users',
-	session: 'sessions'
-});
+export function createLuciaInstance(luciaAdapter: Adapter) {
+	return new Lucia(luciaAdapter, {
+		sessionCookie: {
+			attributes: {
+				// If ever go to production need to change this to true
+				secure: false,
+			}
+		},
+		getUserAttributes: (attributes: DatabaseUserAttributes) => {
+			return {
+				username: attributes.username,
+				profileIsSetup: attributes.profile_is_setup === 0 ? false : true,
+				email: attributes.email,
+				emailIsSetup: attributes.email_is_setup === 0 ? false : true,
+				passwordIsSet: attributes.password_is_set === 0 ? false : true
+			};
+		}
+	});
+}
+
+let _lucia: ReturnType<typeof createLuciaInstance> | null = null;
+
+export const lucia = new Proxy(
+	{},
+	{
+		get: (_, prop) => {
+			if (!_lucia) {
+				_lucia = createLuciaInstance(adapter(getDb()));
+			}
+			return _lucia[prop as keyof typeof _lucia];
+		}
+	}
+) as ReturnType<typeof createLuciaInstance>;
 
 interface DatabaseUserAttributes {
 	username: string;
@@ -18,26 +53,9 @@ interface DatabaseUserAttributes {
 	password_is_set: number;
 }
 
-export const lucia = new Lucia(adapter, {
-	sessionCookie: {
-		attributes: {
-			secure: !dev
-		}
-	},
-	getUserAttributes: (attributes) => {
-		return {
-			username: attributes.username,
-			profileIsSetup: attributes.profile_is_setup === 0 ? false : true,
-			email: attributes.email,
-			emailIsSetup: attributes.email_is_setup === 0 ? false : true,
-			passwordIsSet: attributes.password_is_set === 0 ? false : true
-		};
-	}
-});
-
 declare module 'lucia' {
 	interface Register {
-		Lucia: typeof lucia;
+		Lucia: ReturnType<typeof createLuciaInstance>;
 		DatabaseUserAttributes: DatabaseUserAttributes;
 	}
 }

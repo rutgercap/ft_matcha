@@ -1,38 +1,32 @@
 import type { JsonSerializable } from '$lib/types/jsonSerializable';
 import { createServer, type Server as HttpServer } from 'http';
 import { Server, type Socket as ServerSocket } from 'socket.io';
+import type { Lucia } from 'lucia';
+// need relative import for vite
+import { lucia } from '../auth';
 
 let server: WebsocketServer | null = null;
 
 export class WebsocketServer {
-	private _server: Server;
 	private connections: Map<string, ServerSocket> = new Map();
 	currentId = 0;
 
-	constructor(server: Server) {
-		this._server = server;
+	constructor(private server: Server, private lucia: Lucia) {
 		this.authMiddleWare();
-		this.saveConnections();
 	}
 
 	private authMiddleWare() {
-		this._server.use((socket, next) => {
+		this.server.use(async (socket, next) => {
 			const token = socket.handshake.auth.token;
 			if (!token) {
 				return next(new Error('Authentication error'));
 			}
-			console.log('token', token);
+			const {session, user }= await this.lucia.validateSession(token)
+			if (!session) {
+				return next(new Error('Authentication error'));
+			}
+			this.connections.set(user.id, socket);
 			next();
-		});
-	}
-
-	private saveConnections() {
-		this._server.on('connection', (socket) => {
-			this.connections.set(this.currentId.toString(), socket);
-			socket.on('disconnect', () => {
-				this.connections.delete(this.currentId.toString());
-			});
-			this.currentId++;
 		});
 	}
 
@@ -47,6 +41,6 @@ export function websocketServer(httpServer?: HttpServer): WebsocketServer {
 	}
 	const _httpServer = httpServer ?? createServer();
 	const io = new Server(_httpServer);
-	server = new WebsocketServer(io);
+	server = new WebsocketServer(io, lucia);
 	return server;
 }
