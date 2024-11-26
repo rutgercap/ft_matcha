@@ -1,4 +1,4 @@
-import type { Database } from 'better-sqlite3';
+import type { Database, RunResult } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
 import type { ProfileInfo } from './domain/profile';
 import { hash } from '@node-rs/argon2';
@@ -192,7 +192,7 @@ class UserRepository {
 				const result = this.db
 					.prepare<string, UserId>(
 						`SELECT id
-   						FROM users 
+   						FROM users
 						WHERE id != ?`
 					)
 					.all(id)
@@ -212,7 +212,7 @@ class UserRepository {
 					.prepare<
 						string,
 						UserWithPassword
-					>('SELECT id, email, username, profile_is_setup FROM users WHERE id = ?')
+					>('SELECT id, email, username, profile_is_setup, email_is_setup FROM users WHERE id = ?')
 					.get(id);
 				if (!result) {
 					resolve(null);
@@ -240,7 +240,7 @@ class UserRepository {
 		}
 	}
 
-	public upsertPasswordIsSet(userId: string, flag: boolean) {
+	public async upsertPasswordIsSet(userId: string, flag: boolean) {
 		try {
 			const val = flag ? 1 : 0;
 			const sql = this.db.prepare<[number, string]>(
@@ -296,6 +296,22 @@ class UserRepository {
 		});
 	}
 
+
+	public async updateUserEmail(userId: string, email: string) {
+		try {
+			const sql = this.db.prepare<[string, string]>(
+				`UPDATE users SET email = ? WHERE id = ?`
+			);
+			const res = sql.run(email, userId);
+		} catch (error) {
+			console.log('error occur at updateUserEmail: ', error);
+			throw new UserRepositoryError(
+				'error occur trying to update new email for user:' + userId,
+				error
+			);
+		}
+	}
+
 	public async updateUserPswd(userId: string, password: string) {
 		try {
 			const passwordHash = await hash(password, {
@@ -308,8 +324,7 @@ class UserRepository {
 			const sql = this.db.prepare<[string, string]>(
 				`UPDATE users SET password_hash = ? WHERE id = ?`
 			);
-			const res = sql.run(passwordHash, userId);
-			return res;
+			sql.run(passwordHash, userId);
 		} catch (error) {
 			console.log('error occur at updateUserPswd: ', error);
 			throw new UserRepositoryError(

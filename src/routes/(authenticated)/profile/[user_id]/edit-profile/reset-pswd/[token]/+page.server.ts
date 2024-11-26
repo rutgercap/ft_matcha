@@ -80,12 +80,10 @@ export const actions: Actions = {
 				status: 400
 			});
 		}
-		let res = await userRepository.updateUserPswd(user.id, newpswd.data.new_password);
-		if (!res.changes) return error(500, 'error occur trying to update password');
-
+		await userRepository.updateUserPswd(user.id, newpswd.data.new_password);
 		await emailRepository.deleteResetPasswordSession(params.token);
-		res = userRepository.upsertPasswordIsSet(user.id, true);
-		if (!res.changes) return error(500, 'error occur trying to update password');
+		await userRepository.upsertPasswordIsSet(user.id, true);
+
 
 		redirect(302, '/');
 	}

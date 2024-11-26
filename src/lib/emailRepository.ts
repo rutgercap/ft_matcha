@@ -1,6 +1,6 @@
 import { APP_PASSWORD, GOOGLE_EMAIL } from '$env/static/private';
 import nodemailer from 'nodemailer';
-import type { Database } from 'better-sqlite3';
+import type { Database, RunResult } from 'better-sqlite3';
 import { generateIdFromEntropySize } from 'lucia';
 import { TimeSpan, createDate } from 'oslo';
 import type { ToSnakeCase } from './commonTypes';
@@ -304,7 +304,7 @@ class EmailRepository {
 			const updateProfileSet = this.db.prepare<[number, string]>(
 				'UPDATE users SET email_is_setup = ? WHERE id = ?'
 			);
-			updateProfileSet.run(tmp, userId);
+			const res = updateProfileSet.run(tmp, userId);
 		} catch (error) {
 			console.log('console log error from updateEmailIsSetup', error);
 			throw new EmailRepositoryError(

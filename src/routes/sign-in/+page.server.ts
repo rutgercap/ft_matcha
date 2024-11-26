@@ -103,10 +103,7 @@ export const actions: Actions = {
 			const verificationLink =
 				`${PUBLIC_BASE_URL}/profile/${user.id}/edit-profile/reset-pswd/` + verificationToken;
 			const res_email = await emailRepository.resetLinkTo(email, verificationLink);
-			const res = userRepository.upsertPasswordIsSet(user.id, false);
-			if (!res.changes) {
-				return error(500, 'A problem occure invalidating the profile');
-			}
+			await userRepository.upsertPasswordIsSet(user.id, false);
 			const session = await lucia.createSession(user.id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies.set(sessionCookie.name, sessionCookie.value, {
