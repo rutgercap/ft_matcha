@@ -84,7 +84,6 @@ export const actions: Actions = {
 		await emailRepository.deleteResetPasswordSession(params.token);
 		await userRepository.upsertPasswordIsSet(user.id, true);
 
-
 		redirect(302, '/');
 	}
 };

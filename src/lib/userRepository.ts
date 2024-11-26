@@ -1,17 +1,25 @@
-import type { Database, RunResult } from 'better-sqlite3';
+import type { Database } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
-import type { ProfileInfo } from './domain/profile';
+import type { ProfileInfo, ReducedProfileInfo } from './domain/profile';
 import { hash } from '@node-rs/argon2';
 import _ from 'lodash';
 import type { User } from 'lucia';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageRepository } from './imageRepository';
 import { Buffer } from 'buffer';
-import type { ToSnakeCase } from './commonTypes';
+import type { ToSnakeCase } from './types/snakeCase';
 
 type UserWithPassword = User & { passwordHash: string };
 
-type UserWithoutProfileSetup = Omit<User, 'profileIsSetup' | 'emailIsSetup'>;
+type UserWithoutProfileSetup = Omit<User, 'profileIsSetup' | 'emailIsSetup' | 'passwordIsSet'>;
+
+type ProfileWithoutPicturesAndId = Omit<ProfileInfo, 'uploadedPictures' | 'userId'>;
+
+type ProfilePreview = {
+	userId: string;
+	firstName: string;
+	lastName: string;
+};
 
 class UserRepositoryError extends Error {
 	exception: unknown;
@@ -97,6 +105,29 @@ class UserRepository {
 		});
 	}
 
+	async profilePreviews(ids: string[]): Promise<ProfilePreview[]> {
+		const getProfilePreview = this.db.prepare<string, ToSnakeCase<ProfilePreview>>(
+			`SELECT user_id, first_name, last_name 
+			FROM profile_info 
+			WHERE user_id = ?`
+		);
+		return new Promise((resolve, reject) => {
+			try {
+				const transaction = this.db.transaction((ids: string[]) => {
+					return ids.map((id) => getProfilePreview.get(id)).filter((result) => result != null);
+				});
+				const result = transaction(ids);
+				const mapped = result.map((res) => {
+					const camelCaseObject = _.mapKeys(res, (value, key) => _.camelCase(key));
+					return camelCaseObject as ProfilePreview;
+				});
+				resolve(mapped);
+			} catch (e) {
+				reject(new UserRepositoryError('Something went wrong fetching profile previews', e));
+			}
+		});
+	}
+
 	async profileInfoFor(id: string): Promise<ProfileInfo | null> {
 		return new Promise((resolve, reject) => {
 			try {
@@ -111,13 +142,11 @@ class UserRepository {
 						`
 					)
 					.get(id);
-				const pictures: Array<string> = this.imageRepo.allImageIdOnly(id);
 				if (!result) {
 					resolve(null);
 				} else {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
 					camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
-					camelCaseObject.pictures_filenames = pictures;
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
@@ -128,7 +157,10 @@ class UserRepository {
 		});
 	}
 
-	async upsertPersonalInfo(id: string, info: ProfileInfo): Promise<Array<string | null>> {
+	async upsertProfileInfo(
+		id: string,
+		info: ProfileWithoutPicturesAndId
+	): Promise<Array<string | null>> {
 		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
 			`
 				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography)
@@ -148,58 +180,63 @@ class UserRepository {
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
 
-		const buffers: Array<Buffer | null> = await this.imageRepo.convertFileToBuffer(info.pictures);
-
 		return new Promise((resolve, reject) => {
 			try {
-				const transaction = this.db.transaction((id: string, profileTest: ProfileInfo) => {
-					insertIntoProfile.run(
-						id,
-						profileTest.firstName,
-						profileTest.lastName,
-						profileTest.gender.toString(),
-						profileTest.sexualPreference.toString(),
-						profileTest.biography
-					);
-					updateProfileSet.run(id);
-					deleteTags.run(id);
-					profileTest.tags.forEach((tag) => {
-						insertTag.run(uuidv4(), id, tag);
-					});
-				});
+				const transaction = this.db.transaction(
+					(id: string, profileTest: ProfileWithoutPicturesAndId) => {
+						insertIntoProfile.run(
+							id,
+							profileTest.firstName,
+							profileTest.lastName,
+							profileTest.gender.toString(),
+							profileTest.sexualPreference.toString(),
+							profileTest.biography
+						);
+						updateProfileSet.run(id);
+						deleteTags.run(id);
+						profileTest.tags.forEach((tag) => {
+							insertTag.run(uuidv4(), id, tag);
+						});
+					}
+				);
 				transaction(id, info);
-
-				// if (buffers)
-				const inserted_filename: Array<string | null> = this.imageRepo.upsertImageAll(id, buffers);
-
+				const inserted_filename: Array<string | null> = [];
 				resolve(inserted_filename);
 			} catch (e) {
-				if (e instanceof SqliteError) {
-					reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));
-				}
 				reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));
 			}
 		});
 	}
 
-	public async allOtherUsers(id: string) {
-		interface UserId {
-			id: string;
+	public async updateEmailIsSetup(userId: string, val: boolean) {
+		try {
+			const tmp: number = val ? 1 : 0;
+			const updateProfileSet = this.db.prepare<[number, string]>(
+				'UPDATE users SET email_is_setup = ? WHERE id = ?'
+			);
+			updateProfileSet.run(tmp, userId);
+		} catch (error) {
+			console.log('console log error from updateEmailIsSetup', error);
+			throw new UserRepositoryError(
+				'Error occurs trying to update email_is_setup for user:' + userId,
+				error
+			);
 		}
+	}
+
+	public async allOtherUsers(id: string): Promise<string[]> {
 		return new Promise((resolve, reject) => {
 			try {
-				// this needs AND profile_is_setup = 1
 				const result = this.db
-					.prepare<string, UserId>(
+					.prepare<string, { id: string }>(
 						`SELECT id
    						FROM users
-						WHERE id != ?`
+						WHERE id != ? AND profile_is_setup = 1`
 					)
 					.all(id)
 					.map((user) => user.id);
 				resolve(result);
 			} catch (e) {
-				console.log(e);
 				reject(new UserRepositoryError('Something went wrong fetching other users', e));
 			}
 		});
@@ -217,8 +254,9 @@ class UserRepository {
 				if (!result) {
 					resolve(null);
 				}
-				const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key)) as any;
+				const camelCaseObject = _.mapKeys(result, (__, key) => _.camelCase(key)) as any;
 				camelCaseObject.profileIsSetup = camelCaseObject.profileIsSetup === 0 ? false : true;
+				camelCaseObject.emailIsSetup = camelCaseObject.email_is_setup === 0 ? false : true;
 				resolve(camelCaseObject as User);
 			} catch (e) {
 				reject(new UserRepositoryError('Something went wrong fetching user for id: ' + id, e));
@@ -226,7 +264,33 @@ class UserRepository {
 		});
 	}
 
-	public upsertProfileIsSetup(userId: string, flag: boolean) {
+	public reducedProfile(id: string): Promise<ReducedProfileInfo | null> {
+		return new Promise((resolve, reject) => {
+			try {
+				const sql = `
+					SELECT u.username, p.biography, p.gender
+					FROM users AS u
+					INNER JOIN profile_info AS p ON u.id = p.user_id
+					WHERE u.id = ? 
+				`;
+				const res = this.db.prepare<string, ToSnakeCase<ReducedProfileInfo>>(sql).get(id);
+				if (!res) {
+					resolve(null);
+				}
+				const camelCaseObject = _.mapKeys(res, (__, key) => _.camelCase(key)) as any;
+				resolve(camelCaseObject as ReducedProfileInfo);
+			} catch (error) {
+				reject(
+					new UserRepositoryError(
+						'Something went wrong getting reducedProfile for user id: ' + id,
+						error
+					)
+				);
+			}
+		});
+	}
+
+	public updateProfileIsSetup(userId: string, flag: boolean) {
 		try {
 			const val = flag ? 1 : 0;
 			const sql = this.db.prepare<[number, string]>(
@@ -235,7 +299,6 @@ class UserRepository {
 			const res = sql.run(val, userId);
 			return res;
 		} catch (error) {
-			console.log('error in the userRepository:upsertProfileIsSetup:', error);
 			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error);
 		}
 	}
@@ -254,7 +317,10 @@ class UserRepository {
 		}
 	}
 
-	public async createUser(user: UserWithoutProfileSetup, password: string): Promise<User> {
+	public async createUser(
+		user: UserWithoutProfileSetup,
+		password: string
+	): Promise<UserWithoutProfileSetup> {
 		const passwordHash = await hash(password, {
 			memoryCost: 19456,
 			timeCost: 2,
@@ -264,17 +330,18 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
-					.prepare<[string, string, string, string], ToSnakeCase<UserWithPassword>>(
+					.prepare<[string, string, string, string], ToSnakeCase<UserWithoutProfileSetup>>(
 						`INSERT INTO users (id, email, username, password_hash)
 						VALUES (?, ?, ?, ?)
-						RETURNING id, email, username, profile_is_setup;`
+						RETURNING id, email, username;`
 					)
 					.get(user.id, user.email, user.username, passwordHash);
-				if (result !== undefined) {
-					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
-					resolve(camelCaseObject as unknown as User);
+				if (!result) {
+					return reject(
+						new UserRepositoryError(`Something went wrong creating user: ${user.email}`, null)
+					);
 				}
-				reject(new UserRepositoryError(`Something went wrong creating user: ${user.email}`, null));
+				resolve(result);
 			} catch (e) {
 				if (e instanceof SqliteError) {
 					if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
@@ -296,12 +363,9 @@ class UserRepository {
 		});
 	}
 
-
 	public async updateUserEmail(userId: string, email: string) {
 		try {
-			const sql = this.db.prepare<[string, string]>(
-				`UPDATE users SET email = ? WHERE id = ?`
-			);
+			const sql = this.db.prepare<[string, string]>(`UPDATE users SET email = ? WHERE id = ?`);
 			const res = sql.run(email, userId);
 		} catch (error) {
 			console.log('error occur at updateUserEmail: ', error);
@@ -334,21 +398,35 @@ class UserRepository {
 		}
 	}
 
-	public async deleteUserImage(picture_id: string) {
+	public async deleteUserImage(userId: string, order: number): Promise<void> {
 		try {
-			const res = this.db
-				.prepare<string>('DELETE FROM profile_pictures WHERE id = ?')
-				.run(picture_id);
-			if (res.changes) {
-				await this.imageRepo.deleteImageById(picture_id);
-			} else {
-				throw new Error('picture_id is not in the database');
-			}
+			await this.imageRepo.deleteImage(userId, order);
 		} catch (error) {
-			throw new UserRepositoryError('Error occurs trying to delete image: ' + picture_id, error);
+			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
+		}
+	}
+
+	public async userImage(userId: string, order: number): Promise<Buffer | null> {
+		try {
+			return await this.imageRepo.image(userId, order);
+		} catch (error) {
+			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
+		}
+	}
+
+	public async saveUserImage(userId: string, order: number, image: Buffer): Promise<number> {
+		try {
+			return await this.imageRepo.upsertImage(userId, order, image);
+		} catch (error) {
+			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
 		}
 	}
 }
 
 export { UserRepository, UserRepositoryError, DuplicateEntryError };
-export type { UserWithPassword, UserWithoutProfileSetup };
+export type {
+	UserWithPassword,
+	UserWithoutProfileSetup,
+	ProfileWithoutPicturesAndId,
+	ProfilePreview
+};

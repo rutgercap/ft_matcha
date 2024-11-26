@@ -2,79 +2,114 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
 	import type { PageData } from './$types';
+	import { Icon, Trash } from 'svelte-hero-icons';
+	import addToast from '$lib/toast/toastStore';
 
 	export let data: PageData;
+	$: user = data.user;
 
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
 		resetForm: false
 	});
 
-
-	const user = data.user;
-
-	let all_url = [
-		'/api/pics/' + $form.pictures_filenames[0] + `?t=${Date.now()}`,
-		'/api/pics/' + $form.pictures_filenames[1] + `?t=${Date.now()}`,
-		'/api/pics/' + $form.pictures_filenames[2] + `?t=${Date.now()}`,
-		'/api/pics/' + $form.pictures_filenames[3] + `?t=${Date.now()}`,
-		'/api/pics/' + $form.pictures_filenames[4] + `?t=${Date.now()}`
-	];
+	const maxPictures = 5;
 
 	function triggerEachFileInput(idx: number) {
 		document.getElementById(`pictures-${idx}`)?.click();
 	}
 
-	const handleEachFileInput = (idx: number, e) => {
-		if (!$form.pictures) {
-			$form.pictures = [];
-		}
-		$form.pictures[idx] = e.currentTarget.files?.item(0);
-		let reader = new FileReader();
-		reader.readAsDataURL($form.pictures[idx]);
-		reader.onload = (e) => {
-			all_url[idx] = e.target.result;
-		};
-	};
+	const refreshKeys = [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()];
 
-	const handleDeletePicture = (index: number) => {
-		// Check if the index is valid
-		if (index < 0 || index >= all_url.length) {
-			console.error('Invalid index');
+	async function uploadPicture(
+		idx: number,
+		event: Event & {
+			currentTarget: EventTarget & HTMLInputElement;
+		}
+	) {
+		const inputElement = event.target;
+		if (!(inputElement instanceof HTMLInputElement) || inputElement.files === null) {
+			console.error('Invalid input element.');
 			return;
 		}
-
-		let urlToDelete = all_url[index];
-
-		if (urlToDelete.startsWith('data:image/')) {
-			urlToDelete = all_url[index] =
-				'/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`;
+		const file = inputElement.files[0];
+		const formData = new FormData();
+		formData.append('image', file, file.name);
+		try {
+			const response = await fetch(`/api/pics/${user.id}/${idx}`, {
+				method: 'POST',
+				body: formData
+			});
+			if (response.ok) {
+				refreshKeys[idx] = Math.random();
+			} else {
+				addToast({ message: 'Something went wrong uploading picture', type: 'error' });
+				console.error('Failed to upload file:', response.statusText);
+			}
+		} catch (error) {
+			addToast({ message: 'Something went wrong uploading picture', type: 'error' });
+			console.error('Error uploading file:', error);
 		}
-		fetch(urlToDelete, {
-			method: 'DELETE',
-			headers: {
-				'Content-Type': 'application/json'
+	}
+
+	async function handleDeletePicture(index: number) {
+		const urlToDelete = `/api/pics/${user.id}/${index}`;
+
+		try {
+			const result = await fetch(urlToDelete, {
+				method: 'DELETE'
+			});
+			if (result.ok) {
+				refreshKeys[index] = Math.random();
+			} else {
+				addToast({ message: 'Something went wrong deleting picture', type: 'error' });
+				console.error('Failed to delete picture:', result.statusText);
 			}
-		}).then((response) => {
-			if (response.status === 204 || response.headers.get('Content-Length') === '0') {
-				$form.pictures_filenames[index] = 'default2';
-				all_url[index] = '/api/pics/' + $form.pictures_filenames[index] + `?t=${Date.now()}`;
-			}
-		});
-	};
+		} catch (e) {
+			addToast({ message: 'Something went wrong deleting picture', type: 'error' });
+			console.error('Error deleting picture:', e);
+		}
+	}
 </script>
 
 <div class="max-w-3xl mx-auto">
-	
-	<form class="px-4 mb-8" method="POST" use:enhance enctype="multipart/form-data">
+	<div class="space-y-10">
+		<div class="flex items-center justify-between">
+			<h2 class="text-base font-semibold leading-7 text-gray-900">Edit profile</h2>
+			<a
+				href="/profile/{user.id}/edit-profile/change-email"
+				class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+			>
+				Edit private info
+			</a>
+		</div>
+		<div class="col-span-full profile-picture-row">
+			{#each Array(maxPictures) as _, i}
+				<div class="profile-picture-container">
+					<input
+						id={`pictures-${i}`}
+						name="pictures"
+						type="file"
+						on:input={(e) => uploadPicture(i, e)}
+						accept="image/png, image/jpeg, image/jpg"
+						class="hidden"
+					/>
+					<button class="profile-picture-upload" on:click={() => triggerEachFileInput(i)}>
+						<img
+							alt="profile"
+							class="profile-picture-preview"
+							src={`/api/pics/${user.id}/${i}?refreshKey=${refreshKeys[i]}`}
+						/>
+					</button>
+					<button class="delete-icon" on:click={() => handleDeletePicture(i)}>
+						<Icon src={Trash} class="h-8 w-auto" />
+					</button>
+				</div>
+			{/each}
+		</div>
+	</div>
+	<form class="px-4 mb-8 mt-10" method="POST" use:enhance enctype="multipart/form-data">
 		<div class="space-y-10">
-			<div class="flex items-center justify-between">
-				<h2 class="text-base font-semibold leading-7 text-gray-900">Profile Information</h2>
-				<a href="/profile/{user.id}/edit-profile/change-email"
-					class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-				>
-					Edit private info
-				</a>
-			</div>
+			<h2 class="text-base font-semibold leading-7 text-gray-900">Profile Information</h2>
 			<div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 				<div class="sm:col-span-3">
 					<label for="firstName" class="block text-sm font-medium leading-6 text-gray-900">
@@ -92,7 +127,7 @@
 							{...$constraints.firstName}
 						/>
 					</div>
-					{#if $errors.firstName && $tainted }
+					{#if $errors.firstName && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.firstName}</p>
 					{/if}
 				</div>
@@ -199,65 +234,33 @@
 					</div>
 					<p class="mt-3 text-sm leading-6 text-gray-600">Tags are comma separated.</p>
 					{#if $errors.tags}
-						<p class="mt-2 text-sm text-red-600" id="tags-error">{$errors.tags._errors}</p>
+						<p class="mt-2 text-sm text-red-600" id="tags-error">{$errors.tags}</p>
 					{/if}
 				</div>
-
-				<!-- Image upload field-->
-				<label for="pictures" class="block text-sm font-medium leading-6 text-gray-900"
-					>Profile pictures</label
-				>
-
-				<div class="col-span-full profile-picture-row">
-					{#each all_url as img_url, index}
-						<div class="profile-picture-container">
-							<input
-								id={`pictures-${index}`}
-								name="pictures"
-								type="file"
-								on:input={(e) => handleEachFileInput(index, e)}
-								accept="image/png, image/jpeg, image/jpg"
-								class="hidden"
-							/>
-
-							<!-- Display the image and make it clickable -->
-							<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
-							<div class="profile-picture-upload" on:click={() => triggerEachFileInput(index)}>
-								<img src={img_url} alt="profile" class="profile-picture-preview" />
-							</div>
-							<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions (because of reasons) -->
-							<div class="delete-icon" on:click={() => handleDeletePicture(index)}>
-								<img
-									src="https://png.pngtree.com/png-vector/20190531/ourmid/pngtree-trash-bin-icon-png-image_1252303.jpg"
-									alt="Delete"
-									class="delete-button"
-								/>
-							</div>
-						</div>
-					{/each}
+				{#if $message}
+					{#if $page.status == 200}
+						<p class="mt-2 text-sm text-green-600">{$message}</p>
+					{:else}
+						<p class="mt-2 text-sm text-red-600">{$message}</p>
+					{/if}
+				{/if}
+				<div class="mt-6 flex items-center w-full h-full justify-end gap-x-6">
+					<a
+						href={`/profile/${user?.id}`}
+						type="button"
+						class="text-sm font-semibold leading-6 text-gray-900">Cancel</a
+					>
+					<button
+						type="submit"
+						disabled={!isTainted($tainted)}
+						class="rounded-md {isTainted($tainted)
+							? 'bg-indigo-600 hover:bg-indigo-500 text-white'
+							: 'text-gray-400'} px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+					>
+						Save
+					</button>
 				</div>
 			</div>
-		</div>
-		{#if $message}
-			{#if $page.status == 200}
-				<p class="mt-2 text-sm text-green-600">{$message}</p>
-			{:else}
-				<p class="mt-2 text-sm text-red-600">{$message}</p>
-			{/if}
-		{/if}
-		<div class="mt-6 flex items-center justify-end gap-x-6">
-			<a href={`/profile/${user?.id}`} type="button" class="text-sm font-semibold leading-6 text-gray-900"
-				>Cancel</a
-			>
-			<button
-				type="submit"
-				disabled={!isTainted($tainted)}
-				class="rounded-md {isTainted($tainted)
-					? 'bg-indigo-600 hover:bg-indigo-500 text-white'
-					: 'text-gray-400'} px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-			>
-				Save
-			</button>
 		</div>
 	</form>
 </div>
@@ -272,31 +275,30 @@
 
 	.profile-picture-container {
 		display: flex;
-		flex-direction: column; /* Stack image and delete icon vertically */
+		flex-direction: column;
 		align-items: center;
-		width: 140px; /* Set fixed width for each image container */
+		width: 140px;
+		overflow: hidden;
 	}
 
 	.profile-picture-upload {
 		display: inline-block;
 		cursor: pointer;
-		width: 135px; /* Set fixed width for the preview box */
-		height: 135px; /* Set fixed height for the preview box */
+		width: 135px;
+		height: 135px;
 		position: relative;
 	}
 
-	/* Ensure all images are the same size and aspect ratio */
 	.profile-picture-preview {
 		width: 100%;
 		height: 100%;
-		object-fit: cover; /* Make sure the image covers the area uniformly */
-		border-radius: 10px; /* Add some rounding for a smooth look */
-		border: 1px solid #ddd; /* Optional border to highlight images */
+		object-fit: cover;
+		border-radius: 10px;
+		border: 1px solid #ddd;
 	}
 
-	/* Delete icon */
 	.delete-icon {
-		margin-top: 5px; /* Space between image and delete button */
+		margin-top: 5px;
 		cursor: pointer;
 	}
 

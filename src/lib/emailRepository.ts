@@ -1,9 +1,10 @@
 import { APP_PASSWORD, GOOGLE_EMAIL } from '$env/static/private';
 import nodemailer from 'nodemailer';
-import type { Database, RunResult } from 'better-sqlite3';
+import type { Database } from 'better-sqlite3';
 import { generateIdFromEntropySize } from 'lucia';
 import { TimeSpan, createDate } from 'oslo';
-import type { ToSnakeCase } from './commonTypes';
+import type { Transporter } from 'nodemailer';
+import type { ToSnakeCase } from './types/snakeCase';
 
 class EmailRepositoryError extends Error {
 	exception: unknown;
@@ -21,25 +22,40 @@ interface EmailSession {
 	email: string;
 }
 
-class EmailRepository {
-	transporter;
-	constructor(private db: Database) {
-		this.transporter = nodemailer.createTransport({
-			host: 'smtp.gmail.com',
-			port: 587,
-			secure: false,
-			auth: {
-				user: GOOGLE_EMAIL,
-				pass: APP_PASSWORD
-			}
-		});
-		this.transporter.verify(function (error: any, success: any) {
-			if (error) {
-				console.error(error);
-				throw new EmailRepositoryError('Error occur trying to instaciate mail service', error);
-			}
-		});
+// singleton instance
+let transporter: Transporter | null = null;
+
+export function getTransporter(): Transporter {
+	if (!transporter) {
+		transporter = createTransporter();
 	}
+	return transporter;
+}
+
+function createTransporter(): Transporter {
+	const transporter = nodemailer.createTransport({
+		host: 'smtp.gmail.com',
+		port: 587,
+		secure: false,
+		auth: {
+			user: GOOGLE_EMAIL,
+			pass: APP_PASSWORD
+		}
+	});
+	transporter.verify(function (error: any) {
+		if (error) {
+			console.error(error);
+			throw new EmailRepositoryError('Error occur trying to instaciate mail service', error);
+		}
+	});
+	return transporter;
+}
+
+class EmailRepository {
+	constructor(
+		private db: Database,
+		private transporter: Transporter
+	) {}
 
 	public async verificationLinkTo(email: string, link: string) {
 		const body = `
@@ -293,22 +309,6 @@ class EmailRepository {
 			console.log('console log error from insertResetPasswordSession', error);
 			throw new EmailRepositoryError(
 				'Error occurs trying to insert reset password session for user:' + userId,
-				error
-			);
-		}
-	}
-
-	public async updateEmailIsSetup(userId: string, val: boolean) {
-		try {
-			const tmp: number = val ? 1 : 0;
-			const updateProfileSet = this.db.prepare<[number, string]>(
-				'UPDATE users SET email_is_setup = ? WHERE id = ?'
-			);
-			const res = updateProfileSet.run(tmp, userId);
-		} catch (error) {
-			console.log('console log error from updateEmailIsSetup', error);
-			throw new EmailRepositoryError(
-				'Error occurs trying to update email_is_setup for user:' + userId,
 				error
 			);
 		}

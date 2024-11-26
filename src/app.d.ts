@@ -2,9 +2,9 @@ import type { UserRepository } from '$lib/userRepository';
 import type { EmailRepository } from '$lib/emailRepository';
 import type { User, Session } from 'Lucia';
 import type { ProfileVisitRepository } from '$lib/profileVisitRepository';
+import type { BrowsingRepository } from '$lib/browsingRepository';
+import type { ConnectionRepository } from '$lib/connectionRepository';
 
-// See https://kit.svelte.dev/docs/types#app
-// for information about these interfaces
 declare global {
 	namespace App {
 		// interface Error {}
@@ -14,6 +14,8 @@ declare global {
 			session: Session | null;
 			emailRepository: EmailRepository;
 			profileVisitRepository: ProfileVisitRepository;
+			browsingRepository: BrowsingRepository;
+			connectionRepository: ConnectionRepository;
 		}
 		// interface PageData {}
 		// interface PageState {}

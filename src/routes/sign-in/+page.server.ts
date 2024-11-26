@@ -7,7 +7,6 @@ import { verify } from '@node-rs/argon2';
 import { lucia } from '$lib/auth';
 import { PUBLIC_BASE_URL } from '$env/static/public';
 
-
 const signInSchema = z.object({
 	username: z.string().min(4).max(31),
 	password: z.string().min(6).max(255)
@@ -57,7 +56,7 @@ export const actions: Actions = {
 		// this condition is in case the user clicked the reset password button
 		// but then log in whitout changing the oldpswd
 		if (!user.passwordIsSet) {
-			const change = await emailRepository.deleteResetPasswordSessionByUserId(user.id);
+			await emailRepository.deleteResetPasswordSessionByUserId(user.id);
 			userRepository.upsertPasswordIsSet(user.id, true);
 			await lucia.invalidateUserSessions(user.id);
 		}
