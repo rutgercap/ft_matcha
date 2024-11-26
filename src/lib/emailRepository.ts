@@ -4,6 +4,7 @@ import type { Database, RunResult } from 'better-sqlite3';
 import { generateIdFromEntropySize } from 'lucia';
 import { TimeSpan, createDate } from 'oslo';
 import type { ToSnakeCase } from './commonTypes';
+import { PUBLIC_BASE_URL } from '$env/static/public';
 
 class EmailRepositoryError extends Error {
 	exception: unknown;
@@ -39,6 +40,33 @@ class EmailRepository {
 				throw new EmailRepositoryError('Error occur trying to instaciate mail service', error);
 			}
 		});
+	}
+
+	public async emailVerification(userId:string, email:string) {
+		try {
+			await this.updateEmailIsSetup(userId, false);
+			const token = this.createEmailVerificationToken(userId, email)
+			const link = `${PUBLIC_BASE_URL}/api/email-verification/` + token;
+			const res = await this.verificationLinkTo(email, link);
+			console.log('in emailVerification: verificationLink = ', link)
+		} catch (error) {
+			throw new EmailRepositoryError('Something went wrong doing emailVerification procedure for: ' + email, error)
+		}
+	}
+
+	public async passwordVerification(userId:string, email:string, passwordHash:string) {
+		try {
+			await this.upsertPasswordIsSet(userId, false);
+			const verificationToken = this.createResetPasswordToken(userId, email, passwordHash);
+			const verificationLink =`${PUBLIC_BASE_URL}/profile/${userId}/edit-profile/reset-pswd/` + verificationToken;
+			const res_email = await this.resetLinkTo(email, verificationLink);
+			console.log('in passwordVerification: verificationLink = ', verificationLink)
+
+		} catch (error) {
+			throw new EmailRepositoryError('Something went wrong doing passwordVerification procedure for: ' + email, error)
+		}
+
+
 	}
 
 	public async verificationLinkTo(email: string, link: string) {
@@ -80,7 +108,7 @@ class EmailRepository {
 		const message = {
 			from: GOOGLE_EMAIL,
 			to: email,
-			subject: 'Your rest password link',
+			subject: 'Your reset password link',
 			text: body
 		};
 		return new Promise((resolve: any, reject: any) => {
@@ -131,25 +159,32 @@ class EmailRepository {
 	}
 
 	public createEmailVerificationToken(userId: string, email: string): string {
-		// optionally invalidate all existing tokens
-		this.deleteEmailSession(userId);
-		const tokenId = generateIdFromEntropySize(25); // 40 characters long
-		this.insertEmailSession(userId, tokenId, email, createDate(new TimeSpan(3, 'm')));
-		return tokenId;
+		try {
+			// optionally invalidate all existing tokens
+			this.deleteEmailSession(userId);
+			const tokenId = generateIdFromEntropySize(25); // 40 characters long
+			this.insertEmailSession(userId, tokenId, email, createDate(new TimeSpan(3, 'm')));
+			return tokenId;
+		} catch (error) {
+			throw new EmailRepositoryError('Something went wrong creating the email verification token for: ' + email, error)
+		}
 	}
 
 	public createResetPasswordToken(userId: string, email: string, old_pswd: string): string {
-		// optionally invalidate all existing tokens
-		this.deleteResetPasswordSession(userId);
-		const tokenId = generateIdFromEntropySize(25); // 40 characters long
-		this.insertResetPasswordSession(
-			userId,
-			tokenId,
-			email,
-			createDate(new TimeSpan(3, 'm')),
-			old_pswd
-		);
-		return tokenId;
+		try {
+			this.deleteResetPasswordSession(userId);
+			const tokenId = generateIdFromEntropySize(25); // 40 characters long
+			this.insertResetPasswordSession(
+				userId,
+				tokenId,
+				email,
+				createDate(new TimeSpan(3, 'm')),
+				old_pswd
+			);
+			return tokenId;
+		} catch (error) {
+			throw new EmailRepositoryError('Something went wrong creating the password verification token for:' + email, error)
+		}
 	}
 
 	public emailSessionByUserId(userId: string): ToSnakeCase<EmailSession> | null {
@@ -192,7 +227,7 @@ class EmailRepository {
 		}
 	}
 
-	public resetPasswordSession(tokenId: string) {
+	public passwordSession(tokenId: string) {
 		try {
 			const sql = this.db.prepare<string>(`
 				SELECT *
@@ -202,7 +237,7 @@ class EmailRepository {
 			const res = sql.get(tokenId);
 			return res;
 		} catch (error) {
-			console.log('console log error from resetPasswordSession', error);
+			console.log('console log error from passwordSession', error);
 			throw new EmailRepositoryError(
 				'Error occurs trying to get reset password session for sessionid:' + tokenId,
 				error
@@ -311,6 +346,20 @@ class EmailRepository {
 				'Error occurs trying to update email_is_setup for user:' + userId,
 				error
 			);
+		}
+	}
+
+	public async upsertPasswordIsSet(userId: string, flag: boolean) {
+		try {
+			const val = flag ? 1 : 0;
+			const sql = this.db.prepare<[number, string]>(
+				`UPDATE users SET password_is_set = ? WHERE id = ?`
+			);
+			const res = sql.run(val, userId);
+			return res;
+		} catch (error) {
+			console.log('error in the EmailRepository:upsertPasswordIsSet:', error);
+			throw new EmailRepositoryError('Error occur in the upsertPasswordIsSet function', error);
 		}
 	}
 }

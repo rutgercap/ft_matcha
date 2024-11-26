@@ -240,20 +240,6 @@ class UserRepository {
 		}
 	}
 
-	public async upsertPasswordIsSet(userId: string, flag: boolean) {
-		try {
-			const val = flag ? 1 : 0;
-			const sql = this.db.prepare<[number, string]>(
-				`UPDATE users SET password_is_set = ? WHERE id = ?`
-			);
-			const res = sql.run(val, userId);
-			return res;
-		} catch (error) {
-			console.log('error in the userRepository:upsertProfileIsSetup:', error);
-			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error);
-		}
-	}
-
 	public async createUser(user: UserWithoutProfileSetup, password: string): Promise<User> {
 		const passwordHash = await hash(password, {
 			memoryCost: 19456,

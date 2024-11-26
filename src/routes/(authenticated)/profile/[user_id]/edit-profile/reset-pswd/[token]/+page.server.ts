@@ -22,7 +22,7 @@ export const load: PageServerLoad = async ({ cookies, params, locals }) => {
 	const verificationToken = params.token;
 
 	const emailRepository = locals.emailRepository;
-	const token = emailRepository.resetPasswordSession(verificationToken);
+	const token = emailRepository.passwordSession(verificationToken);
 	if (token) {
 		await emailRepository.deleteResetPasswordSession(params.token);
 	}
@@ -57,7 +57,9 @@ export const actions: Actions = {
 		locals: { user, userRepository, emailRepository }
 	}) => {
 		const newpswd = await superValidate(request, zod(newPassword));
-		if (!newpswd) return fail(400, { newpswd });
+		if (!newpswd){
+			return fail(400, { newpswd });
+		}
 
 		if (newpswd.data.new_password !== newpswd.data.confirm_password) {
 			return message(newpswd, 'new password and confirmation must be the same', {
@@ -80,9 +82,17 @@ export const actions: Actions = {
 				status: 400
 			});
 		}
-		await userRepository.updateUserPswd(user.id, newpswd.data.new_password);
-		await emailRepository.deleteResetPasswordSession(params.token);
-		await userRepository.upsertPasswordIsSet(user.id, true);
+
+		try {
+			await userRepository.updateUserPswd(user.id, newpswd.data.new_password);
+			await emailRepository.deleteResetPasswordSession(params.token);
+			await emailRepository.upsertPasswordIsSet(user.id, true);
+		} catch (error) {
+			return message(newpswd, error, {
+				status: 500
+			});
+		}
+
 
 
 		redirect(302, '/');

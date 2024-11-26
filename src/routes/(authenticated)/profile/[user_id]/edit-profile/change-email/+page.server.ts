@@ -4,7 +4,7 @@ import { fail, redirect, type Action } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { z } from 'zod';
-import { PUBLIC_BASE_URL } from '$env/static/public';
+import { UserRepositoryError } from '$lib/userRepository';
 
 const newEmail = z.object({
 	new_email: z.string().email({ message: 'Invalid email address' }),
@@ -45,18 +45,14 @@ export const actions: Actions = {
 				status: 400
 			});
 		}
-
-
-		await userRepository.updateUserEmail(user.id, newemail.data.new_email);
-
-
-		await emailRepository.updateEmailIsSetup(user.id, false);
-
-		const verificationToken = emailRepository.createEmailVerificationToken(user.id, newemail.data.new_email);
-		const verificationLink = `${PUBLIC_BASE_URL}/api/email-verification/` + verificationToken;
-		console.log('verification link : ', verificationLink);
-		const send_details = await emailRepository.verificationLinkTo(newemail.data.new_email, verificationLink);
-
+		try {
+			await userRepository.updateUserEmail(user.id, newemail.data.new_email);
+			await emailRepository.emailVerification(user.id, newemail.data.new_email)
+		} catch (error) {
+			return message(newemail, 'Something went wrong updating your email', {
+				status: 500
+			});
+		}
 		redirect(302, '/sign-up/auth-email');
 	}
 };
