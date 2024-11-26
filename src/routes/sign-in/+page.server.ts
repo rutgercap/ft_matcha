@@ -3,10 +3,8 @@ import type { Actions, PageServerLoad } from './$types';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
-import { verify } from '@node-rs/argon2';
 import { lucia } from '$lib/auth';
-import { PUBLIC_BASE_URL } from '$env/static/public';
-import { AuthService, AuthServiceError } from '$lib/server/authService';
+import { AuthServiceError } from '$lib/server/authService';
 
 const signInSchema = z.object({
 	username: z.string().min(4).max(31),
@@ -74,12 +72,13 @@ export const actions: Actions = {
 		}
 		if (!user.emailIsSetup) {
 			return message(
-				form, 'your email has not been verified, you must contact service support at matchalover.serviceteam@gmail.com to unlock your profile',
-				{ status: 400}
+				form,
+				'your email has not been verified, you must contact service support at matchalover.serviceteam@gmail.com to unlock your profile',
+				{ status: 400 }
 			);
 		}
 		try {
-			await emailRepository.passwordVerification(user.id, email, user.passwordHash)
+			await emailRepository.passwordVerification(user.id, email, user.passwordHash);
 			const session = await lucia.createSession(user.id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies.set(sessionCookie.name, sessionCookie.value, {

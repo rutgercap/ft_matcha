@@ -1,9 +1,11 @@
 import type { Socket } from 'socket.io-client';
 import { EventEmitter } from 'events';
 
+export type NotificationType = "LIKE" | "MATCH" | "UNMATCH" | "UNLIKE";
+
 export type Notification = {
 	type: string;
-	message: string;
+	from: NotificationType;
 };
 
 export class NotificationClient {

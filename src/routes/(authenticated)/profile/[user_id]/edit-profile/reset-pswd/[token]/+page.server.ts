@@ -57,7 +57,7 @@ export const actions: Actions = {
 		locals: { user, userRepository, emailRepository }
 	}) => {
 		const newpswd = await superValidate(request, zod(newPassword));
-		if (!newpswd){
+		if (!newpswd) {
 			return fail(400, { newpswd });
 		}
 
@@ -92,7 +92,6 @@ export const actions: Actions = {
 				status: 500
 			});
 		}
-
 
 		redirect(302, '/');
 	}
