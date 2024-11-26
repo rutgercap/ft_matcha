@@ -57,12 +57,27 @@ export const actions: Actions = {
 				});
 			}
 		}
+
+		// this condition is in case the user clicked the reset password button
+		// but then log in whitout changing the oldpswd
+		if (!user.passwordIsSet) {
+			const change = await emailRepository.deleteResetPasswordSessionByUserId(user.id);
+			emailRepository.upsertPasswordIsSet(user.id, true);
+			await lucia.invalidateUserSessions(user.id);
+		}
+		const session = await lucia.createSession(user.id, {});
+		const sessionCookie = lucia.createSessionCookie(session.id);
+		cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: '.',
+			...sessionCookie.attributes
+		});
+		if (user.emailIsSetup) return redirect(302, '/');
+		else return redirect(302, '/sign-up/auth-email');
 		return redirect(302, '/');
 	},
 	forgot_pswd: async ({ request, cookies, locals: { userRepository, emailRepository } }) => {
 		const form = await superValidate(request, zod(emailSchema));
 		if (!form.valid) {
-			console.log('*************the form is not valid');
 			return fail(400, { form });
 		}
 
@@ -75,30 +90,18 @@ export const actions: Actions = {
 		}
 		if (!user.emailIsSetup) {
 			return message(
-				form,
-				'your email has not been verified, you must contact service support at matchalover.serviceteam@gmail.com to unlock your profile',
-				{
-					status: 400
-				}
+				form, 'your email has not been verified, you must contact service support at matchalover.serviceteam@gmail.com to unlock your profile',
+				{ status: 400}
 			);
 		}
 		try {
-			const verificationToken = emailRepository.createResetPasswordToken(
-				user.id,
-				email,
-				user.passwordHash
-			);
-			const verificationLink =
-				`${PUBLIC_BASE_URL}/profile/${user.id}/edit-profile/reset-pswd/` + verificationToken;
-			const res_email = await emailRepository.resetLinkTo(email, verificationLink);
-			await userRepository.upsertPasswordIsSet(user.id, false);
+			await emailRepository.passwordVerification(user.id, email, user.passwordHash)
 			const session = await lucia.createSession(user.id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies.set(sessionCookie.name, sessionCookie.value, {
 				path: '.',
 				...sessionCookie.attributes
 			});
-			console.log('reset password verification link: ', verificationLink);
 			return message(
 				form,
 				'Email verified, we sent you a verification link to reset your password',
