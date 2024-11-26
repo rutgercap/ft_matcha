@@ -10,7 +10,6 @@ function waitFor(socket: ServerSocket | ClientSocket, event: string): Promise<un
 	});
 }
 
-
 describe('WebsocketServer', () => {
 	let socket: ClientSocket | null = null;
 
@@ -45,7 +44,7 @@ describe('WebsocketServer', () => {
 			const token = await authService.signIn(user.username, DEFAULT_PASSWORD);
 			socket = io(`http://localhost:${port}`, {
 				auth: {
-					token: token.value,
+					token: token.value
 				}
 			});
 

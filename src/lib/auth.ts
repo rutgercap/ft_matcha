@@ -16,7 +16,7 @@ export function createLuciaInstance(luciaAdapter: Adapter) {
 		sessionCookie: {
 			attributes: {
 				// If ever go to production need to change this to true
-				secure: false,
+				secure: false
 			}
 		},
 		getUserAttributes: (attributes: DatabaseUserAttributes) => {
