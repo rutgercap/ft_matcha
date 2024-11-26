@@ -11,15 +11,16 @@ export class ImageRepositoryError extends Error {
 	}
 }
 
+export const MAX_PICTURES = 5;
+
 class ImageRepository {
-	private maxPictures: number = 5;
 	constructor(
 		private destination: string,
 		private db: Database
 	) {}
 
 	public async upsertImage(userId: string, order: number, imageBuffer: Buffer): Promise<number> {
-		if (order < 0 || order >= this.maxPictures) {
+		if (order < 0 || order >= MAX_PICTURES) {
 			throw new ImageRepositoryError('Image order out of range', null);
 		}
 		const id = uuidv4();

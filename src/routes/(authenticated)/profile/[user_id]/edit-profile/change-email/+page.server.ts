@@ -36,18 +36,18 @@ export const actions: Actions = {
 			});
 		}
 
-		if (newemail.data.new_email == user.email) {
+		if (newemail.data.new_email == user!.email) {
 			return message(newemail, 'new email must be different from the previous one', {
 				status: 400
 			});
 		}
 
-		await userRepository.updateUserEmail(user.id, newemail.data.new_email);
+		await userRepository.updateUserEmail(user!.id, newemail.data.new_email);
 
-		await emailRepository.updateEmailIsSetup(user.id, false);
+		await userRepository.updateEmailIsSetup(user!.id, false);
 
 		const verificationToken = emailRepository.createEmailVerificationToken(
-			user.id,
+			user!.id,
 			newemail.data.new_email
 		);
 		const verificationLink = `${PUBLIC_BASE_URL}/api/email-verification/` + verificationToken;
