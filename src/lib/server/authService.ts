@@ -1,7 +1,6 @@
-import { lucia } from '$lib/auth';
-import type { UserRepository, UserWithoutProfileSetup } from '$lib/userRepository';
+import type { UserRepository } from '$lib/userRepository';
 import { verify } from '@node-rs/argon2';
-import type { Cookie } from 'lucia';
+import type { Cookie, Lucia } from 'lucia';
 
 export type AuthServiceErrorTypes = "INCORRECT_USERNAME_OR_PASSWORD" | "ERROR_CREATING_SESSION";
 
@@ -15,7 +14,7 @@ export class AuthServiceError extends Error {
 }
 
 export class AuthService {
-	constructor(private userRepository: UserRepository) {}
+	constructor(private userRepository: UserRepository, private lucia: Lucia) {}
 
 	public async signIn(username: string, password: string): Promise<Cookie> {
 		const user = await this.userRepository.userByUsername(username);
@@ -38,8 +37,8 @@ export class AuthService {
 			);
 		}
 		try {
-			const session = await lucia.createSession(user.id, {});
-			return lucia.createSessionCookie(session.id);
+			const session = await this.lucia.createSession(user.id, {});
+			return this.lucia.createSessionCookie(session.id);
 		} catch (e) {
 			console.log(e);
 			throw new AuthServiceError('Error creating session', 'ERROR_CREATING_SESSION');

@@ -12,7 +12,7 @@ import temp from 'temp';
 import { it } from 'vitest';
 import type { ImageRepository as ImageRepositoryType } from '$lib/imageRepository';
 import { ImageRepository } from '$lib/imageRepository';
-import type { User } from 'lucia';
+import type { Lucia, User } from 'lucia';
 import { anyUser } from './testHelpers';
 import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import fs from 'fs';
@@ -27,6 +27,7 @@ import type { HttpServer } from 'vite';
 import type { AddressInfo } from 'net';
 import { WebsocketServer } from '$lib/server/websocketServer';
 import { AuthService } from '$lib/server/authService';
+import { adapter, createLuciaInstance } from '$lib/auth';
 
 interface MyFixtures {
 	db: DatabaseType;
@@ -43,6 +44,7 @@ interface MyFixtures {
 	notificationClient: NotificationClient;
 	httpServer: HttpServer;
 	authService: AuthService;
+	lucia: Lucia;
 }
 
 export const DEFAULT_PASSWORD = 'password';
@@ -117,8 +119,13 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	notificationClient: async ({ clientSocket }, use) => {
 		await use(new NotificationClient(clientSocket));
 	},
-	authService: async ({ userRepository }, use) => {
-		const authService = new AuthService(userRepository);
+	authService: async ({ userRepository, lucia }, use) => {
+		const authService = new AuthService(userRepository, lucia);
 		await use(authService);
-	}
+	},
+	lucia: async ({ db }, use) => {
+		const luciaAdapter = adapter(db);
+		const lucia = createLuciaInstance(luciaAdapter);
+		await use(lucia);
+	},
 });

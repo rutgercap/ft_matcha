@@ -1,16 +1,42 @@
-import { Lucia } from 'lucia';
+import { Lucia, type Adapter } from 'lucia';
 import { BetterSqlite3Adapter } from '@lucia-auth/adapter-sqlite';
 import { dev } from '$app/environment';
 import { getDb } from './database/database';
+import type { Database } from 'better-sqlite3';
 
-const db = getDb();
 
-const adapter = new BetterSqlite3Adapter(db, {
-	user: 'users',
-	session: 'sessions'
-});
+export function adapter(db: Database) {
+	const adapter = new BetterSqlite3Adapter(db, {
+		user: 'users',
+		session: 'sessions'
+	});
+	return adapter;
+}
 
-interface DatabaseUserAttributes {
+
+export function createLuciaInstance(luciaAdapter: Adapter) {
+	return new Lucia(luciaAdapter, {
+		sessionCookie: {
+			attributes: {
+				secure: !dev
+			}
+		},
+		getUserAttributes: (attributes: DatabaseUserAttributes) => {
+			return {
+				username: attributes.username,
+				profileIsSetup: attributes.profile_is_setup === 0 ? false : true,
+				email: attributes.email,
+				emailIsSetup: attributes.email_is_setup === 0 ? false : true,
+				passwordIsSet: attributes.password_is_set === 0 ? false : true
+			};
+		}
+	});
+}
+
+export const lucia = createLuciaInstance(adapter(getDb()));
+
+
+export interface DatabaseUserAttributes {
 	username: string;
 	profile_is_setup: number;
 	email: string;
@@ -18,22 +44,6 @@ interface DatabaseUserAttributes {
 	password_is_set: number;
 }
 
-export const lucia = new Lucia(adapter, {
-	sessionCookie: {
-		attributes: {
-			secure: !dev
-		}
-	},
-	getUserAttributes: (attributes) => {
-		return {
-			username: attributes.username,
-			profileIsSetup: attributes.profile_is_setup === 0 ? false : true,
-			email: attributes.email,
-			emailIsSetup: attributes.email_is_setup === 0 ? false : true,
-			passwordIsSet: attributes.password_is_set === 0 ? false : true
-		};
-	}
-});
 
 declare module 'lucia' {
 	interface Register {
