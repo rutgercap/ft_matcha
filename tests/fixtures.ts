@@ -101,15 +101,22 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(server);
 		server.close();
 	},
-	websocketServer: async ({ httpServer }, use) => {
+	websocketServer: async ({ httpServer, lucia }, use) => {
 		const io = new Server(httpServer);
-		const server = new WebsocketServer(io);
+		const server = new WebsocketServer(io, lucia);
 		await use(server);
 		io.close();
 	},
-	clientSocket: async ({ httpServer }, use) => {
+	clientSocket: async ({ httpServer, savedUserFactory, authService }, use) => {
+		const users = await savedUserFactory(1);
+		const user = users[0];
+		const token = await authService.signIn(user.username, DEFAULT_PASSWORD);
 		const port = (httpServer.address() as AddressInfo).port;
-		const socket = io(`http://localhost:${port}`);
+		const socket = io(`http://localhost:${port}`, {
+			auth: {
+				token: token.value
+			}
+		});
 		await use(socket);
 		socket.disconnect();
 	},
@@ -127,5 +134,5 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		const luciaAdapter = adapter(db);
 		const lucia = createLuciaInstance(luciaAdapter);
 		await use(lucia);
-	},
+	}
 });

@@ -1,7 +1,7 @@
 import { afterEach, describe } from 'vitest';
 import { io, type Socket as ClientSocket } from 'socket.io-client';
 import { type Socket as ServerSocket } from 'socket.io';
-import { itWithFixtures } from '../../fixtures';
+import { DEFAULT_PASSWORD, itWithFixtures } from '../../fixtures';
 import type { AddressInfo } from 'net';
 
 function waitFor(socket: ServerSocket | ClientSocket, event: string): Promise<unknown> {
@@ -10,9 +10,6 @@ function waitFor(socket: ServerSocket | ClientSocket, event: string): Promise<un
 	});
 }
 
-async function waitUntilConnected(socket: ClientSocket) {
-	return waitFor(socket, 'connect');
-}
 
 describe('WebsocketServer', () => {
 	let socket: ClientSocket | null = null;
@@ -39,15 +36,19 @@ describe('WebsocketServer', () => {
 	);
 
 	// Dont remove websocket since we need to set it up
-	itWithFixtures.skip(
-		'Should be able to connect without session',
-		async ({ httpServer, websocketServer }) => {
+	itWithFixtures(
+		'Should be able to connect with session',
+		async ({ httpServer, websocketServer, authService, savedUserFactory }) => {
+			const users = await savedUserFactory(1);
+			const user = users[0];
 			const port = (httpServer.address() as AddressInfo).port;
+			const token = await authService.signIn(user.username, DEFAULT_PASSWORD);
 			socket = io(`http://localhost:${port}`, {
 				auth: {
-					token: 'abc'
+					token: token.value,
 				}
 			});
+
 			await new Promise((resolve, reject) => {
 				socket!.on('connect_error', (error) =>
 					reject(new Error('Expected connect_error but connected successfully'))

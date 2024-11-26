@@ -25,4 +25,16 @@ describe('AuthService', () => {
             expect(cookie).instanceOf(Cookie);
 		}
 	);
+
+	itWithFixtures(
+		'should be able to verify the session cookie', 
+		async ({ authService, lucia, savedUserFactory }) => {
+            const users = await savedUserFactory(1);
+            const user = users[0];
+			const cookie = await authService.signIn(user.username, DEFAULT_PASSWORD);
+			const { session } = await lucia.validateSession(cookie.value);
+
+            expect(session).toBeTruthy();
+		}
+	);
 });

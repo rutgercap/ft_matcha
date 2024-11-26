@@ -1,8 +1,8 @@
 import type { UserRepository } from '$lib/userRepository';
 import { verify } from '@node-rs/argon2';
-import type { Cookie, Lucia } from 'lucia';
+import type { Cookie, Lucia, Session, User } from 'lucia';
 
-export type AuthServiceErrorTypes = "INCORRECT_USERNAME_OR_PASSWORD" | "ERROR_CREATING_SESSION";
+export type AuthServiceErrorTypes = 'INCORRECT_USERNAME_OR_PASSWORD' | 'ERROR_CREATING_SESSION';
 
 export class AuthServiceError extends Error {
 	type: string;
@@ -14,7 +14,10 @@ export class AuthServiceError extends Error {
 }
 
 export class AuthService {
-	constructor(private userRepository: UserRepository, private lucia: Lucia) {}
+	constructor(
+		private userRepository: UserRepository,
+		private lucia: Lucia
+	) {}
 
 	public async signIn(username: string, password: string): Promise<Cookie> {
 		const user = await this.userRepository.userByUsername(username);

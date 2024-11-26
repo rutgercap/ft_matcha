@@ -1,9 +1,7 @@
 import { Lucia, type Adapter } from 'lucia';
 import { BetterSqlite3Adapter } from '@lucia-auth/adapter-sqlite';
-import { dev } from '$app/environment';
 import { getDb } from './database/database';
 import type { Database } from 'better-sqlite3';
-
 
 export function adapter(db: Database) {
 	const adapter = new BetterSqlite3Adapter(db, {
@@ -13,12 +11,12 @@ export function adapter(db: Database) {
 	return adapter;
 }
 
-
 export function createLuciaInstance(luciaAdapter: Adapter) {
 	return new Lucia(luciaAdapter, {
 		sessionCookie: {
 			attributes: {
-				secure: !dev
+				// If ever go to production need to change this to true
+				secure: false,
 			}
 		},
 		getUserAttributes: (attributes: DatabaseUserAttributes) => {
@@ -33,10 +31,21 @@ export function createLuciaInstance(luciaAdapter: Adapter) {
 	});
 }
 
-export const lucia = createLuciaInstance(adapter(getDb()));
+let _lucia: ReturnType<typeof createLuciaInstance> | null = null;
 
+export const lucia = new Proxy(
+	{},
+	{
+		get: (_, prop) => {
+			if (!_lucia) {
+				_lucia = createLuciaInstance(adapter(getDb()));
+			}
+			return _lucia[prop as keyof typeof _lucia];
+		}
+	}
+) as ReturnType<typeof createLuciaInstance>;
 
-export interface DatabaseUserAttributes {
+interface DatabaseUserAttributes {
 	username: string;
 	profile_is_setup: number;
 	email: string;
@@ -44,10 +53,9 @@ export interface DatabaseUserAttributes {
 	password_is_set: number;
 }
 
-
 declare module 'lucia' {
 	interface Register {
-		Lucia: typeof lucia;
+		Lucia: ReturnType<typeof createLuciaInstance>;
 		DatabaseUserAttributes: DatabaseUserAttributes;
 	}
 }
