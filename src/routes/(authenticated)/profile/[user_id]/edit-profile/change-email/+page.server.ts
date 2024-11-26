@@ -4,7 +4,6 @@ import { fail, redirect, type Action } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { z } from 'zod';
-import { UserRepositoryError } from '$lib/userRepository';
 
 const newEmail = z.object({
 	new_email: z.string().email({ message: 'Invalid email address' }),
