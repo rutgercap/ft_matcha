@@ -8,6 +8,7 @@ import { IMAGE_FOLDER } from '$env/static/private';
 import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import { BrowsingRepository } from '$lib/browsingRepository';
 import { ConnectionRepository } from '$lib/connectionRepository';
+import { AuthService } from '$lib/server/authService';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
@@ -18,6 +19,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.profileVisitRepository = new ProfileVisitRepository(db);
 	event.locals.browsingRepository = new BrowsingRepository(db);
 	event.locals.connectionRepository = new ConnectionRepository(db);
+	event.locals.authService = new AuthService(event.locals.userRepository);
 
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
 	if (!sessionId) {

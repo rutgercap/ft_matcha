@@ -4,6 +4,7 @@ import type { User, Session } from 'Lucia';
 import type { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import type { BrowsingRepository } from '$lib/browsingRepository';
 import type { ConnectionRepository } from '$lib/connectionRepository';
+import type { AuthService } from '$lib/server/authService';
 
 declare global {
 	namespace App {
@@ -16,6 +17,7 @@ declare global {
 			profileVisitRepository: ProfileVisitRepository;
 			browsingRepository: BrowsingRepository;
 			connectionRepository: ConnectionRepository;
+			authService: AuthService;
 		}
 		// interface PageData {}
 		// interface PageState {}

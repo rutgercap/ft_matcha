@@ -96,7 +96,7 @@
 							class="profile-picture-preview"
 							src={`/api/pics/${user.id}/${i}?refreshKey=${refreshKeys[i]}`}
 						/>
-					</div >
+					</div>
 					<button class="delete-icon" on:click={() => handleDeletePicture(i)}>
 						<Icon src={Trash} class="h-8 w-auto" />
 					</button>

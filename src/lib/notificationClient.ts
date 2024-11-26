@@ -12,6 +12,7 @@ export class NotificationClient {
 
 	constructor(private client: Socket) {
 		this.onNotification();
+		this.onConnectionError();
 	}
 
 	private onNotification() {
@@ -21,7 +22,14 @@ export class NotificationClient {
 		});
 	}
 
-	public notifications() {
+	private onConnectionError() {
+		this.client.on('connect_error', (error) => {
+			console.error('Connection error', error);
+			throw new Error('Connection error');
+		});
+	}
+
+	public notifications(): Notification[] {
 		return this._notifications;
 	}
 

@@ -21,7 +21,6 @@ export class WebsocketServer {
 			if (!token) {
 				return next(new Error('Authentication error'));
 			}
-			console.log('token', token);
 			next();
 		});
 	}

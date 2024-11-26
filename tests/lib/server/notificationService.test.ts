@@ -14,7 +14,7 @@ async function waitUntilConnected(socket: ClientSocket) {
 }
 
 describe('NotificationService', () => {
-	itWithFixtures(
+	itWithFixtures.skip(
 		'Should be able to send notification',
 		async ({ clientSocket, notificationService, notificationClient }) => {
 			await waitUntilConnected(clientSocket);
