@@ -11,7 +11,6 @@ import type { Database as DatabaseType } from 'better-sqlite3';
 import temp from 'temp';
 import { it } from 'vitest';
 import type { ImageRepository as ImageRepositoryType } from '$lib/imageRepository';
-import { EmailRepository, type EmailRepository as EmailRepositoryType } from '$lib/emailRepository';
 import { ImageRepository } from '$lib/imageRepository';
 import type { User } from 'lucia';
 import { anyUser } from './testHelpers';
@@ -33,7 +32,6 @@ interface MyFixtures {
 	db: DatabaseType;
 	userRepository: UserRepositoryType;
 	imageRepository: ImageRepositoryType;
-	emailRepository: EmailRepositoryType;
 	savedUser: User;
 	profileVisitRepository: ProfileVisitRepository;
 	savedUserFactory: (n: number, overrides?: Partial<User>) => Promise<UserWithoutProfileSetup[]>;
@@ -65,11 +63,6 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	userRepository: async ({ db, imageRepository }, use) => {
 		await use(new UserRepository(db, imageRepository));
 	},
-
-	emailRepository: async ({ db }, use) => {
-		await use(new EmailRepository(db));
-	},
-
 	savedUser: async ({ userRepository }, use) => {
 		const user = anyUser();
 		await userRepository.createUser(user, 'password');

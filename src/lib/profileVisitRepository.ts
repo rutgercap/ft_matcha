@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3';
-import type { ToSnakeCase } from './commonTypes';
+import type { ToSnakeCase } from './types/snakeCase';
 
 class ProfileVisitRepositoryError extends Error {
 	exception: unknown;

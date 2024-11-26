@@ -1,10 +1,10 @@
 import { APP_PASSWORD, GOOGLE_EMAIL } from '$env/static/private';
 import nodemailer from 'nodemailer';
-import type { Database, RunResult } from 'better-sqlite3';
+import type { Database } from 'better-sqlite3';
 import { generateIdFromEntropySize } from 'lucia';
 import { TimeSpan, createDate } from 'oslo';
 import type { Transporter } from 'nodemailer';
-import type { ToSnakeCase } from './commonTypes';
+import type { ToSnakeCase } from './types/snakeCase';
 
 class EmailRepositoryError extends Error {
 	exception: unknown;
@@ -309,22 +309,6 @@ class EmailRepository {
 			console.log('console log error from insertResetPasswordSession', error);
 			throw new EmailRepositoryError(
 				'Error occurs trying to insert reset password session for user:' + userId,
-				error
-			);
-		}
-	}
-
-	public async updateEmailIsSetup(userId: string, val: boolean) {
-		try {
-			const tmp: number = val ? 1 : 0;
-			const updateProfileSet = this.db.prepare<[number, string]>(
-				'UPDATE users SET email_is_setup = ? WHERE id = ?'
-			);
-			const res = updateProfileSet.run(tmp, userId);
-		} catch (error) {
-			console.log('console log error from updateEmailIsSetup', error);
-			throw new EmailRepositoryError(
-				'Error occurs trying to update email_is_setup for user:' + userId,
 				error
 			);
 		}

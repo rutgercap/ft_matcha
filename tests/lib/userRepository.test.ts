@@ -1,5 +1,5 @@
 import { DuplicateEntryError } from '$lib/userRepository';
-import type { ProfileWithoutPicturesAndId } from '$lib/userRepository';
+import type { ProfileWithoutPicturesAndId, UserWithPassword } from '$lib/userRepository';
 import { describe, expect } from 'vitest';
 import { faker } from '@faker-js/faker';
 import { type User } from 'lucia';
@@ -178,24 +178,32 @@ describe('UserRepository', () => {
 		const new_email = faker.internet.email();
 		await userRepository.createUser(user, faker.internet.password());
 
-		await userRepository.updateUserEmail(user.id, new_email)
-		const found = await userRepository.user(user.id);
-		expect(found.email).toEqual(new_email)
+		await userRepository.updateUserEmail(user.id, new_email);
+		const found = (await userRepository.user(user.id)) as User;
+		expect(found.email).toEqual(new_email);
 	});
 
+	itWithFixtures('should be able update email_is_setup flag', async ({ userRepository }) => {
+		const user = anyUser({ emailIsSetup: false });
+
+		await userRepository.createUser(user, faker.internet.password());
+
+		await userRepository.updateEmailIsSetup(user.id, true);
+
+		const found = await userRepository.user(user.id);
+		expect(found?.emailIsSetup).toBe(true);
+	});
 
 	itWithFixtures('should be able to update user password', async ({ userRepository }) => {
 		const user = anyUser({ profileIsSetup: true });
 
-		const oldpswd = faker.internet.password()
+		const oldpswd = faker.internet.password();
 		await userRepository.createUser(user, oldpswd);
 
-		const newpswd = faker.internet.password()
+		const newpswd = faker.internet.password();
 
-
-
-		await userRepository.updateUserPswd(user.id, newpswd)
-		const found = await userRepository.userByUsername(user.username);
+		await userRepository.updateUserPswd(user.id, newpswd);
+		const found = (await userRepository.userByUsername(user.username)) as UserWithPassword;
 		const validPassword = await verify(found.passwordHash, newpswd, {
 			memoryCost: 19456,
 			timeCost: 2,
@@ -203,7 +211,6 @@ describe('UserRepository', () => {
 			parallelism: 1
 		});
 
-		expect(validPassword).toBeTruthy()
+		expect(validPassword).toBeTruthy();
 	});
-
 });

@@ -23,12 +23,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-	new_email: async ({
-		request,
-		locals: { user, userRepository, emailRepository }
-	}) => {
+	new_email: async ({ request, locals: { user, userRepository, emailRepository } }) => {
 		const newemail = await superValidate(request, zod(newEmail));
-
 
 		if (!newemail) {
 			return fail(400, { newemail });
@@ -46,16 +42,20 @@ export const actions: Actions = {
 			});
 		}
 
-
 		await userRepository.updateUserEmail(user.id, newemail.data.new_email);
-
 
 		await emailRepository.updateEmailIsSetup(user.id, false);
 
-		const verificationToken = emailRepository.createEmailVerificationToken(user.id, newemail.data.new_email);
+		const verificationToken = emailRepository.createEmailVerificationToken(
+			user.id,
+			newemail.data.new_email
+		);
 		const verificationLink = `${PUBLIC_BASE_URL}/api/email-verification/` + verificationToken;
 		console.log('verification link : ', verificationLink);
-		const send_details = await emailRepository.verificationLinkTo(newemail.data.new_email, verificationLink);
+		const send_details = await emailRepository.verificationLinkTo(
+			newemail.data.new_email,
+			verificationLink
+		);
 
 		redirect(302, '/sign-up/auth-email');
 	}

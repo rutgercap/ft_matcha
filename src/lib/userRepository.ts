@@ -1,4 +1,4 @@
-import type { Database, RunResult } from 'better-sqlite3';
+import type { Database } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
 import type { ProfileInfo, ReducedProfileInfo } from './domain/profile';
 import { hash } from '@node-rs/argon2';
@@ -208,6 +208,22 @@ class UserRepository {
 		});
 	}
 
+	public async updateEmailIsSetup(userId: string, val: boolean) {
+		try {
+			const tmp: number = val ? 1 : 0;
+			const updateProfileSet = this.db.prepare<[number, string]>(
+				'UPDATE users SET email_is_setup = ? WHERE id = ?'
+			);
+			updateProfileSet.run(tmp, userId);
+		} catch (error) {
+			console.log('console log error from updateEmailIsSetup', error);
+			throw new UserRepositoryError(
+				'Error occurs trying to update email_is_setup for user:' + userId,
+				error
+			);
+		}
+	}
+
 	public async allOtherUsers(id: string): Promise<string[]> {
 		return new Promise((resolve, reject) => {
 			try {
@@ -240,6 +256,7 @@ class UserRepository {
 				}
 				const camelCaseObject = _.mapKeys(result, (__, key) => _.camelCase(key)) as any;
 				camelCaseObject.profileIsSetup = camelCaseObject.profileIsSetup === 0 ? false : true;
+				camelCaseObject.emailIsSetup = camelCaseObject.email_is_setup === 0 ? false : true;
 				resolve(camelCaseObject as User);
 			} catch (e) {
 				reject(new UserRepositoryError('Something went wrong fetching user for id: ' + id, e));
@@ -346,12 +363,9 @@ class UserRepository {
 		});
 	}
 
-
 	public async updateUserEmail(userId: string, email: string) {
 		try {
-			const sql = this.db.prepare<[string, string]>(
-				`UPDATE users SET email = ? WHERE id = ?`
-			);
+			const sql = this.db.prepare<[string, string]>(`UPDATE users SET email = ? WHERE id = ?`);
 			const res = sql.run(email, userId);
 		} catch (error) {
 			console.log('error occur at updateUserEmail: ', error);
