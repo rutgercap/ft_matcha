@@ -17,13 +17,6 @@ export class AuthServiceError extends Error {
 export class AuthService {
 	constructor(private userRepository: UserRepository) {}
 
-	public async createUser(
-		user: UserWithoutProfileSetup,
-		password: string
-	): Promise<UserWithoutProfileSetup> {
-		return this.userRepository.createUser(user, password);
-	}
-
 	public async signIn(username: string, password: string): Promise<Cookie> {
 		const user = await this.userRepository.userByUsername(username);
 		if (!user) {
