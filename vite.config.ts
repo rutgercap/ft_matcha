@@ -10,6 +10,7 @@ const webSocketServer = {
 			return;
 		}
 		// need to keep this as a variable to prevent it from being garbage collected
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const dontDelete = websocketServer(server.httpServer as HttpServer);
 	}
 };

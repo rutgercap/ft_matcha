@@ -18,11 +18,11 @@ import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { ConnectionRepository } from '$lib/connectionRepository';
+import { ConnectionRepository } from '$lib/server/connectionRepository';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { NotificationClient } from '$lib/notificationClient';
-import { NoticiationService } from '$lib/server/notificationService';
+import { NotificationService } from '$lib/server/notificationService';
 import type { HttpServer } from 'vite';
 import type { AddressInfo } from 'net';
 import { WebsocketServer } from '$lib/server/websocketServer';
@@ -33,14 +33,14 @@ interface MyFixtures {
 	db: DatabaseType;
 	userRepository: UserRepositoryType;
 	imageRepository: ImageRepositoryType;
-	savedUser: User;
+	savedUser: UserWithoutProfileSetup;
 	profileVisitRepository: ProfileVisitRepository;
 	savedUserFactory: (n: number, overrides?: Partial<User>) => Promise<UserWithoutProfileSetup[]>;
 	image: Buffer;
 	connectionRepository: ConnectionRepository;
 	websocketServer: WebsocketServer;
 	clientSocket: ClientSocket;
-	notificationService: NoticiationService;
+	notificationService: NotificationService;
 	notificationClient: NotificationClient;
 	httpServer: HttpServer;
 	authService: AuthService;
@@ -65,10 +65,9 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	userRepository: async ({ db, imageRepository }, use) => {
 		await use(new UserRepository(db, imageRepository));
 	},
-	savedUser: async ({ userRepository }, use) => {
-		const user = anyUser();
-		await userRepository.createUser(user, 'password');
-		await use(user);
+	savedUser: async ({ savedUserFactory }, use) => {
+		const users = await savedUserFactory(1);
+		await use(users[0]);
 	},
 	profileVisitRepository: async ({ db }, use) => {
 		await use(new ProfileVisitRepository(db));
@@ -92,8 +91,8 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		const image = fs.readFileSync(imagePath);
 		use(image);
 	},
-	connectionRepository: async ({ db }, use) => {
-		use(new ConnectionRepository(db));
+	connectionRepository: async ({ db, notificationService }, use) => {
+		use(new ConnectionRepository(db, notificationService));
 	},
 	httpServer: async ({}, use) => {
 		const server = createServer();
@@ -108,9 +107,8 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		io.close();
 	},
 	clientSocket: async ({ httpServer, savedUserFactory, authService }, use) => {
-		const users = await savedUserFactory(1);
-		const user = users[0];
-		const token = await authService.signIn(user.username, DEFAULT_PASSWORD);
+		const [savedUser] = await savedUserFactory(1);
+		const token = await authService.signIn(savedUser.username, DEFAULT_PASSWORD);
 		const port = (httpServer.address() as AddressInfo).port;
 		const socket = io(`http://localhost:${port}`, {
 			auth: {
@@ -121,7 +119,7 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		socket.disconnect();
 	},
 	notificationService: async ({ websocketServer }, use) => {
-		await use(new NoticiationService(websocketServer));
+		await use(new NotificationService(websocketServer));
 	},
 	notificationClient: async ({ clientSocket }, use) => {
 		await use(new NotificationClient(clientSocket));

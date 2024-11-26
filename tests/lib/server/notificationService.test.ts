@@ -10,11 +10,11 @@ function waitFor(socket: ServerSocket | ClientSocket, event: string): Promise<un
 	});
 }
 
-async function waitUntilConnected(socket: ClientSocket) {
+export async function waitUntilConnected(socket: ClientSocket) {
 	return waitFor(socket, 'connect');
 }
 
-async function getConnectedUser(socket: ClientSocket, lucia: Lucia): Promise<User> {
+export async function getConnectedUser(socket: ClientSocket, lucia: Lucia): Promise<User> {
 	const token = (socket.auth as { token: string }).token;
 	const { user } = await lucia.validateSession(token);
 	return user!;
@@ -30,15 +30,15 @@ describe('NotificationService', () => {
 			await new Promise((resolve, reject) => {
 				notificationClient.subscribe((notification) => {
 					try {
-						expect(notification).toEqual({ type: 'hello', message: 'world' });
+						expect(notification).toEqual({ type: 'LIKE', from: 'world' });
 						resolve(null);
 					} catch {
 						reject(new Error(`Received unexpected message: ${JSON.stringify(notification)}`));
 					}
 				});
-				notificationService.sendNotification(user.id, 'hello', 'world');
+				notificationService.sendNotification(user.id, "LIKE", 'world');
 			});
-			expect(notificationClient.notifications()).toEqual([{ type: 'hello', message: 'world' }]);
+			expect(notificationClient.notifications()).toEqual([{ type: 'LIKE', from: 'world' }]);
 		}
 	);
 
@@ -51,9 +51,9 @@ describe('NotificationService', () => {
 			const token = (clientSocket.auth as { token: string }).token;
 
 			await lucia.invalidateSession(token);
-			notificationService.sendNotification(user.id, 'hello', 'world');
+			notificationService.sendNotification(user.id, 'LIKE', 'world');
 
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+			await new Promise((resolve) => setTimeout(resolve, 500));
 			expect(notificationClient.notifications()).toEqual([]);
 		}
 	);

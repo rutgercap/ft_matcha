@@ -7,7 +7,7 @@ import { lucia } from '$lib/auth';
 import { IMAGE_FOLDER } from '$env/static/private';
 import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import { BrowsingRepository } from '$lib/browsingRepository';
-import { ConnectionRepository } from '$lib/connectionRepository';
+import { ConnectionRepository } from '$lib/server/connectionRepository';
 import { AuthService } from '$lib/server/authService';
 
 export const handle: Handle = async ({ event, resolve }) => {

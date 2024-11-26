@@ -42,9 +42,9 @@ export const actions: Actions = {
 			});
 		}
 
-    try {
+		try {
 			await userRepository.updateUserEmail(user.id, newemail.data.new_email);
-			await emailRepository.emailVerification(user.id, newemail.data.new_email)
+			await emailRepository.emailVerification(user.id, newemail.data.new_email);
 		} catch (error) {
 			return message(newemail, 'Something went wrong updating your email', {
 				status: 500

@@ -1,5 +1,6 @@
+import type { MatchStatus } from '$lib/domain/match';
+import type { NotificationService } from '$lib/server/notificationService';
 import type { Database } from 'better-sqlite3';
-import type { MatchStatus } from './domain/match';
 
 export class ConnectionRepositoryError extends Error {
 	constructor(message: string) {
@@ -9,7 +10,10 @@ export class ConnectionRepositoryError extends Error {
 }
 
 export class ConnectionRepository {
-	constructor(private db: Database) {}
+	constructor(
+		private db: Database,
+		private notificationService: NotificationService
+	) {}
 
 	public async flipLikeUser(userId: string, targetId: string): Promise<boolean> {
 		const didUserAlreadyLike = this.db.prepare<[string, string], { id: number }>(
@@ -49,8 +53,10 @@ export class ConnectionRepository {
 					}
 				});
 				const isLiked = transaction(userId, targetId);
+				this.notificationService.sendNotification(targetId, 'LIKE', userId);
 				resolve(isLiked);
-			} catch {
+			} catch (e) {
+				console.log(e);
 				reject(new ConnectionRepositoryError('Failed to like user'));
 			}
 		});
