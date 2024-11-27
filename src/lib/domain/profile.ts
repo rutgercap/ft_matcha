@@ -36,6 +36,17 @@ type ReducedProfileInfo = {
 	gender: string;
 };
 
+type ReducedProfileInfo = {
+	userName: string;
+	biography: string;
+	gender: string;
+	picture: string;
+	age: number;
+    fameRate: number;
+    localisation: number;
+	mask: boolean;
+}
+
 function initials(profileInfo: ProfileInfo): string {
 	return (profileInfo.firstName[0] + profileInfo.lastName[0]).toUpperCase();
 }

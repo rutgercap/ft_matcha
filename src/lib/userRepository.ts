@@ -231,8 +231,7 @@ class UserRepository {
 					.prepare<string, { id: string }>(
 						`SELECT id
    						FROM users
-						WHERE id != ? AND profile_is_setup = 1`
-					)
+						  WHERE id != ? AND profile_is_setup = 1`)
 					.all(id)
 					.map((user) => user.id);
 				resolve(result);
@@ -264,33 +263,27 @@ class UserRepository {
 		});
 	}
 
-	public reducedProfile(id: string): Promise<ReducedProfileInfo | null> {
+	public reducedProfile(id:string): Promise<ReducedProfileInfo> {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
-					SELECT u.username, p.biography, p.gender
+					SELECT u.username, p.biography, p.gender, pp.id AS picture
 					FROM users AS u
 					INNER JOIN profile_info AS p ON u.id = p.user_id
-					WHERE u.id = ? 
+					INNER JOIN profile_pictures AS pp ON u.id = pp.user_id
+					WHERE u.id = ? AND pp.image_order = 0
 				`;
-				const res = this.db.prepare<string, ToSnakeCase<ReducedProfileInfo>>(sql).get(id);
-				if (!res) {
-					resolve(null);
-				}
-				const camelCaseObject = _.mapKeys(res, (__, key) => _.camelCase(key)) as any;
-				resolve(camelCaseObject as ReducedProfileInfo);
+
+				const res = this.db.prepare<string>(sql).get(id);
+				resolve(res);
 			} catch (error) {
-				reject(
-					new UserRepositoryError(
-						'Something went wrong getting reducedProfile for user id: ' + id,
-						error
-					)
-				);
+				reject(new UserRepositoryError('Something went wrong getting reducedProfile for user id: ' + id, error));
 			}
-		});
+		})
 	}
 
-	public updateProfileIsSetup(userId: string, flag: boolean) {
+	public upsertProfileIsSetup(userId: string, flag: boolean) {
+
 		try {
 			const val = flag ? 1 : 0;
 			const sql = this.db.prepare<[number, string]>(

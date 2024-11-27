@@ -1,4 +1,6 @@
+import type { ReducedProfileInfo } from "./domain/profile";
 import type { Database } from 'better-sqlite3';
+
 
 class BrowsingRepositoryError extends Error {
 	exception: unknown;
@@ -8,6 +10,7 @@ class BrowsingRepositoryError extends Error {
 		this.exception = exception;
 	}
 }
+
 
 class BrowsingRepository {
 	constructor(private db: Database) {}
@@ -24,6 +27,7 @@ class BrowsingRepository {
 			);
 		}
 	}
+
 }
 
 export { BrowsingRepository, BrowsingRepositoryError };

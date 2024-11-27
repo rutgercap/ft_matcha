@@ -14,7 +14,8 @@
 		"test:integration": "playwright test",
 		"test:unit": "vitest --run",
 		"db:reset": "tsx src/lib/database/reset.ts",
-		"db:migrate": "tsx src/lib/database/migrateUp.ts"
+		"db:migrate": "tsx src/lib/database/migrateUp.ts",
+		"script:fake_users": "tsx src/lib/scripts/fake_users.ts"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^9.2.0",
@@ -56,6 +57,7 @@
 		"@node-rs/argon2": "^1.8.3",
 		"@tailwindcss/forms": "^0.5.9",
 		"@types/pg": "^8.11.10",
+		"commander": "^12.1.0",
 		"better-sqlite3": "^11.5.0",
 		"lodash": "^4.17.21",
 		"lucia": "^3.2.2",
