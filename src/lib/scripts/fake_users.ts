@@ -73,6 +73,7 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		gender: gender,
 		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
+		age: faker.number.int({ min: 18, max: 99 }),
 		tags: [faker.lorem.word(), faker.lorem.word()],
 		pictures: [null, null, null, null, null],
 		pictures_filenames: [],
@@ -99,8 +100,8 @@ async function createUsers(n:number) {
 		VALUES (@id, @email, @username, @profileIsSetup, @emailIsSetup, @passwordHash)`);
 
 	const user_profile_sql = db.prepare(`INSERT INTO
-			profile_info (user_id, first_name, last_name, gender, sexual_preference, biography)
-			VALUES (@user_id, @firstName, @lastName, @gender, @sexualPreference, @biography)`);
+			profile_info (user_id, first_name, last_name, gender, sexual_preference, biography, age)
+			VALUES (@user_id, @firstName, @lastName, @gender, @sexualPreference, @biography, @age)`);
 
 	const user_tag_sql = db.prepare(`INSERT INTO
 				tags (id, user_id, tag)

@@ -26,14 +26,9 @@ type ProfileInfo = {
 	gender: Gender;
 	sexualPreference: SexualPreference;
 	biography: string;
+	age: number;
 	tags: string[];
 	uploadedPictures: number[];
-};
-
-type ReducedProfileInfo = {
-	username: string;
-	biography: string;
-	gender: string;
 };
 
 type ReducedProfileInfo = {
