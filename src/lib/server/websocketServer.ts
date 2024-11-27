@@ -42,22 +42,19 @@ export class WebsocketServer {
 				return;
 			}
 			this.connections.set(user.id, socket);
-			console.log(this.connections.size);
 			this.sessionTokenToUserId.set(token, user.id);
 			socket.on('disconnect', () => {
-				console.log('Socket disconnected');
 				const token = socket.handshake.auth.token;
 				const userId = this.sessionTokenToUserId.get(token);
 				if (userId) {
-					// this.connections.delete(userId);
-					// this.sessionTokenToUserId.delete(token);
+					this.connections.delete(userId);
+					this.sessionTokenToUserId.delete(token);
 				}
 			});
 		});
 	}
 
 	public sendMessageToUser(id: string, eventName: string, content: JsonSerializable) {
-		console.log(this.connections.size);
 		const connection = this.connections.get(id);
 		if (!connection) {
 			return;
