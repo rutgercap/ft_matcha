@@ -3,33 +3,7 @@ import { itWithFixtures } from '../fixtures';
 import type { MatchStatus } from '$lib/domain/match';
 import { getConnectedUser, waitUntilConnected } from './server/notificationService.test';
 
-describe('ConnectionRepository', () => {
-	itWithFixtures(
-		'Should be able to like a user',
-		async ({ connectionRepository, savedUserFactory }) => {
-			const [currentUser, targetUser] = await savedUserFactory(2, {});
-
-			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
-
-			const userLikes = await connectionRepository.likes(currentUser.id);
-			expect(userLikes).toEqual([targetUser.id]);
-			const userLikedBy = await connectionRepository.userLikedBy(targetUser.id);
-			expect(userLikedBy).toEqual([currentUser.id]);
-		}
-	);
-
-	itWithFixtures(
-		'One sided like should not result in match',
-		async ({ connectionRepository, savedUserFactory }) => {
-			const [currentUser, targetUser] = await savedUserFactory(2, {});
-
-			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
-
-			const matchStatus = await connectionRepository.matchStatus(currentUser.id, targetUser.id);
-			expect(matchStatus).toBeNull();
-		}
-	);
-
+describe('ConnectionRepository notificaitons', () => {
 	itWithFixtures(
 		'Should get a notification when a user likes you',
 		async ({
@@ -58,6 +32,138 @@ describe('ConnectionRepository', () => {
 				});
 				await connectionRepository.flipLikeUser(savedUser.id, user.id);
 			});
+		}
+	);
+
+	itWithFixtures(
+		'Should get a notification for a match',
+		async ({
+			connectionRepository,
+			lucia,
+			clientSocket,
+			notificationService,
+			notificationClient,
+			savedUser: targetUser
+		}) => {
+			await waitUntilConnected(clientSocket);
+			const currentUserId = await getConnectedUser(clientSocket, lucia);
+			await connectionRepository.flipLikeUser(currentUserId.id, targetUser.id);
+	
+			return new Promise<void>(async (resolve, reject) => {
+				notificationClient.subscribe((notification) => {
+					const expected = { type: 'MATCH', from: targetUser.id };
+					try {
+						expect(notification).toEqual(expected);
+						resolve();
+					} catch {
+						reject(
+							new Error(
+								`Received unexpected message: ${JSON.stringify(notification)} | expected: ${JSON.stringify(expected)}`
+							)
+						);
+					}
+				});
+				await connectionRepository.flipLikeUser(targetUser.id, currentUserId.id);
+			});
+		}
+	);
+
+	itWithFixtures(
+		'Should get a notification for unmatch',
+		async ({
+			connectionRepository,
+			lucia,
+			clientSocket,
+			notificationService,
+			notificationClient,
+			savedUser: targetUser
+		}) => {
+			await waitUntilConnected(clientSocket);
+			const currentUserId = await getConnectedUser(clientSocket, lucia);
+			await connectionRepository.flipLikeUser(currentUserId.id, targetUser.id);
+			await connectionRepository.flipLikeUser(targetUser.id, currentUserId.id);
+			// wait till likes are processed
+			await new Promise((resolve) => setTimeout(resolve, 500));
+
+			return new Promise<void>(async (resolve, reject) => {
+				notificationClient.subscribe((notification) => {
+					const expected = { type: 'UNMATCH', from: targetUser.id };
+					try {
+						expect(notification).toEqual(expected);
+						resolve();
+					} catch {
+						reject(
+							new Error(
+								`Received unexpected message: ${JSON.stringify(notification)} | expected: ${JSON.stringify(expected)}`
+							)
+						);
+					}
+				});
+				await connectionRepository.flipLikeUser(targetUser.id, currentUserId.id);
+			});
+		}
+	);
+
+	itWithFixtures(
+		'Should get a notification for unlike',
+		async ({
+			connectionRepository,
+			lucia,
+			clientSocket,
+			notificationService,
+			notificationClient,
+			savedUser: otherUser
+		}) => {
+			await waitUntilConnected(clientSocket);
+			const currentUserId = await getConnectedUser(clientSocket, lucia);
+			await connectionRepository.flipLikeUser(otherUser.id, currentUserId.id);
+			// wait till likes are processed
+			await new Promise((resolve) => setTimeout(resolve, 500));
+	
+			return new Promise<void>(async (resolve, reject) => {
+				notificationClient.subscribe((notification) => {
+					const expected = { type: 'UNLIKE', from: otherUser.id };
+					try {
+						expect(notification).toEqual(expected);
+						resolve();
+					} catch {
+						reject(
+							new Error(
+								`Received unexpected message: ${JSON.stringify(notification)} | expected: ${JSON.stringify(expected)}`
+							)
+						);
+					}
+				});
+				await connectionRepository.flipLikeUser(otherUser.id, currentUserId.id);
+			});
+		}
+	);
+});
+
+describe('ConnectionRepository', () => {
+	itWithFixtures(
+		'Should be able to like a user',
+		async ({ connectionRepository, savedUserFactory }) => {
+			const [currentUser, targetUser] = await savedUserFactory(2, {});
+
+			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
+
+			const userLikes = await connectionRepository.likes(currentUser.id);
+			expect(userLikes).toEqual([targetUser.id]);
+			const userLikedBy = await connectionRepository.userLikedBy(targetUser.id);
+			expect(userLikedBy).toEqual([currentUser.id]);
+		}
+	);
+
+	itWithFixtures(
+		'One sided like should not result in match',
+		async ({ connectionRepository, savedUserFactory }) => {
+			const [currentUser, targetUser] = await savedUserFactory(2, {});
+
+			await connectionRepository.flipLikeUser(currentUser.id, targetUser.id);
+
+			const matchStatus = await connectionRepository.matchStatus(currentUser.id, targetUser.id);
+			expect(matchStatus).toBeNull();
 		}
 	);
 

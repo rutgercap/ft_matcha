@@ -44,16 +44,25 @@ export class ConnectionRepository {
 						const otherUserLike = didOtherUserLike.get(targetId, userId);
 						if (otherUserLike) {
 							insertMatch.run(userId, targetId);
+							this.notificationService.sendNotification(targetId, 'MATCH', userId);
+							this.notificationService.sendNotification(userId, 'MATCH', targetId);
+						} else {
+							this.notificationService.sendNotification(targetId, 'LIKE', userId);
 						}
 						return true;
 					} else {
 						deleteLike.run(maybeLikeId.id);
-						setUnmatched.run(userId, targetId, targetId, userId);
+						const result = setUnmatched.run(userId, targetId, targetId, userId);
+						if (result.changes) {
+							this.notificationService.sendNotification(targetId, 'UNMATCH', userId);
+							this.notificationService.sendNotification(userId, 'UNMATCH', targetId);
+						} else {
+							this.notificationService.sendNotification(targetId, 'UNLIKE', userId);
+						}
 						return false;
 					}
 				});
 				const isLiked = transaction(userId, targetId);
-				this.notificationService.sendNotification(targetId, 'LIKE', userId);
 				resolve(isLiked);
 			} catch (e) {
 				console.log(e);
