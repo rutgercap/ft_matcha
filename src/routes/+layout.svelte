@@ -16,20 +16,30 @@
 	import { page } from '$app/stores';
 	import { initials as getInitials } from '$lib/domain/profile';
 	import { toasts } from '$lib/toast/toastStore';
-	import type { Notification } from '$lib/notificationClient';
+	import { NotificationClient, type Notification } from '$lib/notificationClient';
+	import { notificationClientStore } from '$lib/stores/notificationClientStore';
+	import { io } from 'socket.io-client';
 	$: url = $page.url.pathname;
 
 	export let data: LayoutData;
 	$: user = data.user;
 	$: initials = data.personalInfo ? getInitials(data.personalInfo) : 'XX';
-	$: notificationClient = data.notificationClient;
-	let notifications: Notification[] = [];
+
+	let notifications = [];
+	$notificationClientStore?.subscribe((notification) => {
+		console.log('notification', notification);
+		notifications.push(notification);
+	});
+
 	$: {
-		if (notificationClient) {
-			const handleNotification = (notification: Notification) => {
-				notifications.push(notification);
-			};
-			notificationClient.subscribe(handleNotification);
+		if (data.session && $notificationClientStore === null) {
+			const socket = io($page.url.origin, {
+				auth: {
+					token: data.session.id
+				}
+			});
+			const notificationClient = new NotificationClient(socket);
+			notificationClientStore.set(notificationClient);
 		}
 	}
 

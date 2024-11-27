@@ -11,14 +11,12 @@ export class WebsocketServer {
 	// userId to socket
 	private connections: Map<string, ServerSocket> = new Map();
 	private sessionTokenToUserId: Map<string, string> = new Map();
-	currentId = 0;
 
 	constructor(
 		private server: Server,
 		private lucia: Lucia
 	) {
 		this.authMiddleWare();
-		this.removeDisconnectedUser();
 	}
 
 	private authMiddleWare() {
@@ -27,28 +25,39 @@ export class WebsocketServer {
 			if (!token) {
 				return next(new Error('Authentication error'));
 			}
-			const { session, user } = await this.lucia.validateSession(token);
+			const { session } = await this.lucia.validateSession(token);
 			if (!session) {
 				return next(new Error('Authentication error'));
 			}
-			this.connections.set(user.id, socket);
-			this.sessionTokenToUserId.set(token, user.id);
 			next();
 		});
-	}
 
-	private removeDisconnectedUser() {
-		this.server.on('disconnect', (socket) => {
-			const id = socket.handshake.auth.id;
-			const userId = this.sessionTokenToUserId.get(id);
-			if (userId) {
-				this.connections.delete(userId);
+		this.server.on('connection', async (socket) => {
+			const token = socket.handshake.auth.token;
+			if (!token) {
+				return;
 			}
-			this.sessionTokenToUserId.delete(id);
+			const { session, user } = await this.lucia.validateSession(token);
+			if (!session) {
+				return;
+			}
+			this.connections.set(user.id, socket);
+			console.log(this.connections.size);
+			this.sessionTokenToUserId.set(token, user.id);
+			socket.on('disconnect', () => {
+				console.log('Socket disconnected');
+				const token = socket.handshake.auth.token;
+				const userId = this.sessionTokenToUserId.get(token);
+				if (userId) {
+					// this.connections.delete(userId);
+					// this.sessionTokenToUserId.delete(token);
+				}
+			});
 		});
 	}
 
 	public sendMessageToUser(id: string, eventName: string, content: JsonSerializable) {
+		console.log(this.connections.size);
 		const connection = this.connections.get(id);
 		if (!connection) {
 			return;
@@ -56,7 +65,7 @@ export class WebsocketServer {
 		const token = connection.handshake.auth.token as string;
 		this.lucia.validateSession(token).then(({ session }) => {
 			if (!session) {
-				this.connections.delete(id);
+				// this.connections.delete(id);
 				return;
 			}
 			connection.emit(eventName, content);
