@@ -36,7 +36,7 @@ describe('NotificationService', () => {
 						reject(new Error(`Received unexpected message: ${JSON.stringify(notification)}`));
 					}
 				});
-				notificationService.sendNotification(user.id, "LIKE", 'world');
+				notificationService.sendNotification(user.id, 'LIKE', 'world');
 			});
 			expect(notificationClient.notifications()).toEqual([{ type: 'LIKE', from: 'world' }]);
 		}

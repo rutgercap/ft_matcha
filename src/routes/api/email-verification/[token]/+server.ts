@@ -29,7 +29,6 @@ export async function GET({ params, locals }) {
 			status: 400
 		});
 	}
-
 	await lucia.invalidateUserSessions(user.id);
 	const res = await locals.userRepository.updateEmailIsSetup(user.id, true);
 	const session = await lucia.createSession(user.id, {});

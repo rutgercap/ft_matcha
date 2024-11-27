@@ -1,8 +1,6 @@
 import type { Socket } from 'socket.io-client';
-import { EventEmitter } from 'events';
 
-export type NotificationType = "LIKE" | "MATCH" | "UNMATCH" | "UNLIKE";
-
+export type NotificationType = 'LIKE' | 'MATCH' | 'UNMATCH' | 'UNLIKE';
 export type Notification = {
 	type: string;
 	from: NotificationType;
@@ -10,7 +8,7 @@ export type Notification = {
 
 export class NotificationClient {
 	private _notifications: Notification[] = [];
-	private emitter = new EventEmitter();
+	private listeners: { [event: string]: Array<(data: any) => void> } = {};
 
 	constructor(private client: Socket) {
 		this.onNotification();
@@ -20,14 +18,13 @@ export class NotificationClient {
 	private onNotification() {
 		this.client.on('notification', (arg: Notification) => {
 			this._notifications.push(arg);
-			this.emitter.emit('notification', arg);
+			this.emit('notification', arg);
 		});
 	}
 
 	private onConnectionError() {
 		this.client.on('connect_error', (error) => {
-			console.error('Connection error', error);
-			throw new Error('Connection error');
+			console.error(error);
 		});
 	}
 
@@ -36,10 +33,28 @@ export class NotificationClient {
 	}
 
 	public subscribe(callback: (notification: Notification) => void) {
-		this.emitter.on('notification', callback);
+		this.on('notification', callback);
 	}
 
 	public unsubscribe(callback: (notification: Notification) => void) {
-		this.emitter.off('notification', callback);
+		this.removeListener('notification', callback);
+	}
+
+	private on(event: string, callback: (data: any) => void) {
+		if (!this.listeners[event]) {
+			this.listeners[event] = [];
+		}
+		this.listeners[event].push(callback);
+	}
+
+	private emit(event: string, data: any) {
+		const eventListeners = this.listeners[event] || [];
+		eventListeners.forEach((listener) => listener(data));
+	}
+
+	private removeListener(event: string, callback: (data: any) => void) {
+		if (this.listeners[event]) {
+			this.listeners[event] = this.listeners[event].filter((listener) => listener !== callback);
+		}
 	}
 }

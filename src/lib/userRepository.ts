@@ -216,7 +216,6 @@ class UserRepository {
 			);
 			updateProfileSet.run(tmp, userId);
 		} catch (error) {
-			console.log('console log error from updateEmailIsSetup', error);
 			throw new UserRepositoryError(
 				'Error occurs trying to update email_is_setup for user:' + userId,
 				error
