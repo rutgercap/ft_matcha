@@ -43,7 +43,6 @@ export class AuthService {
 			const session = await this.lucia.createSession(user.id, {});
 			return this.lucia.createSessionCookie(session.id);
 		} catch (e) {
-			console.log(e);
 			throw new AuthServiceError('Error creating session', 'ERROR_CREATING_SESSION');
 		}
 	}

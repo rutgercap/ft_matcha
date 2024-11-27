@@ -1,7 +1,6 @@
 import type { NotificationType } from '$lib/notificationClient';
 import type { WebsocketServer } from './websocketServer';
 
-
 export class NotificationService {
 	socketServer: WebsocketServer;
 

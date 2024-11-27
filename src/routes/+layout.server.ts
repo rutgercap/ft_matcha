@@ -17,7 +17,10 @@ async function personalInfoFor(
 	}
 }
 
-export const load: LayoutServerLoad = async ({ locals: { user, userRepository, session } }) => {
+export const load: LayoutServerLoad = async ({
+	locals: { user, userRepository, session },
+	cookies
+}) => {
 	if (user) {
 		const personalInfo = await personalInfoFor(user, userRepository);
 		return { user, personalInfo, session };

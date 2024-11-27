@@ -16,7 +16,7 @@ describe('ConnectionRepository notificaitons', () => {
 		}) => {
 			await waitUntilConnected(clientSocket);
 			const user = await getConnectedUser(clientSocket, lucia);
-	
+
 			return new Promise<void>(async (resolve, reject) => {
 				notificationClient.subscribe((notification) => {
 					try {
@@ -48,7 +48,7 @@ describe('ConnectionRepository notificaitons', () => {
 			await waitUntilConnected(clientSocket);
 			const currentUserId = await getConnectedUser(clientSocket, lucia);
 			await connectionRepository.flipLikeUser(currentUserId.id, targetUser.id);
-	
+
 			return new Promise<void>(async (resolve, reject) => {
 				notificationClient.subscribe((notification) => {
 					const expected = { type: 'MATCH', from: targetUser.id };
@@ -119,7 +119,7 @@ describe('ConnectionRepository notificaitons', () => {
 			await connectionRepository.flipLikeUser(otherUser.id, currentUserId.id);
 			// wait till likes are processed
 			await new Promise((resolve) => setTimeout(resolve, 500));
-	
+
 			return new Promise<void>(async (resolve, reject) => {
 				notificationClient.subscribe((notification) => {
 					const expected = { type: 'UNLIKE', from: otherUser.id };

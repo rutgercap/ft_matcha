@@ -10,17 +10,20 @@ import { BrowsingRepository } from '$lib/browsingRepository';
 
 import { ConnectionRepository } from '$lib/server/connectionRepository';
 import { AuthService } from '$lib/server/authService';
+import { NotificationService } from '$lib/server/notificationService';
+import { websocketServer } from '$lib/server/websocketServer';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
 	const transporter = getTransporter();
 	const imageRepo = new ImageRepository(IMAGE_FOLDER, db);
+	const notificationService = new NotificationService(websocketServer());
 	event.locals.userRepository = new UserRepository(db, imageRepo);
 	event.locals.emailRepository = new EmailRepository(db, transporter);
 	event.locals.profileVisitRepository = new ProfileVisitRepository(db);
 
 	event.locals.browsingRepository = new BrowsingRepository(db);
-	event.locals.connectionRepository = new ConnectionRepository(db);
+	event.locals.connectionRepository = new ConnectionRepository(db, notificationService);
 	event.locals.authService = new AuthService(event.locals.userRepository, lucia);
 
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
@@ -39,7 +42,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		});
 		event.locals.user = null;
 		event.locals.session = null;
-		resolve(event);
+		return resolve(event);
 	}
 	const sessionCookie = lucia.createSessionCookie(session!.id);
 	event.cookies.set(sessionCookie.name, sessionCookie.value, {
