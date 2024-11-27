@@ -4,7 +4,7 @@ import { PUBLIC_BASE_URL } from '$env/static/public';
 import { fail } from '@sveltejs/kit';
 
 export const actions: Actions = {
-	resend: async ({ request, locals: { emailRepository, user } }) => {
+	resend: async ({ locals: { emailRepository, user } }) => {
 		if (!user) {
 			return fail(401, { message: 'You must be signed in to get a new link' });
 		}
@@ -17,8 +17,7 @@ export const actions: Actions = {
 		} else {
 			const verificationToken = emailRepository.createEmailVerificationToken(user.id, user.email);
 			const verificationLink = `${PUBLIC_BASE_URL}/api/email-verification/` + verificationToken;
-			console.log('In the resend email verif form: verification link: ', verificationLink)
-			const res = await emailRepository.verificationLinkTo(user.email, verificationLink);
+			await emailRepository.verificationLinkTo(user.email, verificationLink);
 			return {
 				success: true,
 				message: 'Verification link resent successfully'

@@ -20,14 +20,20 @@ enum SexualPreference {
 }
 
 type ProfileInfo = {
+	userId: string;
 	firstName: string;
 	lastName: string;
 	gender: Gender;
 	sexualPreference: SexualPreference;
 	biography: string;
 	tags: string[];
-	pictures: File[] | null[];
-	pictures_filenames: string[];
+	uploadedPictures: number[];
+};
+
+type ReducedProfileInfo = {
+	username: string;
+	biography: string;
+	gender: string;
 };
 
 type ReducedProfileInfo = {

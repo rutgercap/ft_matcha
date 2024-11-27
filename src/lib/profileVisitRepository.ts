@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3';
-import type { ToSnakeCase } from './commonTypes';
+import type { ToSnakeCase } from './types/snakeCase';
 
 class ProfileVisitRepositoryError extends Error {
 	exception: unknown;
@@ -47,13 +47,15 @@ export class ProfileVisitRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const rows = result.all(userId);
-				resolve(rows.map((row) => {
-					const date = new Date(row.visit_time);
-					return {
-						visitorId: row.visitor_id,
-						visitTime: date
-					} as ProfileVisit;
-				}));
+				resolve(
+					rows.map((row) => {
+						const date = new Date(row.visit_time);
+						return {
+							visitorId: row.visitor_id,
+							visitTime: date
+						} as ProfileVisit;
+					})
+				);
 			} catch (e) {
 				reject(
 					new ProfileVisitRepositoryError(

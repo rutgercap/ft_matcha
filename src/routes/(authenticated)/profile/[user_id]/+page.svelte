@@ -2,20 +2,31 @@
 	import type { PageData } from './$types';
 	import _ from 'lodash';
 	import { page } from '$app/stores';
-
-	$: id = $page.params.user_id;
+	import { Heart, Icon } from 'svelte-hero-icons';
+	import addToast from '$lib/toast/toastStore';
+	import { invalidate } from '$app/navigation';
 
 	export let data: PageData;
 
-	let { profileInfo, isCurrentUserProfile } = data;
+	$: id = $page.params.user_id;
+	$: profileInfo = data.profileInfo;
+	$: isCurrentUserProfile = data.isCurrentUserProfile;
+	$: likedByCurrentUser = data.likedByCurrentUser;
 
-	let all_url = [
-		'/api/pics/' + profileInfo.pictures_filenames[0] + `?t=${Date.now()}`,
-		'/api/pics/' + profileInfo.pictures_filenames[1] + `?t=${Date.now()}`,
-		'/api/pics/' + profileInfo.pictures_filenames[2] + `?t=${Date.now()}`,
-		'/api/pics/' + profileInfo.pictures_filenames[3] + `?t=${Date.now()}`,
-		'/api/pics/' + profileInfo.pictures_filenames[4] + `?t=${Date.now()}`
-	];
+	async function likeProfile() {
+		try {
+			const response = await fetch(`/api/like/${id}`, {
+				method: 'POST'
+			});
+			if (response.ok) {
+				invalidate('app:matches');
+				const result: { isLiked: boolean } = await response.json();
+				likedByCurrentUser = result.isLiked;
+			}
+		} catch (error) {
+			addToast({ message: 'Something went wrong liking profile', type: 'error' });
+		}
+	}
 </script>
 
 <div class="max-w-3xl md:mx-auto mx-4 mb-10">
@@ -27,33 +38,40 @@
 				{`${_.capitalize(profileInfo.firstName)} ${_.capitalize(profileInfo.lastName)}`}
 			</h2>
 		</div>
-		<div class="mt-4 flex md:ml-4 md:mt-0 {isCurrentUserProfile ? 'visible' : 'invisible'}">
-			<a
-				href={`/profile/${id}/edit-profile`}
-				type="button"
-				class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-				>Edit</a
-			>
+		<div class="mt-4 flex md:ml-4 md:mt-0">
+			{#if isCurrentUserProfile}
+				<a
+					href={`/profile/${id}/edit-profile`}
+					type="button"
+					class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+					>Edit</a
+				>
+			{:else}
+				<button
+					type="button"
+					on:click={likeProfile}
+					class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+				>
+					<Icon class="h-5 w-5" src={Heart} solid={likedByCurrentUser} />
+				</button>
+			{/if}
 		</div>
 	</div>
 	<br />
 	<div class="mt-1 grid gap-4">
-		<div>
-			<img class="h-auto max-w-full rounded-lg" src={all_url[0]} alt="" />
-		</div>
+		<img
+			alt="main"
+			class="h-auto max-w-full rounded-lg"
+			src={`/api/pics/${id}/0?refresh=${Math.random()}`}
+		/>
 		<div class="grid grid-cols-4 gap-4">
-			<div>
-				<img class="h-auto max-w-full rounded-lg" src={all_url[1]} alt="" />
-			</div>
-			<div>
-				<img class="h-auto max-w-full rounded-lg" src={all_url[2]} alt="" />
-			</div>
-			<div>
-				<img class="h-auto max-w-full rounded-lg" src={all_url[3]} alt="" />
-			</div>
-			<div>
-				<img class="h-auto max-w-full rounded-lg" src={all_url[4]} alt="" />
-			</div>
+			{#each Array(4) as _, i}
+				<img
+					alt={`${i + 1}`}
+					class="h-auto max-w-full rounded-lg"
+					src={`/api/pics/${id}/${i + 1}?refresh=${Math.random()}`}
+				/>
+			{/each}
 		</div>
 	</div>
 	<div class="mt-6 border-t border-gray-100">

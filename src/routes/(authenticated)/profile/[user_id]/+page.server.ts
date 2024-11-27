@@ -2,40 +2,64 @@ import { error, redirect } from '@sveltejs/kit';
 import type { UserRepository } from '$lib/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
 import type { PageServerLoad } from './$types';
+import type { ConnectionRepository } from '$lib/server/connectionRepository';
 
-
-async function personalInfoFor(
+async function profileInfoFor(
 	userId: string,
 	userRepository: UserRepository
 ): Promise<ProfileInfo | null> {
 	try {
 		return await userRepository.profileInfoFor(userId);
-	} catch {
+	} catch (e) {
 		error(500, {
 			message: 'Something went wrong.'
 		});
 	}
 }
 
-export const load: PageServerLoad = async ({ locals: { user, userRepository, profileVisitRepository}, params }) => {
-	if (!user) {
+async function isLikedByCurrentUser(
+	currentUserId: string,
+	targetId: string,
+	connectionRepository: ConnectionRepository
+): Promise<boolean> {
+	try {
+		return await connectionRepository.isLikedBy(currentUserId, targetId);
+	} catch (e) {
+		error(500, {
+			message: 'Something went wrong.'
+		});
+	}
+}
+
+export const load: PageServerLoad = async ({
+	locals: { user: currentUser, userRepository, profileVisitRepository, connectionRepository },
+	params
+}) => {
+	if (!currentUser) {
 		throw redirect(401, '/login');
-	}	
-	const id = params.user_id;
-	const maybeProfileInfo = await personalInfoFor(id, userRepository);
+	}
+	const profileId = params.user_id;
+	const maybeProfileInfo = await profileInfoFor(profileId, userRepository);
 	if (!maybeProfileInfo) {
-		error(404, {
+		throw error(404, {
 			message: 'Not found'
 		});
 	}
 	let isCurrentUserProfile = false;
-	if (user.id === id) {
+	let likedByCurrentUser = false;
+	if (currentUser.id === profileId) {
 		isCurrentUserProfile = true;
 	} else {
-		profileVisitRepository.addVisit(user.id, id);
+		profileVisitRepository.addVisit(currentUser.id, profileId);
+		likedByCurrentUser = await isLikedByCurrentUser(
+			currentUser.id,
+			profileId,
+			connectionRepository
+		);
 	}
 	return {
 		profileInfo: maybeProfileInfo,
 		isCurrentUserProfile,
+		likedByCurrentUser
 	};
 };

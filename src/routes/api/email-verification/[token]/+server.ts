@@ -3,12 +3,8 @@ import { isWithinExpirationDate } from 'oslo';
 import { lucia } from '$lib/auth';
 import { error } from '@sveltejs/kit';
 
-// The directory where images are stored
 export async function GET({ params, locals }) {
 	const verificationToken = params.token;
-	if (!locals.user) {
-		// TODO do appropriate error handling
-	}
 
 	const emailRepository = locals.emailRepository;
 
@@ -35,7 +31,7 @@ export async function GET({ params, locals }) {
 	}
 
 	await lucia.invalidateUserSessions(user.id);
-	const res = await emailRepository.updateEmailIsSetup(user.id, true);
+	const res = await locals.userRepository.updateEmailIsSetup(user.id, true);
 	const session = await lucia.createSession(user.id, {});
 	const sessionCookie = lucia.createSessionCookie(session.id);
 	return new Response(null, {

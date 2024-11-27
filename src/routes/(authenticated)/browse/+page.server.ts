@@ -34,8 +34,3 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository, bro
 
 };
 
-// export const action: Action = {
-// 	default: async ({ params, request, cookies, locals: { user, userRepository, emailRepository }}) => {
-
-// 	}
-// }

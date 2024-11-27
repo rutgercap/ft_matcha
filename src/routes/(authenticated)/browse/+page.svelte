@@ -49,6 +49,7 @@
 		isFilterPopupOpen = false;
 	}
 
+
 </script>
 
 <div class="bg-white">
@@ -111,11 +112,11 @@
 									</p>
 								</div>
 							</div>
-
 							<!-- User Biography -->
 							<p class="text-sm text-gray-500">{filteredUsers[index].biography}</p>
 						</li>
 						{/if}
+
 
 				{/each}
 			{:else}
