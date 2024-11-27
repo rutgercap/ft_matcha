@@ -15,7 +15,8 @@ migrate:
 dev :
 	${DOCKER} up --build
 
-
+fake_users:
+	${DOCKER} exec matcha pnpm run script:fake_users
 
 down :
 	${DOCKER} down
