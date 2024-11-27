@@ -9,6 +9,19 @@ import { Gender, SexualPreference } from '../domain/profile';
 import * as fs from 'fs';
 import * as path from 'path';
 
+
+const args = process.argv.slice(2); // Get arguments after the `node` and script name
+const numUsersArg = args.find(arg => arg.startsWith('--num='));
+
+let numUsers = 10; // Default value
+if (numUsersArg) {
+    numUsers = parseInt(numUsersArg.split('=')[1], 10);
+    if (isNaN(numUsers)) {
+        console.error('Invalid number of users provided');
+        process.exit(1);
+    }
+}
+
 async function copyFile(sourcePath: string, destinationPath: string): Promise<void> {
     try {
         // Validate that the source file exists
@@ -140,4 +153,4 @@ async function createUsers(n:number) {
 }
 
 // pnpm run script:fake_users
-await createUsers(50)
+await createUsers(numUsers)
