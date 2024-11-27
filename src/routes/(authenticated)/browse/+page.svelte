@@ -5,7 +5,6 @@
 	import SortAndFilter from '$lib/component/SortAndFilter.svelte';
 	import type { ReducedProfileInfo } from '$lib/domain/profile';
 
-
 	let users: ReducedProfileInfo[] = data.profiles;
 	let ids: any[] = data.ids;
 
@@ -13,7 +12,6 @@
 	let filteredUsers: ReducedProfileInfo[] | SortingCriteria[] = structuredClone(users);
 
 	let isFilterPopupOpen = false; // Controls visibility of the popup
-
 
 	// Default sorting criteria
 	let sortingCriteria: SortingInfo = {
@@ -26,7 +24,7 @@
 	function applyFilters(event: CustomEvent) {
 		sortingCriteria = event.detail.sortingCriteria;
 
-		console.log('in the apply filter function:', sortingCriteria)
+		console.log('in the apply filter function:', sortingCriteria);
 		if (sortingCriteria.age.order) {
 			filteredUsers = sortByAge(filteredUsers, sortingCriteria.age.order);
 		}
@@ -39,7 +37,11 @@
 			filteredUsers = sortByLocalization(filteredUsers, sortingCriteria.localisation.order);
 		}
 
-		filteredUsers = applyfilter(filteredUsers, sortingCriteria.age.range, sortingCriteria.fameRate.range);
+		filteredUsers = applyfilter(
+			filteredUsers,
+			sortingCriteria.age.range,
+			sortingCriteria.fameRate.range
+		);
 		isFilterPopupOpen = false;
 	}
 
@@ -48,14 +50,12 @@
 		filteredUsers = structuredClone(users);
 		isFilterPopupOpen = false;
 	}
-
-
 </script>
 
 <div class="bg-white">
 	<div class="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
 		<div class="flex justify-between items-center">
-			<h2 class="text-2xl font-bold tracking-tight text-gray-900" >Find your cyber babe here</h2>
+			<h2 class="text-2xl font-bold tracking-tight text-gray-900">Find your cyber babe here</h2>
 			<button
 				on:click={() => (isFilterPopupOpen = true)}
 				class="text-sm font-semibold text-blue-600 hover:underline focus:outline-none"
@@ -78,8 +78,9 @@
 			{#if ids.length > 0}
 				{#each ids as id, index}
 					{#if filteredUsers[index].mask}
-
-						<li class="group flex items-center space-x-4 p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-300">
+						<li
+							class="group flex items-center space-x-4 p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-300"
+						>
 							<!-- User's Profile Picture -->
 							<img
 								src={`/api/pics/${filteredUsers[index].picture}`}
@@ -95,29 +96,33 @@
 										{filteredUsers[index].username}
 									</a>
 								</h3>
-								<p class="text-l font-bold" style="color: {filteredUsers[index].gender === 'man' ? '#0042ad' : '#ff0099'};">
+								<p
+									class="text-l font-bold"
+									style="color: {filteredUsers[index].gender === 'man' ? '#0042ad' : '#ff0099'};"
+								>
 									{filteredUsers[index].gender}
 								</p>
 
 								<!-- Additional Details -->
 								<div class="mt-2">
 									<p class="text-sm text-gray-700">
-										<span class="font-semibold">Age:</span> {filteredUsers[index].age} years
+										<span class="font-semibold">Age:</span>
+										{filteredUsers[index].age} years
 									</p>
 									<p class="text-sm text-gray-700">
-										<span class="font-semibold">Fame Rate:</span> {(filteredUsers[index].fameRate * 100).toFixed(1)}%
+										<span class="font-semibold">Fame Rate:</span>
+										{(filteredUsers[index].fameRate * 100).toFixed(1)}%
 									</p>
 									<p class="text-sm text-gray-700">
-										<span class="font-semibold">Localisation:</span> {filteredUsers[index].localisation} km
+										<span class="font-semibold">Localisation:</span>
+										{filteredUsers[index].localisation} km
 									</p>
 								</div>
 							</div>
 							<!-- User Biography -->
 							<p class="text-sm text-gray-500">{filteredUsers[index].biography}</p>
 						</li>
-						{/if}
-
-
+					{/if}
 				{/each}
 			{:else}
 				<p class="text-gray-500">No profiles found. Please try again later.</p>

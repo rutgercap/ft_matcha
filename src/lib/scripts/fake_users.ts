@@ -9,40 +9,39 @@ import { Gender, SexualPreference } from '../domain/profile';
 import * as fs from 'fs';
 import * as path from 'path';
 
-
 const args = process.argv.slice(2); // Get arguments after the `node` and script name
-const numUsersArg = args.find(arg => arg.startsWith('--num='));
+const numUsersArg = args.find((arg) => arg.startsWith('--num='));
 
 let numUsers = 10; // Default value
 if (numUsersArg) {
-    numUsers = parseInt(numUsersArg.split('=')[1], 10);
-    if (isNaN(numUsers)) {
-        console.error('Invalid number of users provided');
-        process.exit(1);
-    }
+	numUsers = parseInt(numUsersArg.split('=')[1], 10);
+	if (isNaN(numUsers)) {
+		console.error('Invalid number of users provided');
+		process.exit(1);
+	}
 }
 
 async function copyFile(sourcePath: string, destinationPath: string): Promise<void> {
-    try {
-        // Validate that the source file exists
-        if (!fs.existsSync(sourcePath)) {
-            throw new Error(`Source file does not exist: ${sourcePath}`);
-        }
+	try {
+		// Validate that the source file exists
+		if (!fs.existsSync(sourcePath)) {
+			throw new Error(`Source file does not exist: ${sourcePath}`);
+		}
 
-        // Ensure the destination directory exists, create it if not
-        const destinationDir = path.dirname(destinationPath);
-        if (!fs.existsSync(destinationDir)) {
-            fs.mkdirSync(destinationDir, { recursive: true });
-        }
+		// Ensure the destination directory exists, create it if not
+		const destinationDir = path.dirname(destinationPath);
+		if (!fs.existsSync(destinationDir)) {
+			fs.mkdirSync(destinationDir, { recursive: true });
+		}
 
-        // Read the file and write to the destination
-        const data = await fs.promises.readFile(sourcePath);
-        await fs.promises.writeFile(destinationPath, data);
+		// Read the file and write to the destination
+		const data = await fs.promises.readFile(sourcePath);
+		await fs.promises.writeFile(destinationPath, data);
 
-        console.log(`File successfully copied from ${sourcePath} to ${destinationPath}`);
-    } catch (error) {
-        console.error(`Error copying file: ${error.message}`);
-    }
+		console.log(`File successfully copied from ${sourcePath} to ${destinationPath}`);
+	} catch (error) {
+		console.error(`Error copying file: ${error.message}`);
+	}
 }
 
 async function anyUser(password: string, overrides: Partial<User> = {}): User {
@@ -65,7 +64,7 @@ async function anyUser(password: string, overrides: Partial<User> = {}): User {
 }
 
 function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
-	const gender = faker.helpers.arrayElement(Object.values(Gender))
+	const gender = faker.helpers.arrayElement(Object.values(Gender));
 
 	return {
 		firstName: faker.person.firstName(),
@@ -91,8 +90,8 @@ function getDb(path: string = DATABASE_PATH): DatabaseType {
 	return db;
 }
 
-async function createUsers(n:number) {
-	const db = getDb(DATABASE_PATH)
+async function createUsers(n: number) {
+	const db = getDb(DATABASE_PATH);
 
 	const user_sql = db.prepare(`INSERT INTO
 		users (id, email, username, profile_is_setup, email_is_setup, password_hash)
@@ -110,26 +109,35 @@ async function createUsers(n:number) {
 				VALUES (@id, @user_id, @order)`);
 
 	let users: User[] = [];
-	let user_profile: ProfileInfo[] = []
-	let user_tags: any[] = []
-	let user_picture: any[] = []
+	let user_profile: ProfileInfo[] = [];
+	let user_tags: any[] = [];
+	let user_picture: any[] = [];
 
 	for (let i = 0; i < n; i++) {
-		users[i] = await anyUser("123456789")// setting same password for every users so we can access there profiles easily
-		user_profile[i] = anyUserProfile({user_id: users[i].id})
-		let tmp_imgid = generateIdFromEntropySize(10)
-		user_picture[i] = {id: tmp_imgid, user_id: users[i].id, order:0}
+		users[i] = await anyUser('123456789'); // setting same password for every users so we can access there profiles easily
+		user_profile[i] = anyUserProfile({ user_id: users[i].id });
+		let tmp_imgid = generateIdFromEntropySize(10);
+		user_picture[i] = { id: tmp_imgid, user_id: users[i].id, order: 0 };
 		if (user_profile[i].gender === 'man') {
-			await copyFile("static/profile_pictures/male_robot.jpg", "profile-pictures/" + tmp_imgid + ".jpg")
+			await copyFile(
+				'static/profile_pictures/male_robot.jpg',
+				'profile-pictures/' + tmp_imgid + '.jpg'
+			);
 		} else if (user_profile[i].gender === 'woman') {
-			await copyFile("static/profile_pictures/female_robot.jpg", "profile-pictures/" + tmp_imgid + ".jpg")
+			await copyFile(
+				'static/profile_pictures/female_robot.jpg',
+				'profile-pictures/' + tmp_imgid + '.jpg'
+			);
 		} else {
-			await copyFile("static/profile_pictures/other_robot.jpg", "profile-pictures/" + tmp_imgid + ".jpg")
+			await copyFile(
+				'static/profile_pictures/other_robot.jpg',
+				'profile-pictures/' + tmp_imgid + '.jpg'
+			);
 		}
 
 		for (let j = 0; j < user_profile[i].tags.length; j++) {
 			let tmp = generateIdFromEntropySize(10);
-			user_tags.push({id: tmp, user_id: users[i].id, tag: user_profile[i].tags[j]})
+			user_tags.push({ id: tmp, user_id: users[i].id, tag: user_profile[i].tags[j] });
 		}
 	}
 	const insertManyUser = db.transaction((users: User[]) => {
@@ -145,12 +153,11 @@ async function createUsers(n:number) {
 		for (const u of user_picture) user_picture_sql.run(u);
 	});
 
-	insertManyUser(users)
-	insertManyProfile(user_profile)
-	insertManyTag(user_tags)
-	insertManyPicture(user_picture)
-
+	insertManyUser(users);
+	insertManyProfile(user_profile);
+	insertManyTag(user_tags);
+	insertManyPicture(user_picture);
 }
 
 // pnpm run script:fake_users
-await createUsers(numUsers)
+await createUsers(numUsers);

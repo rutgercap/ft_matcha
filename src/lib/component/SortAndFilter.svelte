@@ -25,7 +25,7 @@
 			fameRate: { order: 'none', range: [0, 1] }
 		};
 		dispatch('resetList', { sortingCriteria });
-		close()
+		close();
 	};
 
 	// Close the popup
@@ -137,7 +137,7 @@
 					type="button"
 					class="inline-flex justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 					on:click={handleResetList}
-					>
+				>
 					Reset
 				</button>
 				<button
