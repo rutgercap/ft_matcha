@@ -231,7 +231,8 @@ class UserRepository {
 					.prepare<string, { id: string }>(
 						`SELECT id
    						FROM users
-						  WHERE id != ? AND profile_is_setup = 1`)
+						  WHERE id != ? AND profile_is_setup = 1`
+					)
 					.all(id)
 					.map((user) => user.id);
 				resolve(result);
@@ -263,7 +264,7 @@ class UserRepository {
 		});
 	}
 
-	public reducedProfile(id:string): Promise<ReducedProfileInfo> {
+	public reducedProfile(id: string): Promise<ReducedProfileInfo> {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
@@ -277,13 +278,17 @@ class UserRepository {
 				const res = this.db.prepare<string>(sql).get(id);
 				resolve(res);
 			} catch (error) {
-				reject(new UserRepositoryError('Something went wrong getting reducedProfile for user id: ' + id, error));
+				reject(
+					new UserRepositoryError(
+						'Something went wrong getting reducedProfile for user id: ' + id,
+						error
+					)
+				);
 			}
-		})
+		});
 	}
 
 	public upsertProfileIsSetup(userId: string, flag: boolean) {
-
 		try {
 			const val = flag ? 1 : 0;
 			const sql = this.db.prepare<[number, string]>(

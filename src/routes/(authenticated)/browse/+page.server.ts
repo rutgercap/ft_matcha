@@ -5,21 +5,21 @@ import type { Action, PageServerLoad } from './$types';
 import type { SortingCriteria } from './sorting';
 import { faker } from '@faker-js/faker';
 
-
 interface IdObject {
-    id: string;
+	id: string;
 }
 
-
-
-export const load: PageServerLoad = async ({ locals: { user, userRepository, browsingRepository}, params }) => {
+export const load: PageServerLoad = async ({
+	locals: { user, userRepository, browsingRepository },
+	params
+}) => {
 	if (!user) {
 		throw redirect(401, '/login');
 	}
 
-	const ids: IdObject[] = browsingRepository.allIdExcept(user.id)
+	const ids: IdObject[] = browsingRepository.allIdExcept(user.id);
 
-	const profiles : ReducedProfileInfo[] = await Promise.all(
+	const profiles: ReducedProfileInfo[] = await Promise.all(
 		ids.map((idObj: IdObject) => userRepository.reducedProfile(idObj.id))
 	);
 	profiles.forEach(profile => {
@@ -28,8 +28,6 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository, bro
 		profile.mask = true
 	})
 
+
 	return { profiles, ids };
-
-
 };
-

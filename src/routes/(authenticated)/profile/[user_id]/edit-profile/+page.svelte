@@ -90,13 +90,13 @@
 						accept="image/png, image/jpeg, image/jpg"
 						class="hidden"
 					/>
-					<div class="profile-picture-upload">
+					<button on:click={() => document.getElementById(`pictures-${i}`).click()} class="profile-picture-upload">
 						<img
 							alt="profile"
 							class="profile-picture-preview"
 							src={`/api/pics/${user.id}/${i}?refreshKey=${refreshKeys[i]}`}
 						/>
-					</div>
+					</button>
 					<button class="delete-icon" on:click={() => handleDeletePicture(i)}>
 						<Icon src={Trash} class="h-8 w-auto" />
 					</button>
