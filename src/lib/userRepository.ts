@@ -172,9 +172,6 @@ class UserRepository {
 				sexual_preference=excluded.sexual_preference,
 				biography=excluded.biography;`
 		);
-		const updateProfileSet = this.db.prepare<[string]>(
-			'UPDATE users SET profile_is_setup = 1 WHERE id = ?'
-		);
 		const deleteTags = this.db.prepare<[string]>(`DELETE FROM tags WHERE user_id = ?`);
 		const insertTag = this.db.prepare<[string, string, string]>(
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
@@ -193,7 +190,6 @@ class UserRepository {
 							profileTest.biography,
 							profileTest.age
 						);
-						updateProfileSet.run(id);
 						deleteTags.run(id);
 						profileTest.tags.forEach((tag) => {
 							insertTag.run(uuidv4(), id, tag);
@@ -418,6 +414,10 @@ class UserRepository {
 		} catch (error) {
 			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
 		}
+	}
+
+	public async profileImageIsSet(userId:string): Promise<boolean> {
+		return this.imageRepo.checkIfImageProfileIsSet(userId)
 	}
 }
 

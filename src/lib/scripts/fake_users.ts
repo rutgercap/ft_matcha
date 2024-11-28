@@ -122,17 +122,17 @@ async function createUsers(n: number) {
 		if (user_profile[i].gender === 'man') {
 			await copyFile(
 				'static/profile_pictures/male_robot.jpg',
-				'profile-pictures/' + tmp_imgid + '.jpg'
+				'profile-pictures/' + users[i].id + '_0' + '.jpg'
 			);
 		} else if (user_profile[i].gender === 'woman') {
 			await copyFile(
 				'static/profile_pictures/female_robot.jpg',
-				'profile-pictures/' + tmp_imgid + '.jpg'
+				'profile-pictures/' + users[i].id + '_0' + '.jpg'
 			);
 		} else {
 			await copyFile(
 				'static/profile_pictures/other_robot.jpg',
-				'profile-pictures/' + tmp_imgid + '.jpg'
+				'profile-pictures/' + users[i].id + '_0' + '.jpg'
 			);
 		}
 

@@ -78,6 +78,9 @@ export async function DELETE({ locals: { user, userRepository }, params }) {
 	}
 	try {
 		await userRepository.deleteUserImage(user_id, order);
+		if (order === 0) {
+			await userRepository.upsertProfileIsSetup(user_id, false)
+		}
 		return new Response(null, { status: 204 });
 	} catch {
 		throw error(500, 'Error deleting image');

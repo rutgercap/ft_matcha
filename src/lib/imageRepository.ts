@@ -93,6 +93,19 @@ class ImageRepository {
 			throw new ImageRepositoryError('Error trying delete the image', error);
 		}
 	}
+
+	public async checkIfImageProfileIsSet(userId: string): Promise<boolean> {
+		try {
+			const sql = this.db.prepare<string>(`SELECT count(user_id) AS cnt
+										FROM profile_pictures
+										WHERE user_id == ?
+										AND image_order == 0`);
+			const result = sql.get(userId)
+			return result.cnt == 0 ? false : true ;
+		} catch (e) {
+			throw new ImageRepositoryError('Error occur checking for user profile picture', e)
+		}
+	}
 }
 
 export { ImageRepository };
