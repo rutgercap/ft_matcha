@@ -149,8 +149,26 @@
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.lastName}</p>
 					{/if}
 				</div>
-
-				<div class="sm:col-span-3">
+				<div class="sm:col-span-2">
+					<label for="age" class="block text-sm font-medium leading-6 text-gray-900">Age</label>
+					<div class="mt-2">
+						<input
+							type="number"
+							name="age"
+							id="age"
+							min="18"
+							max="99"
+							class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+							bind:value={$form.age}
+							aria-invalid={$errors.age ? 'true' : undefined}
+							{...$constraints.age}
+						/>
+					</div>
+					{#if $errors.age && $tainted}
+						<p class="mt-2 text-sm text-red-600" id="age-error">{$errors.age}</p>
+					{/if}
+				</div>
+				<div class="sm:col-span-2">
 					<label for="gender" class="block text-sm font-medium leading-6 text-gray-900"
 						>Gender</label
 					>
@@ -172,7 +190,8 @@
 						<p class="mt-2 text-sm text-red-600" id="email-error">{$errors.gender}</p>
 					{/if}
 				</div>
-				<div class="sm:col-span-3">
+
+				<div class="sm:col-span-2">
 					<label for="sexualPreference" class="block text-sm font-medium leading-6 text-gray-900"
 						>Sexual preference</label
 					>

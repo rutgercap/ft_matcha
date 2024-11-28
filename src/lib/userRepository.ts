@@ -107,8 +107,8 @@ class UserRepository {
 
 	async profilePreviews(ids: string[]): Promise<ProfilePreview[]> {
 		const getProfilePreview = this.db.prepare<string, ToSnakeCase<ProfilePreview>>(
-			`SELECT user_id, first_name, last_name 
-			FROM profile_info 
+			`SELECT user_id, first_name, last_name
+			FROM profile_info
 			WHERE user_id = ?`
 		);
 		return new Promise((resolve, reject) => {
@@ -163,8 +163,8 @@ class UserRepository {
 	): Promise<Array<string | null>> {
 		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
 			`
-				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography)
-				VALUES (?, ?, ?, ?, ?, ?)
+				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography, age)
+				VALUES (?, ?, ?, ?, ?, ?, ?)
 				ON CONFLICT(user_id) DO UPDATE SET
 				first_name=excluded.first_name,
 				last_name=excluded.last_name,
@@ -190,7 +190,8 @@ class UserRepository {
 							profileTest.lastName,
 							profileTest.gender.toString(),
 							profileTest.sexualPreference.toString(),
-							profileTest.biography
+							profileTest.biography,
+							profileTest.age
 						);
 						updateProfileSet.run(id);
 						deleteTags.run(id);
@@ -267,7 +268,7 @@ class UserRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
-					SELECT u.username, p.biography, p.gender, pp.id AS picture
+					SELECT u.username, p.biography, p.gender, p.age, pp.id AS picture
 					FROM users AS u
 					INNER JOIN profile_info AS p ON u.id = p.user_id
 					INNER JOIN profile_pictures AS pp ON u.id = pp.user_id

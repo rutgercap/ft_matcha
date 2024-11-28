@@ -16,6 +16,7 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileWithoutPic
 		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
 		tags: [faker.lorem.word(), faker.lorem.word()],
+		age: faker.number.int({ min: 18, max: 99 }),
 		...overrides
 	};
 }
