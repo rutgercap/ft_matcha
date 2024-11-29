@@ -64,13 +64,11 @@ export class WebsocketServer {
 
 	private setupServerSocket(socket: ServerSocket) {
 		this.svelteKitServerSocket = socket;
-		console.log('Server socket connected');
 		socket.on('disconnect', () => {
 			console.warn('Server socket disconnected');
 			this.svelteKitServerSocket = null;
 		});
 		socket.on('redirect', ({ to, eventName, content }) => {
-			console.log('Redirecting to:', to);
 			this.sendMessageToUser(to, eventName, content);
 		});
 		this.svelteKitServerSocket.emit('connected', { id: this.id });

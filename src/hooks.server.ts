@@ -11,7 +11,7 @@ import { ConnectionRepository } from '$lib/server/connectionRepository';
 import { AuthService } from '$lib/server/authService';
 import { NotificationService } from '$lib/server/notificationService';
 import { sequence } from '@sveltejs/kit/hooks';
-import { getServerSocket, ServerSocket } from '$lib/server/serverSocket';
+import { getServerSocket } from '$lib/server/serverSocket';
 
 const authHandle: Handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get(lucia.sessionCookieName);

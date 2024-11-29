@@ -15,17 +15,11 @@ export class ServerSocket {
 		this.socket.on('connect', () => {
 			console.log('Connected to server');
 		});
-		this.socket.on('disconnect', (reason, details) => {
-			console.log('Disconnected from server', reason, details);
+		this.socket.on('disconnect', () => {
+			console.log('Disconnected from server');
 		});
 		this.socket.on('connect_error', (error) => {
-			if (this.socket.active) {
-				// temporary failure, the socket will automatically try to reconnect
-			} else {
-				// the connection was denied by the server
-				// in that case, `socket.connect()` must be manually called in order to reconnect
-				console.log('error: ' + error.message);
-			}
+			console.log('Error connecting to websocketServer: ' + error.message);
 		});
 	}
 
