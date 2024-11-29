@@ -52,7 +52,6 @@ export const actions: Actions = {
 		const formData = form.data;
 		try {
 			await userRepository.upsertProfileInfo(user.id, formData);
-			await userRepository.upsertProfileIsSetup(user.id, true)
 		} catch {
 			return message(form, 'An error occurred while updating your profile', { status: 500 });
 		}

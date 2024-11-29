@@ -161,7 +161,7 @@ class UserRepository {
 		id: string,
 		info: ProfileWithoutPicturesAndId
 	): Promise<Array<string | null>> {
-		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
+		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string, number]>(
 			`
 				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography, age)
 				VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -176,6 +176,12 @@ class UserRepository {
 		const insertTag = this.db.prepare<[string, string, string]>(
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
+
+		const updateProfileSet = this.db.prepare<[string]>(
+			'UPDATE users SET profile_is_setup = 1 WHERE id = ?'
+		);
+
+		const profileImageIsSet = await this.profileImageIsSet(id)
 
 		return new Promise((resolve, reject) => {
 			try {
@@ -194,15 +200,40 @@ class UserRepository {
 						profileTest.tags.forEach((tag) => {
 							insertTag.run(uuidv4(), id, tag);
 						});
+						if (profileImageIsSet) {
+							this.upsertProfileIsSetup(id, true)
+						}
 					}
 				);
 				transaction(id, info);
+
 				const inserted_filename: Array<string | null> = [];
 				resolve(inserted_filename);
 			} catch (e) {
 				reject(new UserRepositoryError(`Something went wrong creating user: ${e}`, e));
 			}
 		});
+	}
+
+	public async profileInfoIsSet(userId:string): Promise<boolean> {
+		try {
+			const sql = `SELECT count(*) AS cnt
+						FROM profile_info AS p
+						INNER JOIN tags AS t ON p.user_id = t.user_id
+						WHERE p.user_id =  ?
+						AND p.first_name IS NOT NULL
+						AND p.last_name IS NOT NULL
+						AND p.gender IS NOT NULL
+						AND p.biography IS NOT NULL
+						AND p.age IS NOT NULL
+						AND p.sexual_preference IS NOT NULL
+						AND t.tag IS NOT NULL;`
+			const qu = this.db.prepare<string>(sql)
+			const res = qu.get(userId)
+			return res.cnt == 0 ? false : true
+		} catch (error) {
+			throw new UserRepositoryError('Error occurs trying to check if profileInfo is set', error)
+		}
 	}
 
 	public async updateEmailIsSetup(userId: string, val: boolean) {
@@ -231,6 +262,7 @@ class UserRepository {
 					)
 					.all(id)
 					.map((user) => user.id);
+				console.log('in allOtherUser: ', result)
 				resolve(result);
 			} catch (e) {
 				reject(new UserRepositoryError('Something went wrong fetching other users', e));
@@ -410,7 +442,12 @@ class UserRepository {
 
 	public async saveUserImage(userId: string, order: number, image: Buffer): Promise<number> {
 		try {
-			return await this.imageRepo.upsertImage(userId, order, image);
+			const res_order = await this.imageRepo.upsertImage(userId, order, image);
+			const profileInfoIsSet = await this.profileInfoIsSet(userId)
+			if (profileInfoIsSet && order === 0) {
+				this.upsertProfileIsSetup(userId, true)
+			}
+			return res_order
 		} catch (error) {
 			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
 		}
