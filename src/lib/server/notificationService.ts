@@ -1,14 +1,14 @@
 import type { NotificationType } from '$lib/notificationClient';
-import type { WebsocketServer } from './websocketServer';
+import type { ServerSocket } from './serverSocket';
 
 export class NotificationService {
-	socketServer: WebsocketServer;
+	private serverSocket: ServerSocket;
 
-	constructor(socketServer: WebsocketServer) {
-		this.socketServer = socketServer;
+	constructor(socketServer: ServerSocket) {
+		this.serverSocket = socketServer;
 	}
 
 	public sendNotification(userId: string, type: NotificationType, from: string) {
-		this.socketServer.sendMessageToUser(userId, 'notification', { type, from });
+		this.serverSocket.sendMessageToUser(userId, 'notification', { type, from });
 	}
 }

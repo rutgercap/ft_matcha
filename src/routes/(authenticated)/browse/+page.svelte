@@ -83,7 +83,7 @@
 						>
 							<!-- User's Profile Picture -->
 							<img
-								src={`/api/pics/${filteredUsers[index].picture}`}
+								src={`/api/pics/${filteredUsers[index]}/0`}
 								alt={id.id}
 								class="h-24 w-24 rounded-full bg-gray-200 object-cover"
 							/>

@@ -161,7 +161,9 @@ class UserRepository {
 		id: string,
 		info: ProfileWithoutPicturesAndId
 	): Promise<Array<string | null>> {
-		const insertIntoProfile = this.db.prepare<[string, string, string, string, string, string]>(
+		const insertIntoProfile = this.db.prepare<
+			[string, string, string, string, string, string, number]
+		>(
 			`
 				INSERT INTO profile_info (user_id, first_name, last_name, gender, sexual_preference, biography, age)
 				VALUES (?, ?, ?, ?, ?, ?, ?)

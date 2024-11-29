@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 
 export const toasts = writable<Toast[]>([]);
 
-type ToastWithoutId = {
+export type ToastWithoutId = {
 	type?: undefined | 'success' | 'error' | 'info';
 	message: string;
 	extraInformation?: string;
