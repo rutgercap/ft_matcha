@@ -25,9 +25,10 @@ import { NotificationClient } from '$lib/notificationClient';
 import { NotificationService } from '$lib/server/notificationService';
 import type { HttpServer } from 'vite';
 import type { AddressInfo } from 'net';
-import { WebsocketServer } from '$lib/server/websocketServer';
 import { AuthService } from '$lib/server/authService';
 import { adapter, createLuciaInstance } from '$lib/auth';
+import { WebsocketServer } from '../vite.config';
+import { ServerSocket } from '$lib/server/serverSocket';
 
 interface MyFixtures {
 	db: DatabaseType;
@@ -38,7 +39,7 @@ interface MyFixtures {
 	savedUserFactory: (n: number, overrides?: Partial<User>) => Promise<UserWithoutProfileSetup[]>;
 	image: Buffer;
 	connectionRepository: ConnectionRepository;
-	websocketServer: WebsocketServer;
+	serverSocket: ServerSocket;
 	clientSocket: ClientSocket;
 	notificationService: NotificationService;
 	notificationClient: NotificationClient;
@@ -100,10 +101,12 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(server);
 		server.close();
 	},
-	websocketServer: async ({ httpServer, lucia }, use) => {
+	serverSocket: async ({ httpServer, lucia }, use) => {
 		const io = new Server(httpServer);
-		const server = new WebsocketServer(io, lucia);
-		await use(server);
+		const dontDelete = new WebsocketServer(io, lucia);
+		const port = (httpServer.address() as AddressInfo).port;
+		const socket = new ServerSocket(`http://localhost:${port}`);
+		await use(socket);
 		io.close();
 	},
 	clientSocket: async ({ httpServer, savedUserFactory, authService }, use) => {
@@ -118,8 +121,8 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(socket);
 		socket.disconnect();
 	},
-	notificationService: async ({ websocketServer }, use) => {
-		await use(new NotificationService(websocketServer));
+	notificationService: async ({ serverSocket }, use) => {
+		await use(new NotificationService(serverSocket));
 	},
 	notificationClient: async ({ clientSocket }, use) => {
 		await use(new NotificationClient(clientSocket));

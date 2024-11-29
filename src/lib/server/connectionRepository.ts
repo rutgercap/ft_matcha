@@ -65,6 +65,7 @@ export class ConnectionRepository {
 				const isLiked = transaction(userId, targetId);
 				resolve(isLiked);
 			} catch (e) {
+				console.error(e);
 				reject(new ConnectionRepositoryError('Failed to like user'));
 			}
 		});

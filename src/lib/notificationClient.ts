@@ -17,6 +17,7 @@ export class NotificationClient {
 
 	private onNotification() {
 		this.client.on('notification', (arg: Notification) => {
+			console.log('notification: ' + arg);
 			this._notifications.push(arg);
 			this.emit('notification', arg);
 		});
@@ -24,7 +25,7 @@ export class NotificationClient {
 
 	private onConnectionError() {
 		this.client.on('connect_error', (error) => {
-			console.error(error);
+			console.error('connection error: ' + error);
 		});
 	}
 

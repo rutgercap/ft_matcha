@@ -19,15 +19,16 @@ export const load: PageServerLoad = async ({
 
 	const ids: IdObject[] = browsingRepository.allIdExcept(user.id);
 
-	const profiles: ReducedProfileInfo[] = await Promise.all(
+	let profiles: ReducedProfileInfo[] = await Promise.all(
 		ids.map((idObj: IdObject) => userRepository.reducedProfile(idObj.id))
 	);
-	profiles.forEach(profile => {
-		profile.fameRate = faker.number.float({ min: 0, max: 1, precision: 0.001 }),
-		profile.localisation = faker.number.int({ min: 0, max: 1000 }),
-		profile.mask = true
-	})
-
+	profiles = profiles.filter((profile) => Boolean(profile));
+	profiles.forEach((profile) => {
+		(profile.age = faker.number.int({ min: 18, max: 100 })),
+			(profile.fameRate = faker.number.float({ min: 0, max: 1, precision: 0.001 })),
+			(profile.localisation = faker.number.int({ min: 0, max: 1000 })),
+			(profile.mask = true);
+	});
 
 	return { profiles, ids };
 };
