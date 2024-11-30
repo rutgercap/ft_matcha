@@ -10,7 +10,6 @@ describe('ImageRepository', () => {
 			await imageRepository.upsertImage(savedUser.id, 0, image);
 
 			const found = await imageRepository.image(savedUser.id, 0);
-
 			expect(found).toEqual(image);
 		}
 	);

@@ -23,13 +23,12 @@ class ImageRepository {
 		if (order < 0 || order >= MAX_PICTURES) {
 			throw new ImageRepositoryError('Image order out of range', null);
 		}
-		const id = uuidv4();
-		const sql = this.db.prepare<[string, string, number]>(`
-            INSERT INTO profile_pictures (id, user_id, image_order)
-            VALUES (?, ?, ?)
+		const sql = this.db.prepare<[string, number]>(`
+            INSERT INTO profile_pictures (user_id, image_order)
+            VALUES (?, ?)
         `);
 		try {
-			sql.run(id, userId, order);
+			sql.run(userId, order);
 		} catch (e) {
 			throw new ImageRepositoryError('Error trying to insert image into profile_pictures table', e);
 		}
@@ -62,10 +61,10 @@ class ImageRepository {
 	public async image(userId: string, order: number): Promise<Buffer | null> {
 		try {
 			const sql = this.db.prepare<[string, number], { id: string }>(`
-                SELECT id FROM profile_pictures WHERE user_id = ? AND image_order = ?
+                SELECT user_id, image_order FROM profile_pictures WHERE user_id = ? AND image_order = ?
                 `);
-			const id = sql.get(userId, order)?.id;
-			if (!id) {
+			const res = sql.get(userId, order);
+			if (!res || !res.user_id) {
 				return null;
 			}
 			const filePath = this.destination + `/${userId}_${order}.jpg`;

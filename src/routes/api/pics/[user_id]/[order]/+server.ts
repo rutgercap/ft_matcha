@@ -1,5 +1,5 @@
 import { MAX_F_SIZE } from '$env/static/private';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import fs from 'fs';
 import path from 'path';
 
