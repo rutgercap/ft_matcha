@@ -75,4 +75,5 @@ describe('ImageRepository', () => {
 		const check = await imageRepository.checkIfImageProfileIsSet(savedUser.id);
 		expect(check).toBe(true)
 	});
+
 });
