@@ -1,6 +1,7 @@
 import { describe, expect } from 'vitest';
 import { itWithFixtures } from '../fixtures';
 import { ImageRepositoryError } from '$lib/imageRepository';
+import { anyUser } from '../testHelpers';
 
 describe('ImageRepository', () => {
 	itWithFixtures(
@@ -9,7 +10,6 @@ describe('ImageRepository', () => {
 			await imageRepository.upsertImage(savedUser.id, 0, image);
 
 			const found = await imageRepository.image(savedUser.id, 0);
-
 			expect(found).toEqual(image);
 		}
 	);
@@ -63,4 +63,17 @@ describe('ImageRepository', () => {
 			await imageRepository.deleteImage(savedUser.id, 0);
 		}
 	);
+
+	itWithFixtures('should return false because user has not set profile picture', async ({ savedUser, imageRepository }) => {
+		const check = await imageRepository.checkIfImageProfileIsSet(savedUser.id);
+		expect(check).toBe(false)
+	});
+
+	itWithFixtures('should return true because user has set profile picture', async ({ savedUser, imageRepository, image}) => {
+		await imageRepository.upsertImage(savedUser.id, 0, image);
+
+		const check = await imageRepository.checkIfImageProfileIsSet(savedUser.id);
+		expect(check).toBe(true)
+	});
+
 });

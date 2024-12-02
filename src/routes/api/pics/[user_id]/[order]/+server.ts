@@ -1,5 +1,5 @@
 import { MAX_F_SIZE } from '$env/static/private';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import fs from 'fs';
 import path from 'path';
 
@@ -78,7 +78,11 @@ export async function DELETE({ locals: { user, userRepository }, params }) {
 	}
 	try {
 		await userRepository.deleteUserImage(user_id, order);
-		return new Response(null, { status: 204 });
+		let isProfilePic = (order === 0);
+		if (isProfilePic) {
+			await userRepository.upsertProfileIsSetup(user_id, false)
+		}
+		return new Response(JSON.stringify({isProfilePic}), { status: 200 });
 	} catch {
 		throw error(500, 'Error deleting image');
 	}

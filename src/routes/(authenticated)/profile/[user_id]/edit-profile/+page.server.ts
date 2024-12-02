@@ -45,9 +45,13 @@ export const actions: Actions = {
 			return fail(401, { message: 'You must be signed in to update your profile' });
 		}
 		const form = await superValidate(request, zod(profileSchema));
+		const imageIsSet = await userRepository.profileImageIsSet(user.id);
 		if (!form.valid) {
 			return message(form, 'Please fix the invalid fields before trying again.', { status: 400 });
+		} else if (!imageIsSet) {
+			return message(form, 'You need a profile picture for you profile to be complete', { status: 400 });
 		}
+
 		const formData = form.data;
 		try {
 			await userRepository.upsertProfileInfo(user.id, formData);

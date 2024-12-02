@@ -106,8 +106,8 @@ async function createUsers(n: number) {
 				tags (id, user_id, tag)
 				VALUES (@id, @user_id, @tag)`);
 	const user_picture_sql = db.prepare(`INSERT INTO
-				profile_pictures (id, user_id, image_order)
-				VALUES (@id, @user_id, @order)`);
+				profile_pictures (user_id, image_order)
+				VALUES (@user_id, @order)`);
 
 	let users: User[] = [];
 	let user_profile: ProfileInfo[] = [];
@@ -117,22 +117,21 @@ async function createUsers(n: number) {
 	for (let i = 0; i < n; i++) {
 		users[i] = await anyUser('123456789'); // setting same password for every users so we can access there profiles easily
 		user_profile[i] = anyUserProfile({ user_id: users[i].id });
-		let tmp_imgid = generateIdFromEntropySize(10);
-		user_picture[i] = { id: tmp_imgid, user_id: users[i].id, order: 0 };
+		user_picture[i] = { user_id: users[i].id, order: 0 };
 		if (user_profile[i].gender === 'man') {
 			await copyFile(
 				'static/profile_pictures/male_robot.jpg',
-				'profile-pictures/' + tmp_imgid + '.jpg'
+				'profile-pictures/' + users[i].id + '_0' + '.jpg'
 			);
 		} else if (user_profile[i].gender === 'woman') {
 			await copyFile(
 				'static/profile_pictures/female_robot.jpg',
-				'profile-pictures/' + tmp_imgid + '.jpg'
+				'profile-pictures/' + users[i].id + '_0' + '.jpg'
 			);
 		} else {
 			await copyFile(
 				'static/profile_pictures/other_robot.jpg',
-				'profile-pictures/' + tmp_imgid + '.jpg'
+				'profile-pictures/' + users[i].id + '_0' + '.jpg'
 			);
 		}
 
