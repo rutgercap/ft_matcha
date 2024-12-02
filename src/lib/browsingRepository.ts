@@ -12,17 +12,22 @@ class BrowsingRepositoryError extends Error {
 class BrowsingRepository {
 	constructor(private db: Database) {}
 
-	public allIdExcept(userId: string) {
-		try {
-			const sql = this.db.prepare<string>('SELECT id FROM users where id != ?');
-			const res = sql.all(userId);
-			return res;
-		} catch (error) {
-			throw new BrowsingRepositoryError(
-				'error occur trying to get browsing list for user:' + userId,
-				error
-			);
-		}
+	public async allOtherUsers(id: string): Promise<string[]> {
+		return new Promise((resolve, reject) => {
+			try {
+				const result = this.db
+					.prepare<string, { id: string }>(
+						`SELECT id
+   						FROM users
+						  WHERE id != ? AND profile_is_setup = 1`
+					)
+					.all(id)
+					.map((user) => user.id);
+				resolve(result);
+			} catch (e) {
+				reject(new BrowsingRepositoryError('Something went wrong fetching other users', e));
+			}
+		});
 	}
 }
 

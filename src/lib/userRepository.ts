@@ -438,7 +438,7 @@ class UserRepository {
 		try {
 			return await this.imageRepo.image(userId, order);
 		} catch (error) {
-			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
+			throw new UserRepositoryError('Error occurs trying to get image for: ' + userId, error);
 		}
 	}
 
@@ -451,7 +451,7 @@ class UserRepository {
 			}
 			return res_order
 		} catch (error) {
-			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
+			throw new UserRepositoryError('Error occurs trying to save image for: ' + userId, error);
 		}
 	}
 

@@ -5,10 +5,6 @@ import type { Action, PageServerLoad } from './$types';
 import type { SortingCriteria } from './sorting';
 import { faker } from '@faker-js/faker';
 
-interface IdObject {
-	id: string;
-}
-
 export const load: PageServerLoad = async ({
 	locals: { user, userRepository, browsingRepository },
 	params
@@ -17,14 +13,13 @@ export const load: PageServerLoad = async ({
 		throw redirect(401, '/login');
 	}
 
-	const ids: IdObject[] = browsingRepository.allIdExcept(user.id);
+	const ids: string[] = await browsingRepository.allOtherUsers(user.id);
 
 	let profiles: ReducedProfileInfo[] = await Promise.all(
-		ids.map((idObj: IdObject) => userRepository.reducedProfile(idObj.id))
+		ids.map((idObj: string) => userRepository.reducedProfile(idObj))
 	);
 	profiles = profiles.filter((profile) => Boolean(profile));
 	profiles.forEach((profile) => {
-		(profile.age = faker.number.int({ min: 18, max: 100 })),
 			(profile.fameRate = faker.number.float({ min: 0, max: 1, precision: 0.001 })),
 			(profile.localisation = faker.number.int({ min: 0, max: 1000 })),
 			(profile.mask = true);

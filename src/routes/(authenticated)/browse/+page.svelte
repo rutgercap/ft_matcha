@@ -83,7 +83,7 @@
 						>
 							<!-- User's Profile Picture -->
 							<img
-								src={`/api/pics/${id.id}/0`}
+								src={`/api/pics/${id}/0`}
 								alt={id.id}
 								class="h-24 w-24 rounded-full bg-gray-200 object-cover"
 							/>
@@ -92,7 +92,7 @@
 							<div class="flex-1">
 								<!-- Username and Gender -->
 								<h3 class="text-lg font-medium text-gray-900">
-									<a href={`/profile/${id.id}`} class="hover:underline">
+									<a href={`/profile/${id}`} class="hover:underline">
 										{filteredUsers[index].username}
 									</a>
 								</h3>

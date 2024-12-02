@@ -65,7 +65,7 @@ export class WebsocketServer {
 	private setupServerSocket(socket: ServerSocket) {
 		this.svelteKitServerSocket = socket;
 		socket.on('disconnect', () => {
-			console.warn('Server socket disconnected');
+			// console.warn('Server socket disconnected');
 			this.svelteKitServerSocket = null;
 		});
 		socket.on('redirect', ({ to, eventName, content }) => {
