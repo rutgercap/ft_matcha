@@ -97,7 +97,10 @@
 						accept="image/png, image/jpeg, image/jpg"
 						class="hidden"
 					/>
-					<button on:click={() => document.getElementById(`pictures-${i}`).click()} class="profile-picture-upload">
+					<button
+						on:click={() => document.getElementById(`pictures-${i}`).click()}
+						class="profile-picture-upload"
+					>
 						<img
 							alt="profile"
 							class="profile-picture-preview"

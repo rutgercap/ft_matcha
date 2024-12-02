@@ -13,7 +13,10 @@ const profileSchema = z.object({
 		.enum(['men', 'women', 'all', 'other'])
 		.refine((value) => isSexualPreference(value)),
 	biography: z.string().min(0).max(500).default(''),
-	age: z.number().min(18, { message: "Age must be at least 18" }).max(99, { message: "bro you too old for this shit" }),
+	age: z
+		.number()
+		.min(18, { message: 'Age must be at least 18' })
+		.max(99, { message: 'bro you too old for this shit' }),
 	tags: z
 		.string()
 		.transform((val) => val.split(',').map((item) => item.trim())) // Split and trim each item

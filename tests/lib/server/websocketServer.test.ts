@@ -15,7 +15,7 @@ describe('WebsocketServer', () => {
 	itWithFixtures(
 		'Should not be able to connect without session',
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		async ({ httpServer, websocketServer }) => {
+		async ({ httpServer, serverSocket }) => {
 			const port = (httpServer.address() as AddressInfo).port;
 			socket = io(`http://localhost:${port}`);
 
@@ -32,7 +32,7 @@ describe('WebsocketServer', () => {
 	itWithFixtures(
 		'Should be able to connect with session',
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		async ({ httpServer, websocketServer, authService, savedUserFactory }) => {
+		async ({ httpServer, serverSocket, authService, savedUserFactory }) => {
 			const users = await savedUserFactory(1);
 			const user = users[0];
 			const port = (httpServer.address() as AddressInfo).port;

@@ -7,12 +7,11 @@ import { lucia } from '$lib/auth';
 import { IMAGE_FOLDER } from '$env/static/private';
 import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import { BrowsingRepository } from '$lib/browsingRepository';
-
 import { ConnectionRepository } from '$lib/server/connectionRepository';
 import { AuthService } from '$lib/server/authService';
 import { NotificationService } from '$lib/server/notificationService';
-import { websocketServer } from '$lib/server/websocketServer';
 import { sequence } from '@sveltejs/kit/hooks';
+import { getServerSocket } from '$lib/server/serverSocket';
 
 const authHandle: Handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
@@ -44,16 +43,16 @@ const authHandle: Handle = async ({ event, resolve }) => {
 export const dependencyHandle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
 	const transporter = getTransporter();
+	const socket = getServerSocket(event.url.origin);
 	const imageRepo = new ImageRepository(IMAGE_FOLDER, db);
-	const notificationService = new NotificationService(websocketServer());
+	const notificationService = new NotificationService(socket);
 	event.locals.userRepository = new UserRepository(db, imageRepo);
 	event.locals.emailRepository = new EmailRepository(db, transporter);
 	event.locals.profileVisitRepository = new ProfileVisitRepository(db);
-
 	event.locals.browsingRepository = new BrowsingRepository(db);
+
 	event.locals.connectionRepository = new ConnectionRepository(db, notificationService);
 	event.locals.authService = new AuthService(event.locals.userRepository, lucia);
-
 	return resolve(event);
 };
 

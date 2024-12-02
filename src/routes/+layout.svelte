@@ -16,21 +16,23 @@
 	import { page } from '$app/stores';
 	import { initials as getInitials } from '$lib/domain/profile';
 	import { toasts } from '$lib/toast/toastStore';
-	import { NotificationClient, type Notification } from '$lib/notificationClient';
+	import {
+		NotificationClient,
+		notificationToToast,
+		type Notification
+	} from '$lib/notificationClient';
 	import { notificationClientStore } from '$lib/stores/notificationClientStore';
 	import { io } from 'socket.io-client';
+	import addToast from '$lib/toast/toastStore';
+	import { onDestroy } from 'svelte';
+
 	$: url = $page.url.pathname;
 
 	export let data: LayoutData;
 	$: user = data.user;
 	$: initials = data.personalInfo ? getInitials(data.personalInfo) : 'XX';
 
-	let notifications = [];
-	$notificationClientStore?.subscribe((notification) => {
-		console.log('notification', notification);
-		notifications.push(notification);
-	});
-
+	let notificationSubscription: number | null = null;
 	$: {
 		if (data.session && $notificationClientStore === null) {
 			const socket = io($page.url.origin, {
@@ -40,8 +42,19 @@
 			});
 			const notificationClient = new NotificationClient(socket);
 			notificationClientStore.set(notificationClient);
+			if (!notificationSubscription) {
+				notificationSubscription = notificationClient.subscribe((notification: Notification) => {
+					addToast(notificationToToast(notification));
+				});
+			}
 		}
 	}
+
+	onDestroy(() => {
+		if (notificationSubscription !== null) {
+			$notificationClientStore?.unsubscribe(notificationSubscription);
+		}
+	});
 
 	type MenuState = 'NOTIFICATIONS' | 'NONE' | 'PROFILE';
 	let menuOpen: MenuState = 'NONE';
@@ -146,43 +159,6 @@
 							<span class="sr-only">View notifications</span>
 							<Icon src={Bell} class="h-6 w-6" />
 						</button>
-						<div
-							class="absolute {menuOpen === 'NOTIFICATIONS'
-								? 'block'
-								: 'hidden'} right-0 md:right-8 z-10 mt-2 w-56 top-8 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
-							role="menu"
-							aria-orientation="vertical"
-							aria-labelledby="menu-button"
-							tabindex="-1"
-						>
-							<div class="py-1" role="none">
-								<!-- Active: "bg-gray-100 text-gray-900 outline-none", Not Active: "text-gray-700" -->
-								<a
-									href="#"
-									class="group flex items-center px-4 py-2 text-sm text-gray-700"
-									role="menuitem"
-									tabindex="-1"
-									id="menu-item-0"
-								>
-									<!-- Active: "text-gray-500", Not Active: "" -->
-									<svg
-										class="mr-3 size-5 text-gray-400"
-										viewBox="0 0 20 20"
-										fill="currentColor"
-										aria-hidden="true"
-										data-slot="icon"
-									>
-										<path
-											d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z"
-										/>
-										<path
-											d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z"
-										/>
-									</svg>
-									Edit
-								</a>
-							</div>
-						</div>
 						<div class="hidden md:block">
 							<button
 								type="button"

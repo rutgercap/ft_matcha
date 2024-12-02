@@ -1,6 +1,6 @@
 import type { UserRepository } from '$lib/userRepository';
 import { verify } from '@node-rs/argon2';
-import type { Cookie, Lucia, Session, User } from 'lucia';
+import type { Cookie, Lucia } from 'lucia';
 
 export type AuthServiceErrorTypes = 'INCORRECT_USERNAME_OR_PASSWORD' | 'ERROR_CREATING_SESSION';
 

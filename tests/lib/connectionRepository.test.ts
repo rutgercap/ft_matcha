@@ -1,7 +1,7 @@
-import { describe, expect } from 'vitest';
 import { itWithFixtures } from '../fixtures';
 import type { MatchStatus } from '$lib/domain/match';
 import { getConnectedUser, waitUntilConnected } from './server/notificationService.test';
+import { describe, expect } from 'vitest';
 
 describe('ConnectionRepository notificaitons', () => {
 	itWithFixtures(
