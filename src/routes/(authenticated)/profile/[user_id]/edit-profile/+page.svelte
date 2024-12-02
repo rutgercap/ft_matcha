@@ -5,6 +5,8 @@
 	import { Icon, Trash } from 'svelte-hero-icons';
 	import addToast from '$lib/toast/toastStore';
 	import { MAX_PICTURES } from '$lib/imageRepository';
+	import { invalidate } from '$app/navigation';
+
 
 	export let data: PageData;
 	$: user = data.user;
@@ -57,6 +59,11 @@
 			});
 			if (result.ok) {
 				refreshKeys[index] = Math.random();
+				const { isProfilePic } = await result.json();
+				if (isProfilePic) {
+					// in order for the layout to refresh
+					window.location.reload();
+				}
 			} else {
 				addToast({ message: 'Something went wrong deleting picture', type: 'error' });
 				console.error('Failed to delete picture:', result.statusText);
