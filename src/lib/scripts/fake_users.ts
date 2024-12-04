@@ -6,6 +6,7 @@ import { hash } from '@node-rs/argon2';
 import type { User } from 'Lucia';
 import type { ProfileInfo } from '../domain/profile';
 import { Gender, SexualPreference } from '../domain/profile';
+import { tagList } from '$lib/domain/browse';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -20,6 +21,18 @@ if (numUsersArg) {
 		process.exit(1);
 	}
 }
+
+function getRandomTags(tags: string[], maxTags = 5) {
+	// Randomly shuffle the array using Fisher-Yates algorithm
+	const shuffledTags = [...tags];
+	for (let i = shuffledTags.length - 1; i > 0; i--) {
+	  const j = Math.floor(Math.random() * (i + 1));
+	  [shuffledTags[i], shuffledTags[j]] = [shuffledTags[j], shuffledTags[i]];
+	}
+  
+	// Return a slice of the shuffled array up to maxTags
+	return shuffledTags.slice(0, faker.number.int({ min: 1, max: maxTags }));
+  }
 
 async function copyFile(sourcePath: string, destinationPath: string): Promise<void> {
 	try {
@@ -73,7 +86,7 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		sexualPreference: faker.helpers.arrayElement(Object.values(SexualPreference)),
 		biography: faker.lorem.paragraph({ min: 1, max: 25 }),
 		age: faker.number.int({ min: 18, max: 99 }),
-		tags: [faker.lorem.word(), faker.lorem.word()],
+		tags: getRandomTags(tagList, 5),
 		pictures: [null, null, null, null, null],
 		pictures_filenames: [],
 		...overrides

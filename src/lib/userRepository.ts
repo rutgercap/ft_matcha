@@ -146,10 +146,16 @@ class UserRepository {
 					resolve(null);
 				} else {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
-					camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
+					if (camelCaseObject.tags) {
+						camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
+
+					} else {
+						camelCaseObject.tags = []
+					}
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
+				console.log('e -->', e)
 				reject(
 					new UserRepositoryError('Something went wrong fetching user for username: ' + id, e)
 				);
@@ -161,7 +167,7 @@ class UserRepository {
 		id: string,
 		info: ProfileWithoutPicturesAndId
 	): Promise<Array<string | null>> {
-
+		console.log('each tag ->', info.tags)
 		const insertIntoProfile = this.db.prepare<
 			[string, string, string, string, string, string, number]
 		>(`

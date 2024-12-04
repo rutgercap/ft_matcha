@@ -1,0 +1,22 @@
+export const tagList: string[] = ["Circuit Seductress",
+                                            "Binary Bondage",
+                                            "Mecha Masochist",
+                                            "Neon Noir Lover",
+                                            "Robo-Submissive",
+                                            "Cyber-Domme",
+                                            "Holo-Heartbreaker",
+                                            "Chrome Fetishist",
+                                            "Algorithmic Admirer",
+                                            "Electric Tease",
+                                            "AI Voyeur",
+                                            "Transhuman Temptress",
+                                            "Synthetic Sensualist",
+                                            "Neural Link Lover",
+                                            "Code Craver",
+                                            "Techno Temptation",
+                                            "Quantum Kinkster",
+                                            "Firmware Flirt",
+                                            "Augmentation Arousal",
+                                            "Digital Deviant"
+                                            ];
+
