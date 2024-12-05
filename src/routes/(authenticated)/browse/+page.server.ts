@@ -19,11 +19,16 @@ export const load: PageServerLoad = async ({
 		ids.map((idObj: string) => userRepository.reducedProfile(idObj))
 	);
 	profiles = profiles.filter((profile) => Boolean(profile));
-	profiles.forEach((profile) => {
+	profiles.forEach(async (profile, idx) => {
 			(profile.fameRate = faker.number.float({ min: 0, max: 1, precision: 0.001 })),
 			(profile.localisation = faker.number.int({ min: 0, max: 1000 })),
 			(profile.mask = true);
+			(profile.score = await browsingRepository.scoring(user.id, ids[idx]))
 	});
+	const compare = (a: any, b: any) => {
+		return b.score - a.score; // Sort by age in ascending order
+	};
+	profiles.sort(compare);
 
 	return { profiles, ids };
 };

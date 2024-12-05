@@ -167,7 +167,6 @@ class UserRepository {
 		id: string,
 		info: ProfileWithoutPicturesAndId
 	): Promise<Array<string | null>> {
-		console.log('each tag ->', info.tags)
 		const insertIntoProfile = this.db.prepare<
 			[string, string, string, string, string, string, number]
 		>(`

@@ -49,8 +49,6 @@ export const actions: Actions = {
 		}
 
 		const formData = form.data;
-		console.log('in the form action ->', form)
-		console.log('in the form action ->', formData)
 		try {
 			await userRepository.upsertProfileInfo(user.id, formData);
 		} catch {

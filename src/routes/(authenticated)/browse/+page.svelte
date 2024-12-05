@@ -117,6 +117,10 @@
 										<span class="font-semibold">Localisation:</span>
 										{filteredUsers[index].localisation} km
 									</p>
+									<p class="text-sm text-red-700">
+										<span class="font-semibold">score:</span>
+										{filteredUsers[index].score} TEST TEST
+									</p>
 								</div>
 							</div>
 							<!-- User Biography -->

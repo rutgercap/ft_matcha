@@ -76,7 +76,6 @@
 	}
 
 	const toggleTag = (tag: string, add: boolean) => {
-		console.log('in the toggle tag : ', tag, add);
 		if (add) {
 			form.update(
 				($form) => {
@@ -267,12 +266,12 @@
 				</div>
 				<div class="col-span-full">
 					<label for="tags" class="block text-sm font-medium leading-6 text-gray-900">Tags</label>
-					
+
 					<div class="mt-2 flex flex-wrap gap-2">
 						{#each tagList as tag}
 						<button
 						type="button"
-						class="px-3 py-1 rounded-full border text-sm 
+						class="px-3 py-1 rounded-full border text-sm
 						{$form.tags.includes(tag) ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}"
 						on:click={() => toggleTag(tag, $form.tags.includes(tag) ? false : true)}
 						>

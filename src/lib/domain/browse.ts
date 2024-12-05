@@ -20,3 +20,20 @@ export const tagList: string[] = ["Circuit Seductress",
                                             "Digital Deviant"
                                             ];
 
+export const averages = {
+    'average_views':5,
+    'average_likes':1,
+    'average_match':0.5,
+}
+
+export const fameRatingWeights = {
+    'views' : 0.2,
+    'likes' : 0.5,
+    'match' : 0.9,
+}
+
+export const scoreWeights = {
+    'fameRating' : 0.2,
+    'tags' : 0.5,
+    'distance' : 0.9,
+}
