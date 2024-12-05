@@ -29,6 +29,19 @@ class BrowsingRepository {
 			}
 		});
 	}
+
+	public async numberOfLiked(userId: string) {
+		try {
+			const sql = `
+				SELECT count(id) AS cnt FROM likes WHERE liked_id = ?`;
+			const query = this.db.prepare<string>(sql);
+			const result = query.get(userId);
+			return result.cnt;
+		} catch (e) {
+			throw new BrowsingRepositoryError('an error occured trying to get the number of like for user:' + userId, e)
+		}
+
+	}
 }
 
 export { BrowsingRepository, BrowsingRepositoryError };

@@ -42,5 +42,26 @@ describe('BrowsingRepository', () => {
 		expect(found.every(other => other.id !== user.id)).toBe(true);
 	});
 
-	
+	itWithFixtures('should get the count of user like 0 because table is empty', async ({ db , browsingRepository, savedUserFactory }) => {
+		const users = await savedUserFactory(1, {})
+		const user = users[0]
+		const cnt = await browsingRepository.numberOfLiked(user.id);
+		expect(cnt).toBe(0)
+	});
+
+	itWithFixtures('should get the count of user like', async ({ db , browsingRepository, savedUserFactory }) => {
+		const users = await savedUserFactory(5, {})
+		const user = users[0]
+		const others = users.slice(1);
+		const sql = `INSERT INTO likes (liker_id, liked_id) VALUES (?, ?)`
+		const query = db.prepare<string, string>(sql)
+		for (const oth of others) {
+			const res = query.run(oth.id, user.id)
+		}
+
+		const cnt = await browsingRepository.numberOfLiked(user.id);
+		expect(cnt).toBe(4)
+	});
+
+
 })
