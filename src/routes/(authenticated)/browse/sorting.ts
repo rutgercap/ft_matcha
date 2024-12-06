@@ -1,4 +1,4 @@
-import type { ReducedProfileInfo } from '$lib/domain/profile';
+import type { ReducedProfileInfo } from '$lib/domain/browse';
 
 interface SortingCriteria {
 	id: string;

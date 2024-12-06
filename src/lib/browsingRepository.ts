@@ -1,6 +1,7 @@
 import type { Database } from 'better-sqlite3';
-import { averages, fameRatingWeights, scoreWeights} from './domain/browse';
-
+import { averages, fameRatingWeights, scoreWeights } from './domain/browse';
+import type { ReducedProfileInfo, CommonTagStats, BrowsingInfo } from './domain/browse';
+import { SexualPreference } from './domain/profile';
 
 class BrowsingRepositoryError extends Error {
 	exception: unknown;
@@ -28,6 +29,29 @@ class BrowsingRepository {
 				resolve(result);
 			} catch (e) {
 				reject(new BrowsingRepositoryError('Something went wrong fetching other users', e));
+			}
+		});
+	}
+
+	public browsingInfoFor(id: string): Promise<ReducedProfileInfo> {
+		return new Promise((resolve, reject) => {
+			try {
+				const sql = `
+					SELECT u.id, u.username, p.biography, p.gender, p.age, p.sexual_preference
+					FROM users AS u
+					INNER JOIN profile_info AS p ON u.id = p.user_id
+					WHERE u.id = ?
+				`;
+
+				const res = this.db.prepare<string>(sql).get(id);
+				resolve(res);
+			} catch (error) {
+				reject(
+					new BrowsingRepositoryError(
+						'Something went wrong getting browsing infos for user id: ' + id,
+						error
+					)
+				);
 			}
 		});
 	}
@@ -93,7 +117,7 @@ class BrowsingRepository {
 		}
 	}
 
-	public async commonTagsStats(userId:string, otherUserId: string): Promise<any> {
+	public async commonTagsStats(userId:string, otherUserId: string): Promise<CommonTagStats> {
 		try {
 			const sql = `SELECT * FROM tags WHERE user_id = ? OR user_id = ?`
 
@@ -107,7 +131,7 @@ class BrowsingRepository {
 
 			let cnt = 0;
 
-			user1tags.forEach((u) => {
+			user1tags.forEach((u: any) => {
 				if (user2tags.some(u2 => u.tag === u2.tag))
 					cnt += 1
 			})
@@ -124,19 +148,74 @@ class BrowsingRepository {
 		}
 	}
 
-	public async scoring(userId: string, userToScoreId: string) {
+	public async scoring(userId: string, userToScoreId: string, fameRatingPreComp: number | null = null) {
 		const fameWeight = scoreWeights.fameRating
 		const commonTagWeight = scoreWeights.tags
 		const distWeight = scoreWeights.distance
 
-		const fameRate = await this.fameRatingFor(userToScoreId);
+		let fameRate = 0
+		if (!fameRatingPreComp) {
+			fameRate = await this.fameRatingFor(userToScoreId);
+		} else {
+			fameRate = fameRatingPreComp
+		}
 		const commonTags = await this.commonTagsStats(userId, userToScoreId);
 		const tagStat = commonTags.commonTag / (commonTags.ntagsUser1 + commonTags.ntagsUser2)
 
 		const distance = 0 // TODO update for distance metric to be relevant
 
-		return (fameWeight * fameRate) + (tagStat * commonTagWeight) + (distance * distWeight)
+		return Number(((fameWeight * fameRate) + (tagStat * commonTagWeight) + (distance * distWeight)).toFixed(4))
 
+	}
+
+	public async fameRateAll(users: BrowsingInfo[]) {
+		try {
+			for (const u of users) {
+				u.fameRate = await this.fameRatingFor(u.id)
+			}
+			return users
+		} catch (error) {
+			throw new BrowsingRepositoryError('Error occurs trying to compute fameRating for every users', error)
+		}
+	}
+
+	public async scoreThemAll(userId: string, users: BrowsingInfo[]) {
+		try {
+			for (const u of users) {
+				u.score = await this.scoring(userId, u.id, u.fameRate)
+			}
+			return users
+		} catch (error) {
+			console.log('in scoreThemAll', error)
+			throw new BrowsingRepositoryError('Error occurs trying to compute score for every users', error)
+		}
+	}
+
+	public async sort(users: BrowsingInfo[]) {
+		try {
+			const compare = (a: any, b: any) => {
+				return b.score - a.score; // Sort by age in ascending order
+			};
+			users = users.sort(compare)
+			return users
+		} catch (error) {
+			throw new BrowsingRepositoryError('Error occurs trying to sort the list by score', error)
+		}
+	}
+
+	public async preFilter(userSexualPreference:string, users: BrowsingInfo[]) {
+		try {
+			if (userSexualPreference === 'all')
+					return users
+			let test = 'other';
+			if (userSexualPreference === 'men')
+				test = 'man'
+			else if (userSexualPreference === 'women')
+				test = 'woman'
+			return users.filter((u) => (u.gender === test))
+		} catch (error) {
+			throw new BrowsingRepositoryError('Error occurs trying to pre filter the list by score', error)
+		}
 	}
 }
 

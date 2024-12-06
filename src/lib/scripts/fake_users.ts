@@ -29,7 +29,7 @@ function getRandomTags(tags: string[], maxTags = 5) {
 	  const j = Math.floor(Math.random() * (i + 1));
 	  [shuffledTags[i], shuffledTags[j]] = [shuffledTags[j], shuffledTags[i]];
 	}
-  
+
 	// Return a slice of the shuffled array up to maxTags
 	return shuffledTags.slice(0, faker.number.int({ min: 1, max: maxTags }));
   }
@@ -122,6 +122,10 @@ async function createUsers(n: number) {
 				profile_pictures (user_id, image_order)
 				VALUES (@user_id, @order)`);
 
+	const views_sql = db.prepare(`INSERT INTO profile_visits (visitor_id, visited_user_id) VALUES (?, ?)`)
+	const like_sql = db.prepare(`INSERT INTO likes (liker_id, liked_id) VALUES (?, ?)`)
+
+
 	let users: User[] = [];
 	let user_profile: ProfileInfo[] = [];
 	let user_tags: any[] = [];
@@ -153,6 +157,7 @@ async function createUsers(n: number) {
 			user_tags.push({ id: tmp, user_id: users[i].id, tag: user_profile[i].tags[j] });
 		}
 	}
+
 	const insertManyUser = db.transaction((users: User[]) => {
 		for (const u of users) user_sql.run(u);
 	});
@@ -170,6 +175,21 @@ async function createUsers(n: number) {
 	insertManyProfile(user_profile);
 	insertManyTag(user_tags);
 	insertManyPicture(user_picture);
+
+	for (let i = 0, j = (users.length - 1); i < j; i++, j--) {
+		if (Math.random() < 0.5) {
+			views_sql.run(users[i].id, users[j].id)
+			if (Math.random() < 0.4) {
+				like_sql.run(users[i].id, users[j].id)
+			}
+		}
+		if (Math.random() < 0.5) {
+			views_sql.run(users[j].id, users[i].id)
+			if (Math.random() < 0.4) {
+				like_sql.run(users[j].id, users[i].id)
+			}
+		}
+	}
 }
 
 // pnpm run script:fake_users

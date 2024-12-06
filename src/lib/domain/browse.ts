@@ -37,3 +37,28 @@ export const scoreWeights = {
     'tags' : 0.5,
     'distance' : 0.9,
 }
+
+export type BrowsingInfo = {
+	id: string;
+	gender: string;
+	fameRate: number;
+	localisation: number;
+	score: number;
+	sexualPreferences: string;
+};
+
+export type CommonTagStats = {
+    commonTag: number;
+    ntagsUser1: number;
+    ntagsUser2: number;
+}
+
+export type ReducedProfileInfo = {
+	userName: string;
+	biography: string;
+	gender: string;
+	age: number;
+	fameRate: number;
+	localisation: number;
+	mask: boolean;
+};

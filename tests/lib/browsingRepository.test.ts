@@ -162,6 +162,35 @@ describe('BrowsingRepository', () => {
 		expect(rating2).toBeGreaterThan(rating);;
 	})
 
+	itWithFixtures('compute fame rating for a list of user', async ({ db, browsingRepository, savedUserFactory}) => {
+		const users = await savedUserFactory(7, {})
+		const user = users[0]
+		const user2 = users[1]
+		const others = users.slice(2);
+		const sql_likes = `INSERT INTO likes (liker_id, liked_id) VALUES (?, ?)`
+		const sql_views = `INSERT INTO profile_visits (visitor_id, visited_user_id) VALUES (?, ?)`
+		const querylikes = db.prepare<string, string>(sql_likes)
+		const queryviews = db.prepare<string, string>(sql_views)
+
+		let last = users.length - 1
+		for (const oth of others) {
+			queryviews.run(oth.id, user.id); // everyone visited user
+			queryviews.run(oth.id, user2.id);// everyone visited user2
+			querylikes.run(oth.id, user2.id);// everyone liked user2
+			if (oth.id !== users[last].id)
+				querylikes.run(oth.id, users[last].id);
+		}
+		let tmp = []
+		for (const u of users) {
+			tmp.push({id: u.id, fameRate: 0})
+		}
+		const rates = await browsingRepository.fameRateAll(tmp)
+		const test = rates.map(rate => (rate.fameRate !== 0) ? true : false)
+		const truth = [true, true, false, false, false, false, true ]
+
+		expect(test).toEqual(truth)
+	})
+
 	itWithFixtures('compute common tag', async ({ db, browsingRepository, savedUserFactory, userRepository, }) => {
 		const users = await savedUserFactory(2, {});
 		const user = users[0];
