@@ -11,8 +11,10 @@
 	export let data: PageData;
 	$: user = data.user;
 
+	let tagList = data.tagList;
+
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
-		resetForm: false
+		resetForm: false, dataType: 'json'
 	});
 
 	const maxPictures = MAX_PICTURES;
@@ -52,7 +54,6 @@
 
 	async function handleDeletePicture(index: number) {
 		const urlToDelete = `/api/pics/${user.id}/${index}`;
-
 		try {
 			const result = await fetch(urlToDelete, {
 				method: 'DELETE'
@@ -73,6 +74,25 @@
 			console.error('Error deleting picture:', e);
 		}
 	}
+
+	const toggleTag = (tag: string, add: boolean) => {
+		if (add) {
+			form.update(
+				($form) => {
+					$form.tags.push(tag);
+					return $form;
+				},
+			);
+		} else {
+			console.log(tag, add)
+			form.update(
+				($form) => {
+					$form.tags = $form.tags.filter(item => item !== tag);
+					return $form;
+				},
+			);
+		}
+  	};
 </script>
 
 <div class="max-w-3xl mx-auto">
@@ -246,22 +266,23 @@
 				</div>
 				<div class="col-span-full">
 					<label for="tags" class="block text-sm font-medium leading-6 text-gray-900">Tags</label>
-					<div class="mt-2">
-						<textarea
-							id="tags"
-							name="tags"
-							rows="1"
-							class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							bind:value={$form.tags}
-							aria-invalid={$errors.tags ? 'true' : undefined}
-							aria-describedby={$errors.tags ? 'tags-error' : undefined}
-							{...$constraints.tags}
-						></textarea>
+
+					<div class="mt-2 flex flex-wrap gap-2">
+						{#each tagList as tag}
+						<button
+						type="button"
+						class="px-3 py-1 rounded-full border text-sm
+						{$form.tags.includes(tag) ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}"
+						on:click={() => toggleTag(tag, $form.tags.includes(tag) ? false : true)}
+						>
+						  {tag}
+						</button>
+					  {/each}
 					</div>
-					<p class="mt-3 text-sm leading-6 text-gray-600">Tags are comma separated.</p>
-					{#if $errors.tags}
-						<p class="mt-2 text-sm text-red-600" id="tags-error">{$errors.tags}</p>
+					{#if $errors.tags && $tainted}
+						<p class="mt-2 text-sm text-red-600" id="tags-error">choose between 2 and 5 tag</p>
 					{/if}
+
 				</div>
 				{#if $message}
 					{#if $page.status == 200}

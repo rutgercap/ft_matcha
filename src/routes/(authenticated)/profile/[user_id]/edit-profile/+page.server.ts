@@ -4,6 +4,7 @@ import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { isGender, isSexualPreference } from '$lib/domain/profile';
+import { tagList } from '$lib/domain/browse';
 
 const profileSchema = z.object({
 	firstName: z.string().min(1).max(255),
@@ -17,12 +18,7 @@ const profileSchema = z.object({
 		.number()
 		.min(18, { message: 'Age must be at least 18' })
 		.max(99, { message: 'bro you too old for this shit' }),
-	tags: z
-		.string()
-		.transform((val) => val.split(',').map((item) => item.trim())) // Split and trim each item
-		.refine((arr) => arr.length > 0 && arr.length <= 50, {
-			message: 'Array length must be between 1 and 50.'
-		})
+	tags: z.string().min(2, { message: 'you must choose at least 2 tag' }).array().max(5, { message: 'you cannot choose more than 5 tag' })
 });
 
 export const load: PageServerLoad = async ({ locals: { user, userRepository }, params }) => {
@@ -32,10 +28,10 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository }, p
 	}
 	const currentProfile = await userRepository.profileInfoFor(user.id);
 	const form = await superValidate(
-		currentProfile ? { ...currentProfile, tags: currentProfile.tags.join(',') } : {},
+		currentProfile ? { ...currentProfile, tags: currentProfile.tags } : {},
 		zod(profileSchema)
 	);
-	return { form, user };
+	return { form, user, tagList };
 };
 
 export const actions: Actions = {

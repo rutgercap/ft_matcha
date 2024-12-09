@@ -1,34 +1,41 @@
 import { error, redirect } from '@sveltejs/kit';
-import { UserRepository } from '$lib/userRepository';
-import type { ProfileInfo, ReducedProfileInfo } from '$lib/domain/profile';
-import type { Action, PageServerLoad } from './$types';
-import type { SortingCriteria } from './sorting';
+import type { ReducedProfileInfo } from '$lib/domain/browse';
+import type { PageServerLoad } from './$types';
 import { faker } from '@faker-js/faker';
 
-interface IdObject {
-	id: string;
-}
-
 export const load: PageServerLoad = async ({
-	locals: { user, userRepository, browsingRepository },
-	params
+	locals: { user, browsingRepository },
 }) => {
 	if (!user) {
 		throw redirect(401, '/login');
 	}
 
-	const ids: IdObject[] = browsingRepository.allIdExcept(user.id);
+	try {
+		const userReducedProfile = await browsingRepository.browsingInfoFor(user.id)
+		let ids: string[] = await browsingRepository.allOtherUsers(user.id);
+		let profiles: ReducedProfileInfo[] = await Promise.all(ids.map((idObj: string) => browsingRepository.browsingInfoFor(idObj)));
+		profiles = await browsingRepository.preFilter(userReducedProfile.sexual_preference, profiles)
+		profiles = await browsingRepository.fameRateAll(profiles)
+		profiles = await browsingRepository.scoreThemAll(user.id, profiles)
+		profiles = await browsingRepository.sort(profiles)
 
-	let profiles: ReducedProfileInfo[] = await Promise.all(
-		ids.map((idObj: IdObject) => userRepository.reducedProfile(idObj.id))
-	);
-	profiles = profiles.filter((profile) => Boolean(profile));
-	profiles.forEach((profile) => {
-		(profile.age = faker.number.int({ min: 18, max: 100 })),
-			(profile.fameRate = faker.number.float({ min: 0, max: 1, precision: 0.001 })),
-			(profile.localisation = faker.number.int({ min: 0, max: 1000 })),
-			(profile.mask = true);
-	});
+		let idx = 0
+		for (const pr of profiles) {
+			pr.localisation = faker.number.int({ min: 0, max: 1000 })
+			pr.mask = true;
+			idx++
+		}
+		return { profiles };
+	} catch (error) {
+		console.error('Error loading browsing page:', error); // Log the error for debugging
 
-	return { profiles, ids };
+		// Return a fallback response for the UI or notify the user about the issue
+		return {
+			error: true,
+			message: 'An error occurred while loading the browsing page. Please try again later.',
+			profiles: [], // Return an empty array to ensure the page still renders
+		};
+	}
+
+
 };

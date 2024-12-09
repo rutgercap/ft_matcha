@@ -7,7 +7,7 @@ function anyUser(overrides: Partial<User> = {}): User {
 	return {
 		id: userId,
 		email: faker.internet.email(),
-		username: faker.internet.userName(),
+		username: faker.internet.username(),
 		profileIsSetup: faker.datatype.boolean(),
 		...overrides
 	};

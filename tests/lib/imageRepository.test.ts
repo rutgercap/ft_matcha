@@ -15,13 +15,13 @@ describe('ImageRepository', () => {
 	);
 
 	itWithFixtures(
-		'should throw error when trying to save an image in order that already exists',
-		async ({ savedUser, imageRepository, image }) => {
+		'saving image on couple (userId, order) that already exist should update image',
+		async ({ savedUser, imageRepository, image, image2 }) => {
 			await imageRepository.upsertImage(savedUser.id, 0, image);
+			await imageRepository.upsertImage(savedUser.id, 0, image2)
 
-			await expect(imageRepository.upsertImage(savedUser.id, 0, image)).rejects.toThrow(
-				ImageRepositoryError
-			);
+			const found = await imageRepository.image(savedUser.id, 0)
+			expect(found).toEqual(image2)
 		}
 	);
 

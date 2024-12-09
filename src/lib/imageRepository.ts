@@ -24,7 +24,7 @@ class ImageRepository {
 			throw new ImageRepositoryError('Image order out of range', null);
 		}
 		const sql = this.db.prepare<[string, number]>(`
-            INSERT INTO profile_pictures (user_id, image_order)
+            INSERT OR IGNORE INTO profile_pictures (user_id, image_order)
             VALUES (?, ?)
         `);
 		try {

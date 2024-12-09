@@ -29,6 +29,7 @@ import { AuthService } from '$lib/server/authService';
 import { adapter, createLuciaInstance } from '$lib/auth';
 import { WebsocketServer } from '../vite.config';
 import { ServerSocket } from '$lib/server/serverSocket';
+import { BrowsingRepository } from '$lib/browsingRepository';
 
 interface MyFixtures {
 	db: DatabaseType;
@@ -73,6 +74,11 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	profileVisitRepository: async ({ db }, use) => {
 		await use(new ProfileVisitRepository(db));
 	},
+
+	browsingRepository : async({ db }, use) => {
+		await use(new BrowsingRepository(db))
+	},
+
 	savedUserFactory: async ({ userRepository }, use) => {
 		const createUser = async (n: number, overrides: Partial<User> = {}) => {
 			return Promise.all(
@@ -92,6 +98,16 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		const image = fs.readFileSync(imagePath);
 		use(image);
 	},
+
+	image2: async ({}, use) => {
+		const __filename = fileURLToPath(import.meta.url);
+		const __dirname = dirname(__filename);
+
+		const imagePath = path.join(__dirname, 'test-image2.jpg');
+		const image = fs.readFileSync(imagePath);
+		use(image);
+	},
+
 	connectionRepository: async ({ db, notificationService }, use) => {
 		use(new ConnectionRepository(db, notificationService));
 	},

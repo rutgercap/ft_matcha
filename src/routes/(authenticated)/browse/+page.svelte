@@ -3,10 +3,9 @@
 	import { sortByAge, sortByfameRate, sortByLocalization, applyfilter } from './sorting';
 	import type { SortingCriteria, SortingInfo } from './sorting';
 	import SortAndFilter from '$lib/component/SortAndFilter.svelte';
-	import type { ReducedProfileInfo } from '$lib/domain/profile';
+	import type { ReducedProfileInfo } from '$lib/domain/browse';
 
 	let users: ReducedProfileInfo[] = data.profiles;
-	let ids: any[] = data.ids;
 
 	// I make a copy of the array to keep a reset option
 	let filteredUsers: ReducedProfileInfo[] | SortingCriteria[] = structuredClone(users);
@@ -75,16 +74,16 @@
 		{/if}
 
 		<ul class="mt-6 space-y-6">
-			{#if ids.length > 0}
-				{#each ids as id, index}
+			{#if filteredUsers.length > 0}
+				{#each filteredUsers as user, index}
 					{#if filteredUsers[index].mask}
 						<li
 							class="group flex items-center space-x-4 p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-300"
 						>
 							<!-- User's Profile Picture -->
 							<img
-								src={`/api/pics/${id.id}/0`}
-								alt={id.id}
+								src={`/api/pics/${user.id}/0`}
+								alt={user.id.id}
 								class="h-24 w-24 rounded-full bg-gray-200 object-cover"
 							/>
 
@@ -92,7 +91,7 @@
 							<div class="flex-1">
 								<!-- Username and Gender -->
 								<h3 class="text-lg font-medium text-gray-900">
-									<a href={`/profile/${id.id}`} class="hover:underline">
+									<a href={`/profile/${user.id}`} class="hover:underline">
 										{filteredUsers[index].username}
 									</a>
 								</h3>
@@ -116,6 +115,10 @@
 									<p class="text-sm text-gray-700">
 										<span class="font-semibold">Localisation:</span>
 										{filteredUsers[index].localisation} km
+									</p>
+									<p class="text-sm text-red-700">
+										<span class="font-semibold">score:</span>
+										{filteredUsers[index].score} TEST TEST
 									</p>
 								</div>
 							</div>

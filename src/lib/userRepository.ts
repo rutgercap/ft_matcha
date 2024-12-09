@@ -1,6 +1,6 @@
 import type { Database } from 'better-sqlite3';
 import { SqliteError } from 'better-sqlite3';
-import type { ProfileInfo, ReducedProfileInfo } from './domain/profile';
+import type { ProfileInfo } from './domain/profile';
 import { hash } from '@node-rs/argon2';
 import _ from 'lodash';
 import type { User } from 'lucia';
@@ -146,10 +146,16 @@ class UserRepository {
 					resolve(null);
 				} else {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
-					camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
+					if (camelCaseObject.tags) {
+						camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
+
+					} else {
+						camelCaseObject.tags = []
+					}
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
+				console.log('e -->', e)
 				reject(
 					new UserRepositoryError('Something went wrong fetching user for username: ' + id, e)
 				);
@@ -161,7 +167,6 @@ class UserRepository {
 		id: string,
 		info: ProfileWithoutPicturesAndId
 	): Promise<Array<string | null>> {
-
 		const insertIntoProfile = this.db.prepare<
 			[string, string, string, string, string, string, number]
 		>(`
@@ -294,30 +299,6 @@ class UserRepository {
 		});
 	}
 
-	public reducedProfile(id: string): Promise<ReducedProfileInfo> {
-		return new Promise((resolve, reject) => {
-			try {
-				const sql = `
-					SELECT u.username, p.biography, p.gender, p.age
-					FROM users AS u
-					INNER JOIN profile_info AS p ON u.id = p.user_id
-					INNER JOIN profile_pictures AS pp ON u.id = pp.user_id
-					WHERE u.id = ? AND pp.image_order = 0
-				`;
-
-				const res = this.db.prepare<string>(sql).get(id);
-				resolve(res);
-			} catch (error) {
-				reject(
-					new UserRepositoryError(
-						'Something went wrong getting reducedProfile for user id: ' + id,
-						error
-					)
-				);
-			}
-		});
-	}
-
 	public upsertProfileIsSetup(userId: string, flag: boolean) {
 		try {
 			const val = flag ? 1 : 0;
@@ -438,7 +419,7 @@ class UserRepository {
 		try {
 			return await this.imageRepo.image(userId, order);
 		} catch (error) {
-			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
+			throw new UserRepositoryError('Error occurs trying to get image for: ' + userId, error);
 		}
 	}
 
@@ -451,7 +432,7 @@ class UserRepository {
 			}
 			return res_order
 		} catch (error) {
-			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
+			throw new UserRepositoryError('Error occurs trying to save image for: ' + userId, error);
 		}
 	}
 
