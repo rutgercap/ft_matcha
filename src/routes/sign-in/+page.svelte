@@ -30,7 +30,6 @@
 			const result = await response.json();
 			const message = JSON.parse(result.data);
 			if (response.ok) {
-				console.log('response is ok --> ', result.status);
 				status = result.status;
 				$message = message[9]; // Handle success (e.g., show success message)
 			} else {

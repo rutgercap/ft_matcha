@@ -141,6 +141,13 @@
 								: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
 							>Matches</a
 						>
+						<a
+							href={`/chat`}
+							class="{isActive(url, 'chat')
+								? 'border-indigo-500 text-gray-900'
+								: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
+							>Chat</a
+						>
 					</div>
 				{/if}
 			</div>
@@ -258,6 +265,13 @@
 					? 'bg-indigo-50 border-indigo-500 text-indigo-700'
 					: 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
 				>Matches</a
+			>
+			<a
+				href={`/chat`}
+				class="block {isActive(url, 'chat')
+					? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+					: 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
+				>Chat</a
 			>
 			<a
 				href={`/visits`}

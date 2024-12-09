@@ -34,7 +34,6 @@ export class NotificationClient {
 
 	private onNotification() {
 		this.client.on('notification', (arg: Notification) => {
-			console.log('notification: ' + arg);
 			this._notifications.push(arg);
 			this.listeners.forEach((listener) => listener(arg));
 		});

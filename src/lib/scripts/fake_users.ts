@@ -37,14 +37,12 @@ async function copyFile(sourcePath: string, destinationPath: string): Promise<vo
 		// Read the file and write to the destination
 		const data = await fs.promises.readFile(sourcePath);
 		await fs.promises.writeFile(destinationPath, data);
-
-		console.log(`File successfully copied from ${sourcePath} to ${destinationPath}`);
 	} catch (error) {
 		console.error(`Error copying file: ${error.message}`);
 	}
 }
 
-async function anyUser(password: string, overrides: Partial<User> = {}): User {
+async function anyUser(password: string, overrides: Partial<User> = {}): Promise<User> {
 	const passwordHash = await hash(password, {
 		memoryCost: 19456,
 		timeCost: 2,
@@ -55,12 +53,12 @@ async function anyUser(password: string, overrides: Partial<User> = {}): User {
 	return {
 		id: userId,
 		email: faker.internet.email(),
-		username: faker.internet.userName(),
+		username: faker.internet.username(),
 		profileIsSetup: 1,
 		emailIsSetup: 1,
 		passwordHash: passwordHash,
 		...overrides
-	};
+	} as User;
 }
 
 function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {

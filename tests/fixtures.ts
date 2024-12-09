@@ -29,11 +29,13 @@ import { AuthService } from '$lib/server/authService';
 import { adapter, createLuciaInstance } from '$lib/auth';
 import { WebsocketServer } from '../vite.config';
 import { ServerSocket } from '$lib/server/serverSocket';
+import { ChatRepository } from '$lib/server/chatRepository';
 
 interface MyFixtures {
 	db: DatabaseType;
 	userRepository: UserRepositoryType;
 	imageRepository: ImageRepositoryType;
+	chatRepository: ChatRepository;
 	savedUser: UserWithoutProfileSetup;
 	profileVisitRepository: ProfileVisitRepository;
 	savedUserFactory: (n: number, overrides?: Partial<User>) => Promise<UserWithoutProfileSetup[]>;
@@ -135,5 +137,8 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		const luciaAdapter = adapter(db);
 		const lucia = createLuciaInstance(luciaAdapter);
 		await use(lucia);
+	},
+	chatRepository: async ({ db, notificationService }, use) => {
+		await use(new ChatRepository(db, notificationService));
 	}
 });

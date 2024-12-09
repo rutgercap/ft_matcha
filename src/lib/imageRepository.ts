@@ -99,10 +99,10 @@ class ImageRepository {
 										FROM profile_pictures
 										WHERE user_id == ?
 										AND image_order == 0`);
-			const result = sql.get(userId)
-			return result.cnt == 0 ? false : true ;
+			const result = sql.get(userId);
+			return result.cnt == 0 ? false : true;
 		} catch (e) {
-			throw new ImageRepositoryError('Error occur checking for user profile picture', e)
+			throw new ImageRepositoryError('Error occur checking for user profile picture', e);
 		}
 	}
 }

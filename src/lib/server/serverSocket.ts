@@ -12,15 +12,6 @@ export class ServerSocket {
 				token: 'server'
 			}
 		});
-		this.socket.on('connect', () => {
-			console.log('Connected to server');
-		});
-		this.socket.on('disconnect', () => {
-			console.log('Disconnected from server');
-		});
-		this.socket.on('connect_error', (error) => {
-			console.log('Error connecting to websocketServer: ' + error.message);
-		});
 	}
 
 	public sendMessageToUser(toUserId: string, eventName: string, content: JsonSerializable) {

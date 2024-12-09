@@ -49,7 +49,9 @@ export const actions: Actions = {
 		if (!form.valid) {
 			return message(form, 'Please fix the invalid fields before trying again.', { status: 400 });
 		} else if (!imageIsSet) {
-			return message(form, 'You need a profile picture for you profile to be complete', { status: 400 });
+			return message(form, 'You need a profile picture for you profile to be complete', {
+				status: 400
+			});
 		}
 
 		const formData = form.data;

@@ -78,11 +78,11 @@ export async function DELETE({ locals: { user, userRepository }, params }) {
 	}
 	try {
 		await userRepository.deleteUserImage(user_id, order);
-		let isProfilePic = (order === 0);
+		let isProfilePic = order === 0;
 		if (isProfilePic) {
-			await userRepository.upsertProfileIsSetup(user_id, false)
+			await userRepository.upsertProfileIsSetup(user_id, false);
 		}
-		return new Response(JSON.stringify({isProfilePic}), { status: 200 });
+		return new Response(JSON.stringify({ isProfilePic }), { status: 200 });
 	} catch {
 		throw error(500, 'Error deleting image');
 	}

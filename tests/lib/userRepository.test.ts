@@ -107,7 +107,6 @@ describe('UserRepository', () => {
 		}
 	);
 
-
 	itWithFixtures(
 		'Setting user profile sets profile_is_setup true because profile image is set',
 		async ({ userRepository, image }) => {
@@ -118,7 +117,7 @@ describe('UserRepository', () => {
 			expect(found.profileIsSetup).toBe(false);
 
 			const userProfile = anyUserProfile();
-			await userRepository.saveUserImage(user.id, 0, image)
+			await userRepository.saveUserImage(user.id, 0, image);
 			await userRepository.upsertProfileInfo(user.id, userProfile);
 
 			found = (await userRepository.user(user.id)) as User;
@@ -134,11 +133,11 @@ describe('UserRepository', () => {
 			const thisUser = users[0];
 			const others = users.slice(1);
 			for (const user of users) {
-				await userRepository.saveUserImage(user.id, 0, image)
+				await userRepository.saveUserImage(user.id, 0, image);
 			}
-			
+
 			for (const user of users) {
-				await userRepository.upsertProfileInfo(user.id, profile)
+				await userRepository.upsertProfileInfo(user.id, profile);
 			}
 
 			const found = await userRepository.allOtherUsers(thisUser.id);
@@ -156,7 +155,7 @@ describe('UserRepository', () => {
 			const others = users.slice(1);
 
 			for (const user of users) {
-				await userRepository.upsertProfileInfo(user.id, profile)
+				await userRepository.upsertProfileInfo(user.id, profile);
 			}
 
 			const found = await userRepository.allOtherUsers(thisUser.id);
@@ -168,7 +167,7 @@ describe('UserRepository', () => {
 		const profile = anyUserProfile();
 		const users = await savedUserFactory(3, {});
 		for (const user of users) {
-			await userRepository.upsertProfileInfo(user.id, profile)
+			await userRepository.upsertProfileInfo(user.id, profile);
 		}
 
 		const preview = await userRepository.profilePreviews(users.map((user) => user.id));
@@ -202,7 +201,7 @@ describe('UserRepository', () => {
 	itWithFixtures(
 		'should return DuplicateEntryError if username taken',
 		async ({ userRepository }) => {
-			const userName = faker.internet.userName();
+			const userName = faker.internet.username();
 			const password = faker.internet.password();
 			const userOne = anyUser({ username: userName, profileIsSetup: false });
 			const userTwo = anyUser({ username: userName, profileIsSetup: false });
@@ -258,59 +257,67 @@ describe('UserRepository', () => {
 		expect(validPassword).toBeTruthy();
 	});
 
-	itWithFixtures('should return false because image profile is not set', async ({ userRepository }) => {
-		const user = anyUser({ profileIsSetup: true });
+	itWithFixtures(
+		'should return false because image profile is not set',
+		async ({ userRepository }) => {
+			const user = anyUser({ profileIsSetup: true });
 
-		const oldpswd = faker.internet.password();
-		await userRepository.createUser(user, oldpswd);
+			const oldpswd = faker.internet.password();
+			await userRepository.createUser(user, oldpswd);
 
-		const res = await userRepository.profileImageIsSet(user.id)
+			const res = await userRepository.profileImageIsSet(user.id);
 
-		expect(res).toBe(false)
+			expect(res).toBe(false);
+		}
+	);
 
-	});
-
-	itWithFixtures.only('should return false profileInfo is not full / set', async ({ userRepository }) => {
-		const user = anyUser({ profileIsSetup: true });
-		const oldpswd = faker.internet.password();
-		await userRepository.createUser(user, oldpswd);
-		const res = await userRepository.profileInfoIsSet(user.id) 
-		expect(res).toBe(false)
-	});
+	itWithFixtures.only(
+		'should return false profileInfo is not full / set',
+		async ({ userRepository }) => {
+			const user = anyUser({ profileIsSetup: true });
+			const oldpswd = faker.internet.password();
+			await userRepository.createUser(user, oldpswd);
+			const res = await userRepository.profileInfoIsSet(user.id);
+			expect(res).toBe(false);
+		}
+	);
 
 	itWithFixtures('should return true profileInfo is fullfilled', async ({ userRepository }) => {
 		const user = anyUser({ profileIsSetup: true });
-		const profile =  anyUserProfile()
+		const profile = anyUserProfile();
 		const oldpswd = faker.internet.password();
 		await userRepository.createUser(user, oldpswd);
-		await userRepository.upsertProfileInfo(user.id, profile)
-		const res = await userRepository.profileInfoIsSet(user.id) 
-		expect(res).toBe(true)
+		await userRepository.upsertProfileInfo(user.id, profile);
+		const res = await userRepository.profileInfoIsSet(user.id);
+		expect(res).toBe(true);
 	});
 
-	itWithFixtures('setting profile before image profile should also set profileIsSetup to true if Profile info is complete', 
+	itWithFixtures(
+		'setting profile before image profile should also set profileIsSetup to true if Profile info is complete',
 		async ({ userRepository, image }) => {
-		const user = anyUser({ profileIsSetup: false });
-		await userRepository.createUser(user, faker.internet.password());
+			const user = anyUser({ profileIsSetup: false });
+			await userRepository.createUser(user, faker.internet.password());
 
-		let found = (await userRepository.user(user.id)) as User;
-		expect(found.profileIsSetup).toBe(false);
+			let found = (await userRepository.user(user.id)) as User;
+			expect(found.profileIsSetup).toBe(false);
 
-		const userProfile = anyUserProfile();
-		await userRepository.upsertProfileInfo(user.id, userProfile);
-		await userRepository.saveUserImage(user.id, 0, image)
+			const userProfile = anyUserProfile();
+			await userRepository.upsertProfileInfo(user.id, userProfile);
+			await userRepository.saveUserImage(user.id, 0, image);
 
-		found = (await userRepository.user(user.id)) as User;
-		expect(found.profileIsSetup).toBe(true);
-	});
+			found = (await userRepository.user(user.id)) as User;
+			expect(found.profileIsSetup).toBe(true);
+		}
+	);
 
-	itWithFixtures('setting image without profile should not set profileIsSet to true', 
+	itWithFixtures(
+		'setting image without profile should not set profileIsSet to true',
 		async ({ userRepository, image }) => {
-		const user = anyUser({ profileIsSetup: false });
-		await userRepository.createUser(user, faker.internet.password());
-		await userRepository.saveUserImage(user.id, 0, image)
-		const found = (await userRepository.user(user.id)) as User;
-		expect(found.profileIsSetup).toBe(false);
-	});
-
+			const user = anyUser({ profileIsSetup: false });
+			await userRepository.createUser(user, faker.internet.password());
+			await userRepository.saveUserImage(user.id, 0, image);
+			const found = (await userRepository.user(user.id)) as User;
+			expect(found.profileIsSetup).toBe(false);
+		}
+	);
 });

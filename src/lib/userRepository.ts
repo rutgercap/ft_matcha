@@ -161,7 +161,6 @@ class UserRepository {
 		id: string,
 		info: ProfileWithoutPicturesAndId
 	): Promise<Array<string | null>> {
-
 		const insertIntoProfile = this.db.prepare<
 			[string, string, string, string, string, string, number]
 		>(`
@@ -172,8 +171,7 @@ class UserRepository {
 				last_name=excluded.last_name,
 				gender=excluded.gender,
 				sexual_preference=excluded.sexual_preference,
-				biography=excluded.biography;`
-		);
+				biography=excluded.biography;`);
 		const deleteTags = this.db.prepare<[string]>(`DELETE FROM tags WHERE user_id = ?`);
 		const insertTag = this.db.prepare<[string, string, string]>(
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
@@ -183,7 +181,7 @@ class UserRepository {
 			'UPDATE users SET profile_is_setup = 1 WHERE id = ?'
 		);
 
-		const profileImageIsSet = await this.profileImageIsSet(id)
+		const profileImageIsSet = await this.profileImageIsSet(id);
 
 		return new Promise((resolve, reject) => {
 			try {
@@ -203,7 +201,7 @@ class UserRepository {
 							insertTag.run(uuidv4(), id, tag);
 						});
 						if (profileImageIsSet) {
-							this.upsertProfileIsSetup(id, true)
+							this.upsertProfileIsSetup(id, true);
 						}
 					}
 				);
@@ -217,7 +215,7 @@ class UserRepository {
 		});
 	}
 
-	public async profileInfoIsSet(userId:string): Promise<boolean> {
+	public async profileInfoIsSet(userId: string): Promise<boolean> {
 		try {
 			const sql = `SELECT count(*) AS cnt
 						FROM profile_info AS p
@@ -229,12 +227,12 @@ class UserRepository {
 						AND p.biography IS NOT NULL
 						AND p.age IS NOT NULL
 						AND p.sexual_preference IS NOT NULL
-						AND t.tag IS NOT NULL;`
-			const qu = this.db.prepare<string>(sql)
-			const res = qu.get(userId)
-			return res.cnt == 0 ? false : true
+						AND t.tag IS NOT NULL;`;
+			const qu = this.db.prepare<string>(sql);
+			const res = qu.get(userId);
+			return res.cnt == 0 ? false : true;
 		} catch (error) {
-			throw new UserRepositoryError('Error occurs trying to check if profileInfo is set', error)
+			throw new UserRepositoryError('Error occurs trying to check if profileInfo is set', error);
 		}
 	}
 
@@ -264,7 +262,6 @@ class UserRepository {
 					)
 					.all(id)
 					.map((user) => user.id);
-				console.log('in allOtherUser: ', result)
 				resolve(result);
 			} catch (e) {
 				reject(new UserRepositoryError('Something went wrong fetching other users', e));
@@ -340,7 +337,6 @@ class UserRepository {
 			const res = sql.run(val, userId);
 			return res;
 		} catch (error) {
-			console.log('error in the userRepository:upsertProfileIsSetup:', error);
 			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error);
 		}
 	}
@@ -396,7 +392,6 @@ class UserRepository {
 			const sql = this.db.prepare<[string, string]>(`UPDATE users SET email = ? WHERE id = ?`);
 			const res = sql.run(email, userId);
 		} catch (error) {
-			console.log('error occur at updateUserEmail: ', error);
 			throw new UserRepositoryError(
 				'error occur trying to update new email for user:' + userId,
 				error
@@ -418,7 +413,6 @@ class UserRepository {
 			);
 			sql.run(passwordHash, userId);
 		} catch (error) {
-			console.log('error occur at updateUserPswd: ', error);
 			throw new UserRepositoryError(
 				'error occur trying to update new password for user:' + userId,
 				error
@@ -445,18 +439,18 @@ class UserRepository {
 	public async saveUserImage(userId: string, order: number, image: Buffer): Promise<number> {
 		try {
 			const res_order = await this.imageRepo.upsertImage(userId, order, image);
-			const profileInfoIsSet = await this.profileInfoIsSet(userId)
+			const profileInfoIsSet = await this.profileInfoIsSet(userId);
 			if (profileInfoIsSet && order === 0) {
-				this.upsertProfileIsSetup(userId, true)
+				this.upsertProfileIsSetup(userId, true);
 			}
-			return res_order
+			return res_order;
 		} catch (error) {
 			throw new UserRepositoryError('Error occurs trying to delete image for: ' + userId, error);
 		}
 	}
 
-	public async profileImageIsSet(userId:string): Promise<boolean> {
-		return this.imageRepo.checkIfImageProfileIsSet(userId)
+	public async profileImageIsSet(userId: string): Promise<boolean> {
+		return this.imageRepo.checkIfImageProfileIsSet(userId);
 	}
 }
 
