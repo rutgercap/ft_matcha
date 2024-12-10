@@ -93,6 +93,36 @@
 			);
 		}
   	};
+
+	if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+		console.log('THE LOCATION SERVICE IS OPERATIONAL')
+		navigator.geolocation.getCurrentPosition(pos => {
+			let latitude = pos.coords.latitude
+			let longitude = pos.coords.longitude
+
+			console.log('latitude is', latitude)
+			console.log('longitude is', longitude)
+
+			console.log('types: ', typeof longitude, typeof latitude)
+			const url = `/api/location/${user.id}/${longitude}/${latitude}`
+			try {
+				//${longitude}/${latitude}
+				const response = fetch(url, {
+					method: 'POST',
+				}).then(value => {
+					console.log('location properly updated', value)
+
+				}).catch(error => {
+					console.error('Failed to post location dated:', error);
+				});
+			} catch (error) {
+				console.error('Error trying to upload location date', error);
+			}
+		}, error => {
+			console.log('the user block his location service')
+		})
+	}
+
 </script>
 
 <div class="max-w-3xl mx-auto">

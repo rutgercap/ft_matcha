@@ -269,7 +269,6 @@ class UserRepository {
 					)
 					.all(id)
 					.map((user) => user.id);
-				console.log('in allOtherUser: ', result)
 				resolve(result);
 			} catch (e) {
 				reject(new UserRepositoryError('Something went wrong fetching other users', e));
@@ -438,6 +437,31 @@ class UserRepository {
 
 	public async profileImageIsSet(userId:string): Promise<boolean> {
 		return this.imageRepo.checkIfImageProfileIsSet(userId)
+	}
+
+	public async upsertLocation(userId: string, longitude: number, latitude: number) {
+		try {
+			const sql = `INSERT INTO profile_info (user_id, longitude, latitude)
+			VALUES (?, ?, ?)`
+
+			const req = this.db.prepare<string, number, number>(sql);
+			const ret = req.run(userId, longitude, latitude)
+		} catch (e) {
+			throw new UserRepositoryError('Error occur trying to upsert location coordinate for user: ' + userId, e)
+		}
+	}
+
+	public async location(userId: string) {
+		try {
+			const sql = `SELECT longitude, latitude FROM profile_info WHERE user_id = ?`
+
+			const req = this.db.prepare<string>(sql);
+			const ret = req.get(userId)
+			return ret
+		} catch (e) {
+			console.log('Error occur trying in get location:', e)
+			throw new UserRepositoryError('Error occur trying to get location coordinate for user: ' + userId, e)
+		}
 	}
 }
 
