@@ -89,6 +89,8 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		tags: getRandomTags(tagList, 5),
 		pictures: [null, null, null, null, null],
 		pictures_filenames: [],
+		longitude: faker.address.longitude(),
+		latitude: faker.address.latitude(),
 		...overrides
 	};
 }
@@ -112,8 +114,8 @@ async function createUsers(n: number) {
 		VALUES (@id, @email, @username, @profileIsSetup, @emailIsSetup, @passwordHash)`);
 
 	const user_profile_sql = db.prepare(`INSERT INTO
-			profile_info (user_id, first_name, last_name, gender, sexual_preference, biography, age)
-			VALUES (@user_id, @firstName, @lastName, @gender, @sexualPreference, @biography, @age)`);
+			profile_info (user_id, first_name, last_name, gender, sexual_preference, biography, age, longitude, latitude)
+			VALUES (@user_id, @firstName, @lastName, @gender, @sexualPreference, @biography, @age, @longitude, @latitude)`);
 
 	const user_tag_sql = db.prepare(`INSERT INTO
 				tags (id, user_id, tag)

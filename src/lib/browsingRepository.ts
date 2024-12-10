@@ -37,7 +37,7 @@ class BrowsingRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
-					SELECT u.id, u.username, p.biography, p.gender, p.age, p.sexual_preference
+					SELECT u.id, u.username, p.biography, p.gender, p.age, p.sexual_preference, p.longitude, p.latitude
 					FROM users AS u
 					INNER JOIN profile_info AS p ON u.id = p.user_id
 					WHERE u.id = ?
@@ -148,7 +148,7 @@ class BrowsingRepository {
 		}
 	}
 
-	public async scoring(userId: string, userToScoreId: string, fameRatingPreComp: number | null = null) {
+	public async scoring(userId: string, userToScoreId: string, distance: number, fameRatingPreComp: number | null = null) {
 		const fameWeight = scoreWeights.fameRating
 		const commonTagWeight = scoreWeights.tags
 		const distWeight = scoreWeights.distance
@@ -162,9 +162,9 @@ class BrowsingRepository {
 		const commonTags = await this.commonTagsStats(userId, userToScoreId);
 		const tagStat = commonTags.commonTag / (commonTags.ntagsUser1 + commonTags.ntagsUser2)
 
-		const distance = 0 // TODO update for distance metric to be relevant
+		const dist = distance // TODO update for distance metric to be relevant
 
-		return Number(((fameWeight * fameRate) + (tagStat * commonTagWeight) + (distance * distWeight)).toFixed(4))
+		return Number(((fameWeight * fameRate) + (tagStat * commonTagWeight) + (1/(1+dist) * distWeight)).toFixed(4))
 
 	}
 
@@ -182,7 +182,7 @@ class BrowsingRepository {
 	public async scoreThemAll(userId: string, users: BrowsingInfo[]) {
 		try {
 			for (const u of users) {
-				u.score = await this.scoring(userId, u.id, u.fameRate)
+				u.score = await this.scoring(userId, u.id, u.localisation, u.fameRate)
 			}
 			return users
 		} catch (error) {
@@ -217,6 +217,49 @@ class BrowsingRepository {
 			throw new BrowsingRepositoryError('Error occurs trying to pre filter the list by score', error)
 		}
 	}
+
+	public async distanceAll(userCoordinate: BrowsingInfo, usersCoordinates: BrowsingInfo[]) : Promise<ReducedProfileInfo[]> {
+		for (const other of usersCoordinates) {
+			other.localisation = (await this.haversineDistance(userCoordinate.latitude,
+				userCoordinate.longitude,
+				other.latitude,
+				other.longitude
+			)).toFixed(2)
+		}
+		return usersCoordinates
+	}
+
+	public async haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) : Promise<number> {
+		try {
+			const toRadians = (degrees:number) => (degrees * Math.PI) / 180;
+
+			// Convert degrees to radians
+			const lat1Rad = toRadians(lat1);
+			const lon1Rad = toRadians(lon1);
+			const lat2Rad = toRadians(lat2);
+			const lon2Rad = toRadians(lon2);
+
+			// Radius of Earth in kilometers (mean radius)
+			const R = 6371;
+
+			// Differences in coordinates
+			const dLat = lat2Rad - lat1Rad;
+			const dLon = lon2Rad - lon1Rad;
+
+			// Haversine formula
+			const a =
+			Math.sin(dLat / 2) ** 2 +
+			Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) ** 2;
+
+			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+			// Distance in kilometers
+			return R * c;
+		} catch (error) {
+			console.log('harvessing error -->', error)
+			throw new BrowsingRepositoryError('Error occurs trying to compute harvesing distance', error)
+		}
+	  }
 }
 
 export { BrowsingRepository, BrowsingRepositoryError };

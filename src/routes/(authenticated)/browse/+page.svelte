@@ -23,7 +23,6 @@
 	function applyFilters(event: CustomEvent) {
 		sortingCriteria = event.detail.sortingCriteria;
 
-		console.log('in the apply filter function:', sortingCriteria);
 		if (sortingCriteria.age.order) {
 			filteredUsers = sortByAge(filteredUsers, sortingCriteria.age.order);
 		}
@@ -112,9 +111,9 @@
 										<span class="font-semibold">Fame Rate:</span>
 										{(filteredUsers[index].fameRate * 100).toFixed(1)}%
 									</p>
-									<p class="text-sm text-gray-700">
-										<span class="font-semibold">Localisation:</span>
-										{filteredUsers[index].localisation} km
+									<span class="text-gray-700">{filteredUsers[index].localisation}</span>
+									<p class="text-gray-700 text-sm font-semibold">
+										km away from you
 									</p>
 									<p class="text-sm text-red-700">
 										<span class="font-semibold">score:</span>

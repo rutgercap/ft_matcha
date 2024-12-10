@@ -43,6 +43,8 @@ export type BrowsingInfo = {
 	gender: string;
 	fameRate: number;
 	localisation: number;
+    longitude: number;
+    latitude:number;
 	score: number;
 	sexualPreferences: string;
 };
@@ -59,6 +61,8 @@ export type ReducedProfileInfo = {
 	gender: string;
 	age: number;
 	fameRate: number;
-	localisation: number;
-	mask: boolean;
+    longitude: number;
+    latitude:number;
+    localisation:number;
+    mask: boolean;
 };

@@ -9,9 +9,10 @@ export async function POST({ params, locals: { user, userRepository }, request }
 		throw error(403, 'Forbidden');
 	}
 	try {
-		if (isNaN(longitude) && isNaN(latitude))  {
+		if (isNaN(longitude) && isNaN(latitude)) {
 			// get the request IP
 			// the user didnt shared his location use MaxMind to map ip to location
+			console.log('USER DIDNT ACCEPTED LOCATION SO CREATING MOCK ONES')
 			userRepository.upsertLocation(user_id, faker.address.latitude(), faker.address.longitude())
 		} else {
 			console.log('coordinate for user' + user.id, ':', longitude, latitude)

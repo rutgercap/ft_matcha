@@ -177,19 +177,14 @@ class UserRepository {
 				last_name=excluded.last_name,
 				gender=excluded.gender,
 				sexual_preference=excluded.sexual_preference,
-				biography=excluded.biography;`
+				biography=excluded.biography,
+				age=excluded.age;`
 		);
 		const deleteTags = this.db.prepare<[string]>(`DELETE FROM tags WHERE user_id = ?`);
 		const insertTag = this.db.prepare<[string, string, string]>(
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
-
-		const updateProfileSet = this.db.prepare<[string]>(
-			'UPDATE users SET profile_is_setup = 1 WHERE id = ?'
-		);
-
 		const profileImageIsSet = await this.profileImageIsSet(id)
-
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction(
@@ -442,7 +437,11 @@ class UserRepository {
 	public async upsertLocation(userId: string, longitude: number, latitude: number) {
 		try {
 			const sql = `INSERT INTO profile_info (user_id, longitude, latitude)
-			VALUES (?, ?, ?)`
+						VALUES (?, ?, ?)
+						ON CONFLICT(user_id)
+						DO UPDATE SET
+							longitude = excluded.longitude,
+							latitude = excluded.latitude;`
 
 			const req = this.db.prepare<string, number, number>(sql);
 			const ret = req.run(userId, longitude, latitude)

@@ -40,6 +40,8 @@ describe('UserRepository', () => {
 		const found = await userRepository.profileInfoFor(savedUser.id);
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		userProfile.latitude = null;
+		userProfile.longitude = null;
 		const { userId, ...rest } = found!;
 		expect(rest).toEqual(userProfile);
 	});
@@ -321,6 +323,24 @@ describe('UserRepository', () => {
 		const longitude = faker.address.longitude();
 
 		await userRepository.createUser(user, faker.internet.password());
+		await userRepository.upsertLocation(user.id, longitude, latitude);
+		const res = await userRepository.location(user.id);
+		expect(res.longitude).toEqual(longitude);
+		expect(res.latitude).toEqual(latitude);
+	});
+
+
+	itWithFixtures('upsert coordinate for user even if user profile already exist',
+		async ({ userRepository }) => {
+
+		const user = anyUser({ profileIsSetup: false });
+		await userRepository.createUser(user, faker.internet.password());
+		const userProfile = anyUserProfile();
+		await userRepository.upsertProfileInfo(user.id, userProfile);
+
+		const latitude = faker.address.latitude();
+		const longitude = faker.address.longitude();
+
 		await userRepository.upsertLocation(user.id, longitude, latitude);
 		const res = await userRepository.location(user.id);
 		expect(res.longitude).toEqual(longitude);
