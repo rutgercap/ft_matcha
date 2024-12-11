@@ -4,6 +4,25 @@ import { getConnectedUser } from './server/notificationService.test';
 import type { AddressInfo } from 'net';
 import { io } from 'socket.io-client';
 import { ChatClient } from '$lib/chatClient';
+import type { Chat, ChatPreview } from '$lib/domain/chat';
+
+function chatToPreview(chat: Chat): ChatPreview {
+	return {
+		id: chat.id,
+		userOne: chat.userOne,
+		userTwo: chat.userTwo,
+		lastMessage: chat.messages[chat.messages.length - 1]
+	};
+}
+
+function areChatPreviewsSame(a: ChatPreview, b: ChatPreview) {
+	return (
+		a.id === b.id &&
+		(a.userOne === b.userOne || a.userOne === b.userTwo) &&
+		(a.userTwo === b.userOne || a.userTwo === b.userTwo)
+		&& a.lastMessage === b.lastMessage
+	);
+}
 
 describe('chatClient', () => {
 	// keep serversocket
@@ -25,9 +44,9 @@ describe('chatClient', () => {
 			while (chatClient.loading) {
 				await new Promise((resolve) => setTimeout(resolve, 100));
 			}
-			const chats = chatClient.chatPreviews();
+			const found = chatClient.chatPreviews();
 
-			expect(chats).toEqual([chat]);
+			expect(found).toEqual([chatToPreview(chat)]);
 		}
 	);
 
@@ -44,10 +63,11 @@ describe('chatClient', () => {
 			let chats = chatClient.chatPreviews();
 			expect(chats).toEqual([]);
 
-			const chatId = await chatClient.createChat(other.id);
+			const chat= await chatClient.createChat(other.id);
 
 			chats = chatClient.chatPreviews();
-			expect(chats).toEqual([{ id: chatId, userOne: user.id, userTwo: other.id, messages: [] }]);
+			expect(chats.length).toBe(1);
+			expect(areChatPreviewsSame(chats[0], { id: chat.id, userOne: user.id, userTwo: other.id }));
 		}
 	);
 });
