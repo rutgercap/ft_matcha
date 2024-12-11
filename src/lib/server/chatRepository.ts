@@ -116,7 +116,7 @@ export class ChatRepository {
 				const result = this.db
 					.prepare<
 						[number, string, string],
-						{ id: number; chatId: number, sender: string; message: string; sentAt: string }
+						{ id: number; chatId: number; sender: string; message: string; sentAt: string }
 					>(
 						`INSERT INTO messages (chat_id, sender_id, message)
 						VALUES (?, ?, ?)
@@ -129,7 +129,7 @@ export class ChatRepository {
 					sentAt: date
 				});
 			} catch (e) {
-				console.log(e)
+				console.log(e);
 				reject(
 					new ChatRepositoryError(`Something went wrong fetching chats for user: ${userId}`, null)
 				);

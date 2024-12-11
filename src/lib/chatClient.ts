@@ -10,21 +10,22 @@ class ChatClientError extends Error {
 	}
 }
 
-
 export class ChatClient {
 	public loading = true;
 	private _chats: Map<number, Chat> = new Map();
-	private nextListenerId: number = 1;
 
-	constructor(private client: Socket, private userId: string) {
+	constructor(
+		private client: Socket,
+		private userId: string
+	) {
 		this.onMessage();
 		this.onConnectionError();
 		this.fetchChats();
 	}
 
 	private onMessage() {
-		this.client.on('message', (arg: { id: number; message: Message }) => {
-			this._chats.get(arg.id)?.messages.push(arg.message);
+		this.client.on('message', (arg: { chatId: number; message: Message }) => {
+			this._chats.get(arg.chatId)?.messages.push(arg.message);
 		});
 	}
 
@@ -43,7 +44,11 @@ export class ChatClient {
 	}
 
 	public messages(chatId: number): Message[] {
-		return this._chats.get(chatId)?.messages || [];
+		const chat = this._chats.get(chatId);
+		if (!chat) {
+			return [];
+		}
+		return chat.messages;
 	}
 
 	public async createChat(chatPartnerId: string): Promise<Chat> {
@@ -64,11 +69,15 @@ export class ChatClient {
 	public chatPreviews(): ChatPreview[] {
 		this.fetchChats();
 		return Array.from(this._chats.values()).map((chat) => {
-			const {messages, ...rest} = chat;
+			const { messages, ...rest } = chat;
 			return {
 				...rest,
 				lastMessage: chat.messages[chat.messages.length - 1]
 			};
 		});
+	}
+
+	public sendMessage(chatId: number, message: string) {
+		this.client.emit('sendMessage', { userId: this.userId, chatId, message });
 	}
 }
