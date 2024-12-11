@@ -34,6 +34,27 @@ function getRandomTags(tags: string[], maxTags = 5) {
 	return shuffledTags.slice(0, faker.number.int({ min: 1, max: maxTags }));
   }
 
+function randomCoordinate(min, max) {
+return Math.random() * (max - min) + min;
+}
+
+function generateFakeCoordinates(boundingBox) {
+const { minLat, maxLat, minLon, maxLon } = boundingBox;
+
+return {
+	latitude: randomCoordinate(minLat, maxLat),
+	longitude: randomCoordinate(minLon, maxLon),
+};
+}
+
+// Example bounding box for Paris region:
+const parisBoundingBox = {
+	minLat: 48.8156, // Southwest corner latitude
+	maxLat: 48.9022, // Northeast corner latitude
+	minLon: 2.2242,  // Southwest corner longitude
+	maxLon: 2.4699,  // Northeast corner longitude
+};
+
 async function copyFile(sourcePath: string, destinationPath: string): Promise<void> {
 	try {
 		// Validate that the source file exists
@@ -89,8 +110,6 @@ function anyUserProfile(overrides: Partial<ProfileInfo> = {}): ProfileInfo {
 		tags: getRandomTags(tagList, 5),
 		pictures: [null, null, null, null, null],
 		pictures_filenames: [],
-		longitude: faker.address.longitude(),
-		latitude: faker.address.latitude(),
 		...overrides
 	};
 }
@@ -114,8 +133,8 @@ async function createUsers(n: number) {
 		VALUES (@id, @email, @username, @profileIsSetup, @emailIsSetup, @passwordHash)`);
 
 	const user_profile_sql = db.prepare(`INSERT INTO
-			profile_info (user_id, first_name, last_name, gender, sexual_preference, biography, age, longitude, latitude)
-			VALUES (@user_id, @firstName, @lastName, @gender, @sexualPreference, @biography, @age, @longitude, @latitude)`);
+			profile_info (user_id, first_name, last_name, gender, sexual_preference, biography, age)
+			VALUES (@user_id, @firstName, @lastName, @gender, @sexualPreference, @biography, @age)`);
 
 	const user_tag_sql = db.prepare(`INSERT INTO
 				tags (id, user_id, tag)
@@ -123,6 +142,9 @@ async function createUsers(n: number) {
 	const user_picture_sql = db.prepare(`INSERT INTO
 				profile_pictures (user_id, image_order)
 				VALUES (@user_id, @order)`);
+	const location_sql = db.prepare(`INSERT INTO
+				location (user_id, longitude, latitude)
+				VALUES (@user_id, @longitude, @latitude)`);
 
 	const views_sql = db.prepare(`INSERT INTO profile_visits (visitor_id, visited_user_id) VALUES (?, ?)`)
 	const like_sql = db.prepare(`INSERT INTO likes (liker_id, liked_id) VALUES (?, ?)`)
@@ -132,11 +154,14 @@ async function createUsers(n: number) {
 	let user_profile: ProfileInfo[] = [];
 	let user_tags: any[] = [];
 	let user_picture: any[] = [];
+	let location: any[] = []
 
 	for (let i = 0; i < n; i++) {
 		users[i] = await anyUser('123456789'); // setting same password for every users so we can access there profiles easily
 		user_profile[i] = anyUserProfile({ user_id: users[i].id });
 		user_picture[i] = { user_id: users[i].id, order: 0 };
+		let coordinates = generateFakeCoordinates(parisBoundingBox)
+		location[i] = {user_id: users[i].id, longitude: coordinates.longitude, latitude: coordinates.latitude}
 		if (user_profile[i].gender === 'man') {
 			await copyFile(
 				'static/profile_pictures/male_robot.jpg',
@@ -166,6 +191,10 @@ async function createUsers(n: number) {
 	const insertManyProfile = db.transaction((users_profle: ProfileInfo[]) => {
 		for (const u of users_profle) user_profile_sql.run(u);
 	});
+
+	const insertManyLocation = db.transaction((locations: any[]) => {
+		for (const l of locations) location_sql.run(l)
+	})
 	const insertManyTag = db.transaction((user_tags: any[]) => {
 		for (const u of user_tags) user_tag_sql.run(u);
 	});
@@ -175,6 +204,7 @@ async function createUsers(n: number) {
 
 	insertManyUser(users);
 	insertManyProfile(user_profile);
+	insertManyLocation(location);
 	insertManyTag(user_tags);
 	insertManyPicture(user_picture);
 

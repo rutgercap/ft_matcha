@@ -37,9 +37,10 @@ class BrowsingRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
-					SELECT u.id, u.username, p.biography, p.gender, p.age, p.sexual_preference, p.longitude, p.latitude
+					SELECT u.id, u.username, p.biography, p.gender, p.age, p.sexual_preference, l.longitude, l.latitude
 					FROM users AS u
 					INNER JOIN profile_info AS p ON u.id = p.user_id
+					INNER JOIN location AS l ON u.id = l.user_id
 					WHERE u.id = ?
 				`;
 

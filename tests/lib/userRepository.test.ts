@@ -40,8 +40,6 @@ describe('UserRepository', () => {
 		const found = await userRepository.profileInfoFor(savedUser.id);
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		userProfile.latitude = null;
-		userProfile.longitude = null;
 		const { userId, ...rest } = found!;
 		expect(rest).toEqual(userProfile);
 	});

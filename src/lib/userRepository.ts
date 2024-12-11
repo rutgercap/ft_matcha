@@ -436,7 +436,7 @@ class UserRepository {
 
 	public async upsertLocation(userId: string, longitude: number, latitude: number) {
 		try {
-			const sql = `INSERT INTO profile_info (user_id, longitude, latitude)
+			const sql = `INSERT INTO location (user_id, longitude, latitude)
 						VALUES (?, ?, ?)
 						ON CONFLICT(user_id)
 						DO UPDATE SET
@@ -452,7 +452,7 @@ class UserRepository {
 
 	public async location(userId: string) {
 		try {
-			const sql = `SELECT longitude, latitude FROM profile_info WHERE user_id = ?`
+			const sql = `SELECT longitude, latitude FROM location WHERE user_id = ?`
 
 			const req = this.db.prepare<string>(sql);
 			const ret = req.get(userId)

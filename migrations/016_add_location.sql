@@ -1,4 +1,7 @@
-ALTER TABLE profile_info
-ADD COLUMN longitude DECIMAL(9,6);
-ALTER TABLE profile_info
-ADD COLUMN latitude DECIMAL(9,6);
+
+CREATE TABLE location (
+    user_id TEXT PRIMARY KEY NOT NULL,
+	longitude DECIMAL(9,6),
+	latitude DECIMAL(9,6),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);
