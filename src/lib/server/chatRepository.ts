@@ -16,17 +16,18 @@ export class ChatRepositoryError extends Error {
 export class ChatRepository {
 	constructor(private db: Database) {}
 
-	public async createChat(userOneId: string, userTwoId: string): Promise<number> {
+	public async createChat(userOneId: string, userTwoId: string): Promise<Chat> {
 		return new Promise((resolve, reject) => {
 			try {
 				const result = this.db
-					.prepare<[string, string], { id: number }>(
+					.prepare<[string, string], Chat>(
 						`INSERT INTO chat (user_id_1, user_id_2)
 						VALUES (?, ?)
-						RETURNING id`
+						RETURNING id, user_id_1 as userOne, user_id_2 as userTwo`
 					)
 					.get(userOneId, userTwoId);
-				resolve(result!.id);
+				result!.messages = [];
+				resolve(result!);
 			} catch (e) {
 				if (e instanceof SqliteError) {
 					if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {

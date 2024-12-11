@@ -6,7 +6,7 @@ export class ChatClient {
 	private _chats: Map<number, Chat> = new Map();
 	private nextListenerId: number = 1;
 
-	constructor(private client: Socket) {
+	constructor(private client: Socket, private userId: string) {
 		this.onMessage();
 		this.onConnectionError();
 		this.fetchChats();
@@ -34,6 +34,20 @@ export class ChatClient {
 
 	public messages(chatId: number): Message[] {
 		return this._chats.get(chatId)?.messages || [];
+	}
+
+	public async createChat(chatPartnerId: string): Promise<Chat> {
+		return new Promise((resolve, reject) => {
+			try {
+				this.client.emit('createChat', { chatPartnerId });
+				this.client.timeout(3000).on('newChat', (chat: Chat) => {
+					this._chats.set(chat.id, chat);
+					resolve(chat);
+				});
+			} catch (e) {
+				reject(e);
+			}
+		});
 	}
 
 	public chatPreviews(): ChatPreview[] {
