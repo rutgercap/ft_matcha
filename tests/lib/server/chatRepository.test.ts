@@ -12,7 +12,8 @@ describe('chatRepository', () => {
 			{
 				id: 1,
 				userOne: users[0].id,
-				userTwo: users[1].id
+				userTwo: users[1].id,
+				messages: []
 			}
 		]);
 		chats = await chatRepository.chatsForUser(users[1].id);
@@ -20,28 +21,36 @@ describe('chatRepository', () => {
 			{
 				id: 1,
 				userOne: users[0].id,
-				userTwo: users[1].id
+				userTwo: users[1].id,
+				messages: []
 			}
 		]);
 	});
 
-	itWithFixtures(
-		'Chatpreview returns latest message',
-		async ({ chatRepository, savedUserFactory }) => {
-			const users = await savedUserFactory(2);
-			const id = await chatRepository.createChat(users[0].id, users[1].id);
-			await chatRepository.saveMessage(id, users[0].id, 'send nudes');
-			await chatRepository.saveMessage(id, users[0].id, 'send more nudes');
+	itWithFixtures('chats are sorted by latest', async ({ chatRepository, savedUserFactory }) => {
+		const users = await savedUserFactory(2);
+		const id = await chatRepository.createChat(users[0].id, users[1].id);
+		await chatRepository.saveMessage(id, users[0].id, 'send nudes');
+		await chatRepository.saveMessage(id, users[0].id, 'send more nudes');
 
-			let chats = await chatRepository.chatsForUser(users[0].id);
-			let latest = chats[0];
-			console.log(latest);
-			expect(latest.lastMessage?.message).toEqual('send more nudes');
-			chats = await chatRepository.chatsForUser(users[1].id);
-			latest = chats[0];
-			expect(latest.lastMessage?.message).toEqual('send more nudes');
-		}
-	);
+		let chats = await chatRepository.chatsForUser(users[0].id);
+
+		let latest = chats[0];
+		expect(latest.messages[0]).toStrictEqual({
+			id: expect.any(Number),
+			message: 'send more nudes',
+			senderId: users[0].id,
+			sentAt: expect.any(Date)
+		});
+		chats = await chatRepository.chatsForUser(users[1].id);
+		latest = chats[0];
+		expect(latest.messages[0]).toStrictEqual({
+			id: expect.any(Number),
+			message: 'send more nudes',
+			senderId: users[0].id,
+			sentAt: expect.any(Date)
+		});
+	});
 
 	itWithFixtures('Can save a message to a chat', async ({ chatRepository, savedUserFactory }) => {
 		const users = await savedUserFactory(2);

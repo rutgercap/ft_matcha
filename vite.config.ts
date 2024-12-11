@@ -4,6 +4,9 @@ import { Server, type Socket as ServerSocket } from 'socket.io';
 import type { Lucia } from 'lucia';
 import { lucia } from './src/lib/auth';
 import type { JsonSerializable } from '$lib/types/jsonSerializable';
+import { ChatService } from './src/lib/server/chatService';
+import { ChatRepository } from './src/lib/server/chatRepository';
+import { getDb } from './src/lib/database/database';
 
 export class WebsocketServer {
 	public id: number;
@@ -14,7 +17,8 @@ export class WebsocketServer {
 
 	constructor(
 		private server: Server,
-		private lucia: Lucia
+		private lucia: Lucia,
+		private chatService: ChatService
 	) {
 		this.authMiddleWare();
 		this.id = Math.floor(Math.random() * 1000000);
@@ -49,15 +53,21 @@ export class WebsocketServer {
 			if (!session) {
 				return;
 			}
+			console.log('connect: ' + user.id);
 			this.connections.set(user.id, socket);
 			this.sessionTokenToUserId.set(token, user.id);
 			socket.on('disconnect', () => {
 				const token = socket.handshake.auth.token;
 				const userId = this.sessionTokenToUserId.get(token);
+				console.log('disconnect: ' + userId);
 				if (userId) {
 					this.connections.delete(userId);
 					this.sessionTokenToUserId.delete(token);
 				}
+			});
+			socket.on('fetchChats', async () => {
+				const chats = await this.chatService.chatsForUser(user.id);
+				socket.emit('fetchChatsResponse', chats);
 			});
 		});
 	}
@@ -101,9 +111,12 @@ const webSocketServer = {
 			return;
 		}
 		const io = new Server(server.httpServer);
+		const db = getDb();
+		const chatRepository = new ChatRepository(db);
+		const chatService = new ChatService(chatRepository);
 		// need to keep this as a variable to prevent it from being garbage collected
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const dontDelete = new WebsocketServer(io, lucia);
+		const dontDelete = new WebsocketServer(io, lucia, chatService);
 	}
 };
 
