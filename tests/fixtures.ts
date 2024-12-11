@@ -34,7 +34,7 @@ import { BlockRepository } from '$lib/blockRepository';
 import { ChatRepository } from '$lib/server/chatRepository';
 import { ChatClient } from '$lib/chatClient';
 import { ChatService } from '$lib/server/chatService';
-import { waitUntilConnected } from './lib/server/notificationService.test';
+import { getConnectedUser, waitUntilConnected } from './lib/server/notificationService.test';
 
 interface MyFixtures {
 	db: DatabaseType;
@@ -170,8 +170,9 @@ export const itWithFixtures = it.extend<MyFixtures>({
 	chatRepository: async ({ db }, use) => {
 		await use(new ChatRepository(db));
 	},
-	chatClient: async ({ clientSocket }, use) => {
-		await use(new ChatClient(clientSocket));
+	chatClient: async ({ clientSocket, lucia }, use) => {
+		const user = await getConnectedUser(clientSocket, lucia); 
+		await use(new ChatClient(clientSocket, user.id));
 	},
 	chatService: async ({ chatRepository }, use) => {
 		await use(new ChatService(chatRepository));

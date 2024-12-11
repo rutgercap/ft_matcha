@@ -29,9 +29,9 @@ describe('chatRepository', () => {
 
 	itWithFixtures('chats are sorted by latest', async ({ chatRepository, savedUserFactory }) => {
 		const users = await savedUserFactory(2);
-		const id = await chatRepository.createChat(users[0].id, users[1].id);
-		await chatRepository.saveMessage(id, users[0].id, 'send nudes');
-		await chatRepository.saveMessage(id, users[0].id, 'send more nudes');
+		const chat = await chatRepository.createChat(users[0].id, users[1].id);
+		await chatRepository.saveMessage(chat.id, users[0].id, 'send nudes');
+		await chatRepository.saveMessage(chat.id, users[0].id, 'send more nudes');
 
 		let chats = await chatRepository.chatsForUser(users[0].id);
 
@@ -54,10 +54,10 @@ describe('chatRepository', () => {
 
 	itWithFixtures('Can save a message to a chat', async ({ chatRepository, savedUserFactory }) => {
 		const users = await savedUserFactory(2);
-		const chatId = await chatRepository.createChat(users[0].id, users[1].id);
+		const createdChat = await chatRepository.createChat(users[0].id, users[1].id);
 
-		await chatRepository.saveMessage(chatId, users[0].id, 'send nudes');
-		const chat = await chatRepository.chat(chatId);
+		await chatRepository.saveMessage(createdChat.id, users[0].id, 'send nudes');
+		const chat = await chatRepository.chat(createdChat.id);
 
 		expect(chat.messages).toEqual([
 			{

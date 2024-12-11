@@ -18,7 +18,7 @@ export class WebsocketServer {
 	constructor(
 		private server: Server,
 		private lucia: Lucia,
-		private chatService: ChatService
+		private chatRepository:ChatRepository 
 	) {
 		this.authMiddleWare();
 		this.id = Math.floor(Math.random() * 1000000);
@@ -66,8 +66,12 @@ export class WebsocketServer {
 				}
 			});
 			socket.on('fetchChats', async () => {
-				const chats = await this.chatService.chatsForUser(user.id);
+				const chats = await this.chatRepository.chatsForUser(user.id);
 				socket.emit('fetchChatsResponse', chats);
+			});
+			socket.on('createChat', async ({ chatPartnerId }) => {
+				const chat = await this.chatRepository.createChat(user.id, chatPartnerId);
+				socket.emit('newChat', chat);
 			});
 		});
 	}
@@ -113,10 +117,9 @@ const webSocketServer = {
 		const io = new Server(server.httpServer);
 		const db = getDb();
 		const chatRepository = new ChatRepository(db);
-		const chatService = new ChatService(chatRepository);
 		// need to keep this as a variable to prevent it from being garbage collected
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const dontDelete = new WebsocketServer(io, lucia, chatService);
+		const dontDelete = new WebsocketServer(io, lucia, chatRepository);
 	}
 };
 
