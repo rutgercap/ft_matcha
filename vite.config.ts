@@ -4,7 +4,6 @@ import { Server, type Socket as ServerSocket } from 'socket.io';
 import type { Lucia } from 'lucia';
 import { lucia } from './src/lib/auth';
 import type { JsonSerializable } from '$lib/types/jsonSerializable';
-import { ChatService } from './src/lib/server/chatService';
 import { ChatRepository } from './src/lib/server/chatRepository';
 import { getDb } from './src/lib/database/database';
 
@@ -18,7 +17,7 @@ export class WebsocketServer {
 	constructor(
 		private server: Server,
 		private lucia: Lucia,
-		private chatRepository:ChatRepository 
+		private chatRepository: ChatRepository
 	) {
 		this.authMiddleWare();
 		this.id = Math.floor(Math.random() * 1000000);
@@ -53,13 +52,11 @@ export class WebsocketServer {
 			if (!session) {
 				return;
 			}
-			console.log('connect: ' + user.id);
 			this.connections.set(user.id, socket);
 			this.sessionTokenToUserId.set(token, user.id);
 			socket.on('disconnect', () => {
 				const token = socket.handshake.auth.token;
 				const userId = this.sessionTokenToUserId.get(token);
-				console.log('disconnect: ' + userId);
 				if (userId) {
 					this.connections.delete(userId);
 					this.sessionTokenToUserId.delete(token);
@@ -72,6 +69,14 @@ export class WebsocketServer {
 			socket.on('createChat', async ({ chatPartnerId }) => {
 				const chat = await this.chatRepository.createChat(user.id, chatPartnerId);
 				socket.emit('newChat', chat);
+			});
+			socket.on('sendMessage', async ({ userId, chatId, message }) => {
+				try {
+					const createdMessage = await this.chatRepository.saveMessage(chatId, userId, message);
+					socket.emit('message', { chatId, message: createdMessage });
+				} catch (e) {
+					console.error('Error saving message:', e);
+				}
 			});
 		});
 	}

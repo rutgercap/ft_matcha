@@ -5,6 +5,10 @@ import type { AddressInfo } from 'net';
 import { io } from 'socket.io-client';
 import { ChatClient } from '$lib/chatClient';
 import type { Chat, ChatPreview } from '$lib/domain/chat';
+import type { HttpServer } from 'vite';
+import type { AuthService } from '$lib/server/authService';
+import type { User } from 'lucia';
+import type { UserWithoutProfileSetup } from '$lib/userRepository';
 
 function chatToPreview(chat: Chat): ChatPreview {
 	return {
@@ -19,9 +23,24 @@ function areChatPreviewsSame(a: ChatPreview, b: ChatPreview) {
 	return (
 		a.id === b.id &&
 		(a.userOne === b.userOne || a.userOne === b.userTwo) &&
-		(a.userTwo === b.userOne || a.userTwo === b.userTwo)
-		&& a.lastMessage === b.lastMessage
+		(a.userTwo === b.userOne || a.userTwo === b.userTwo) &&
+		a.lastMessage === b.lastMessage
 	);
+}
+
+async function createChatClient(
+	user: UserWithoutProfileSetup,
+	authService: AuthService,
+	httpServer: HttpServer
+) {
+	const port = (httpServer.address() as AddressInfo).port;
+	const token = await authService.signIn(user.username, DEFAULT_PASSWORD);
+	const socket = io(`http://localhost:${port}`, {
+		auth: {
+			token: token.value
+		}
+	});
+	return new ChatClient(socket, user.id);
 }
 
 describe('chatClient', () => {
@@ -38,8 +57,7 @@ describe('chatClient', () => {
 					token: token.value
 				}
 			});
-			const chatClient = new ChatClient(socket, user.id);
-			socket.emit('fetchChats');
+			const chatClient = await createChatClient(user, authService, httpServer);
 
 			while (chatClient.loading) {
 				await new Promise((resolve) => setTimeout(resolve, 100));
@@ -63,11 +81,57 @@ describe('chatClient', () => {
 			let chats = chatClient.chatPreviews();
 			expect(chats).toEqual([]);
 
-			const chat= await chatClient.createChat(other.id);
+			const chat = await chatClient.createChat(other.id);
 
 			chats = chatClient.chatPreviews();
 			expect(chats.length).toBe(1);
 			expect(areChatPreviewsSame(chats[0], { id: chat.id, userOne: user.id, userTwo: other.id }));
+		}
+	);
+
+	// keep serversocket
+	itWithFixtures(
+		'Can send messages',
+		async ({ savedUserFactory, chatClient, authService, httpServer, serverSocket }) => {
+			const [other] = await savedUserFactory(2);
+			const otherUserClient = await createChatClient(other, authService, httpServer);
+			const chat = await chatClient.createChat(other.id);
+			while (chatClient.loading) {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+			}
+
+			chatClient.sendMessage(chat.id, 'Hello');
+			// might have to increase this delay if the test fails
+			await new Promise((resolve) => setTimeout(resolve, 300));
+
+			const messages = chatClient.messages(chat.id);
+			expect(messages.length).toBe(1);
+			expect(messages[0].message).toBe('Hello');
+
+			const otherMessages = otherUserClient.messages(chat.id);
+			expect(otherMessages.length).toBe(1);
+			expect(otherMessages[0].message).toBe('Hello');
+		}
+	);
+
+	// keep serversocket
+	itWithFixtures(
+		'other users do not see messages from other chats',
+		async ({ savedUserFactory, chatClient, authService, httpServer, serverSocket }) => {
+			const [other, randomUser] = await savedUserFactory(2);
+			const otherUserClient = await createChatClient(other, authService, httpServer);
+			const randomUserClient = await createChatClient(randomUser, authService, httpServer);
+			const chat = await chatClient.createChat(other.id);
+			while (chatClient.loading) {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+			}
+
+			chatClient.sendMessage(chat.id, 'Hello');
+			// might have to increase this delay if the test fails
+			await new Promise((resolve) => setTimeout(resolve, 300));
+
+			const otherMessages = randomUserClient.messages(chat.id);
+			expect(otherMessages.length).toBe(0);
 		}
 	);
 });

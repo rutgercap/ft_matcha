@@ -65,7 +65,7 @@ describe('chatRepository', () => {
 			id: expect.any(Number),
 			sender: users[0].id,
 			message: text,
-			sentAt: expect.any(Date),
+			sentAt: expect.any(Date)
 		});
 		expect(chat.messages).toEqual([
 			{
