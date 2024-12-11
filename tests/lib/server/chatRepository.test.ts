@@ -56,9 +56,17 @@ describe('chatRepository', () => {
 		const users = await savedUserFactory(2);
 		const createdChat = await chatRepository.createChat(users[0].id, users[1].id);
 
-		await chatRepository.saveMessage(createdChat.id, users[0].id, 'send nudes');
+		const text = 'send nudes';
+		const result = await chatRepository.saveMessage(createdChat.id, users[0].id, text);
 		const chat = await chatRepository.chat(createdChat.id);
 
+		expect(result).toEqual({
+			chatId: createdChat.id,
+			id: expect.any(Number),
+			sender: users[0].id,
+			message: text,
+			sentAt: expect.any(Date),
+		});
 		expect(chat.messages).toEqual([
 			{
 				id: 1,

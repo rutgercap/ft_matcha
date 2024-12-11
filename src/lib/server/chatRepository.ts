@@ -110,20 +110,26 @@ export class ChatRepository {
 		});
 	}
 
-	public async saveMessage(chatId: number, userId: string, message: string): Promise<void> {
+	public async saveMessage(chatId: number, userId: string, message: string): Promise<Message> {
 		return new Promise((resolve, reject) => {
 			try {
-				this.db
+				const result = this.db
 					.prepare<
 						[number, string, string],
-						{ id: number; user_id_1: string; user_id_2: string; created_at: string }
+						{ id: number; chatId: number, sender: string; message: string; sentAt: string }
 					>(
 						`INSERT INTO messages (chat_id, sender_id, message)
-						VALUES (?, ?, ?)`
+						VALUES (?, ?, ?)
+						RETURNING id, chat_id as chatId, sender_id as sender, message, sent_at as sentAt`
 					)
-					.run(chatId, userId, message);
-				resolve();
-			} catch {
+					.get(chatId, userId, message);
+				const date = parse(result!.sentAt, 'yyyy-MM-dd HH:mm:ss', new Date());
+				resolve({
+					...result!,
+					sentAt: date
+				});
+			} catch (e) {
+				console.log(e)
 				reject(
 					new ChatRepositoryError(`Something went wrong fetching chats for user: ${userId}`, null)
 				);
