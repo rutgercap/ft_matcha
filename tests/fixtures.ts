@@ -108,9 +108,9 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(server);
 		server.close();
 	},
-	serverSocket: async ({ httpServer, lucia, chatService }, use) => {
+	serverSocket: async ({ httpServer, lucia, chatRepository }, use) => {
 		const io = new Server(httpServer);
-		const dontDelete = new WebsocketServer(io, lucia, chatService);
+		const dontDelete = new WebsocketServer(io, lucia, chatRepository );
 		const port = (httpServer.address() as AddressInfo).port;
 		const socket = new ServerSocket(`http://localhost:${port}`);
 		await use(socket);

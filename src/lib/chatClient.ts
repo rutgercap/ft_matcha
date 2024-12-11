@@ -1,6 +1,16 @@
 import type { Socket } from 'socket.io-client';
 import type { Chat, ChatPreview, Message } from './domain/chat';
 
+class ChatClientError extends Error {
+	exception: unknown;
+	constructor(message: string, exception: unknown) {
+		super(message);
+		this.name = 'ChatClientError';
+		this.exception = exception;
+	}
+}
+
+
 export class ChatClient {
 	public loading = true;
 	private _chats: Map<number, Chat> = new Map();
@@ -45,7 +55,8 @@ export class ChatClient {
 					resolve(chat);
 				});
 			} catch (e) {
-				reject(e);
+				console.log(e);
+				reject(new ChatClientError('Something went wrong creating chat', e));
 			}
 		});
 	}
@@ -53,8 +64,9 @@ export class ChatClient {
 	public chatPreviews(): ChatPreview[] {
 		this.fetchChats();
 		return Array.from(this._chats.values()).map((chat) => {
+			const {messages, ...rest} = chat;
 			return {
-				...chat,
+				...rest,
 				lastMessage: chat.messages[chat.messages.length - 1]
 			};
 		});
