@@ -1,9 +1,7 @@
 import type { Database } from 'better-sqlite3';
 import type { Chat, ChatPreview, Message } from '$lib/domain/chat';
 import { parse } from 'date-fns';
-import type { NotificationService } from './notificationService';
 import { SqliteError } from 'better-sqlite3';
-import type { ToSnakeCase } from '$lib/types/snakeCase';
 import _ from 'lodash';
 
 export class ChatRepositoryError extends Error {
@@ -16,10 +14,7 @@ export class ChatRepositoryError extends Error {
 }
 
 export class ChatRepository {
-	constructor(
-		private db: Database,
-		private notificationService: NotificationService
-	) {}
+	constructor(private db: Database) {}
 
 	public async createChat(userOneId: string, userTwoId: string): Promise<number> {
 		return new Promise((resolve, reject) => {
@@ -60,7 +55,7 @@ export class ChatRepository {
 		});
 	}
 
-	public async chatsForUser(userId: string): Promise<ChatPreview[]> {
+	public async chatsForUser(userId: string): Promise<Chat[]> {
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction((userId) => {
@@ -71,7 +66,7 @@ export class ChatRepository {
 							WHERE user_id_1 = ? OR user_id_2 = ?`
 						)
 						.all(userId, userId);
-					const mapped: ChatPreview[] = chats
+					const mapped: Chat[] = chats
 						.map((chat) => {
 							return {
 								id: chat.id,
@@ -90,18 +85,17 @@ export class ChatRepository {
 							WHERE chat_id = ?
 							ORDER BY sent_at DESC`
 								)
-								.get(chat.id);
-							if (!snakeCaseMessage) {
-								return chat;
-							}
-							const date = parse(snakeCaseMessage.sent_at, 'yyyy-MM-dd HH:mm:ss', new Date());
-							const lastMessage = {
-								..._.mapKeys(snakeCaseMessage, (value, key) => _.camelCase(key)),
-								sentAt: date
-							} as unknown as Message;
+								.all(chat.id);
+							const messages = snakeCaseMessage.map((message) => {
+								const date = parse(message.sent_at, 'yyyy-MM-dd HH:mm:ss', new Date());
+								return {
+									..._.mapKeys(message, (value, key) => _.camelCase(key)),
+									sentAt: date
+								} as unknown as Message;
+							});
 							return {
 								...chat,
-								lastMessage
+								messages
 							};
 						});
 					resolve(mapped);

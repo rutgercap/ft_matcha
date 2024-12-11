@@ -1,17 +1,17 @@
 <script lang="ts">
-	import type { ChatPreview } from '$lib/domain/chat';
+	import type { Message } from '$lib/domain/chat';
 
-	let chats: ChatPreview[] = [];
+	let messages: Message[] = [];
 </script>
 
 <div class="flex flex-row justify-center">
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900 mb-4">Chats</h1>
-		{#if chats.length === 0}
-			<p class="text-sm text-gray-500">No chats yet. Loser!</p>
+		{#if messages.length === 0}
+			<p class="text-sm text-gray-500">No messages yet. Loser!</p>
 		{:else}
 			<ul role="list" class="divide-y divide-gray-100">
-				{#each chats as chat}
+				{#each messages as chat}
 					<li class="flex items-center border px-4 rounded-xl justify-between gap-x-6 py-5">
 						<div class="flex min-w-0 gap-x-4">
 							<!-- <img

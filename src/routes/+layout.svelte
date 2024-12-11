@@ -22,9 +22,11 @@
 		type Notification
 	} from '$lib/notificationClient';
 	import { notificationClientStore } from '$lib/stores/notificationClientStore';
+	import { chatClientStore } from '$lib/stores/chatClientStore';
 	import { io } from 'socket.io-client';
 	import addToast from '$lib/toast/toastStore';
 	import { onDestroy } from 'svelte';
+	import { ChatClient } from '$lib/chatClient';
 
 	$: url = $page.url.pathname;
 
@@ -33,6 +35,7 @@
 	$: initials = data.personalInfo ? getInitials(data.personalInfo) : 'XX';
 
 	let notificationSubscription: number | null = null;
+	let chatSubscription: number | null = null;
 	$: {
 		if (data.session && $notificationClientStore === null) {
 			const socket = io($page.url.origin, {
@@ -47,6 +50,8 @@
 					addToast(notificationToToast(notification));
 				});
 			}
+			const chatClient = new ChatClient(socket);
+			chatClientStore.set(chatClient);
 		}
 	}
 

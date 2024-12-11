@@ -30,10 +30,14 @@ import { adapter, createLuciaInstance } from '$lib/auth';
 import { WebsocketServer } from '../vite.config';
 import { ServerSocket } from '$lib/server/serverSocket';
 import { ChatRepository } from '$lib/server/chatRepository';
+import { ChatClient } from '$lib/chatClient';
+import { ChatService } from '$lib/server/chatService';
+import { waitUntilConnected } from './lib/server/notificationService.test';
 
 interface MyFixtures {
 	db: DatabaseType;
 	userRepository: UserRepositoryType;
+	chatClient: ChatClient;
 	imageRepository: ImageRepositoryType;
 	chatRepository: ChatRepository;
 	savedUser: UserWithoutProfileSetup;
@@ -48,6 +52,7 @@ interface MyFixtures {
 	httpServer: HttpServer;
 	authService: AuthService;
 	lucia: Lucia;
+	chatService: ChatService;
 }
 
 export const DEFAULT_PASSWORD = 'password';
@@ -103,9 +108,9 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(server);
 		server.close();
 	},
-	serverSocket: async ({ httpServer, lucia }, use) => {
+	serverSocket: async ({ httpServer, lucia, chatService }, use) => {
 		const io = new Server(httpServer);
-		const dontDelete = new WebsocketServer(io, lucia);
+		const dontDelete = new WebsocketServer(io, lucia, chatService);
 		const port = (httpServer.address() as AddressInfo).port;
 		const socket = new ServerSocket(`http://localhost:${port}`);
 		await use(socket);
@@ -138,7 +143,13 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		const lucia = createLuciaInstance(luciaAdapter);
 		await use(lucia);
 	},
-	chatRepository: async ({ db, notificationService }, use) => {
-		await use(new ChatRepository(db, notificationService));
+	chatRepository: async ({ db }, use) => {
+		await use(new ChatRepository(db));
+	},
+	chatClient: async ({ clientSocket }, use) => {
+		await use(new ChatClient(clientSocket));
+	},
+	chatService: async ({ chatRepository }, use) => {
+		await use(new ChatService(chatRepository));
 	}
 });
