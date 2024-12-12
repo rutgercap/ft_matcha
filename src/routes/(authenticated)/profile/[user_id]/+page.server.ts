@@ -44,7 +44,7 @@ export const load: PageServerLoad = async ({
 	params
 }) => {
 	if (session === null || currentUser === null) {
-		return redirect(402, '/login');
+		return redirect(401, '/login');
 	}
 
 	const profileId = params.user_id;

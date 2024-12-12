@@ -16,7 +16,7 @@
 				messages = [];
 			}
 		});
-	} 
+	}
 
 	function sendMessage(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -31,7 +31,7 @@
 	}
 </script>
 
-<div class="flex flex-row justify-center">
+<div class="flex flex-row justify-center my-4">
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900 mb-4">Chats</h1>
 		{#if messages.length === 0}

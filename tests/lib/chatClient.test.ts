@@ -7,7 +7,6 @@ import { ChatClient } from '$lib/chatClient';
 import type { Chat, ChatPreview } from '$lib/domain/chat';
 import type { HttpServer } from 'vite';
 import type { AuthService } from '$lib/server/authService';
-import type { User } from 'lucia';
 import type { UserWithoutProfileSetup } from '$lib/userRepository';
 
 function chatToPreview(chat: Chat): ChatPreview {
@@ -112,7 +111,6 @@ describe('chatClient', () => {
 		'other users do not see messages from other chats',
 		async ({ savedUserFactory, chatClient, authService, httpServer, serverSocket }) => {
 			const [other, randomUser] = await savedUserFactory(2);
-			const otherUserClient = await createChatClient(other, authService, httpServer);
 			const randomUserClient = await createChatClient(randomUser, authService, httpServer);
 			const chat = await chatClient.createChat(other.id);
 			while (chatClient.loading) {

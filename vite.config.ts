@@ -68,12 +68,12 @@ export class WebsocketServer {
 			});
 			socket.on('createChat', async ({ chatPartnerId }) => {
 				const chat = await this.chatRepository.createChat(user.id, chatPartnerId);
-				socket.emit('newChat', chat);
+				this.server.emit('newChat', chat);
 			});
 			socket.on('sendMessage', async ({ userId, chatId, message }) => {
 				try {
 					const createdMessage = await this.chatRepository.saveMessage(chatId, userId, message);
-					socket.emit('message', { chatId, message: createdMessage });
+					this.server.emit('message', { chatId, message: createdMessage });
 				} catch (e) {
 					console.error('Error saving message:', e);
 				}

@@ -270,7 +270,7 @@ describe('UserRepository', () => {
 		}
 	);
 
-	itWithFixtures.only(
+	itWithFixtures(
 		'should return false profileInfo is not full / set',
 		async ({ userRepository }) => {
 			const user = anyUser({ profileIsSetup: true });
