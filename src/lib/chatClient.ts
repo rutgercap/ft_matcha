@@ -1,5 +1,6 @@
 import type { Socket } from 'socket.io-client';
 import type { Chat, ChatPreview, Message } from './domain/chat';
+import { writable, type Writable } from 'svelte/store';
 
 class ChatClientError extends Error {
 	exception: unknown;
@@ -12,7 +13,7 @@ class ChatClientError extends Error {
 
 export class ChatClient {
 	public loading = true;
-	private _chats: Map<number, Chat> = new Map();
+	public chats: Writable<Map<number, Chat>> = writable(new Map());
 
 	constructor(
 		private client: Socket,
@@ -25,14 +26,21 @@ export class ChatClient {
 
 	private onMessage() {
 		this.client.on('message', (arg: { chatId: number; message: Message }) => {
-			this._chats.get(arg.chatId)?.messages.push(arg.message);
+			console.log('message', arg);
+			this.chats.update((currentChats) => {
+				const chat = currentChats.get(arg.chatId);
+				if (chat) {
+					chat.messages.push(arg.message);
+				}
+				return new Map(currentChats);
+			});
 		});
 	}
 
 	private async fetchChats() {
 		this.client.emit('fetchChats');
 		this.client.on('fetchChatsResponse', (response: Chat[]) => {
-			this._chats = new Map(response.map((chat: Chat) => [chat.id, chat]));
+			this.chats.set(new Map(response.map((chat: Chat) => [chat.id, chat])));
 			this.loading = false;
 		});
 	}
@@ -44,7 +52,8 @@ export class ChatClient {
 	}
 
 	public messages(chatId: number): Message[] {
-		const chat = this._chats.get(chatId);
+		let chat: undefined | Chat;
+		this.chats.subscribe((chats) => (chat = chats.get(chatId)));
 		if (!chat) {
 			return [];
 		}
@@ -56,7 +65,10 @@ export class ChatClient {
 			try {
 				this.client.emit('createChat', { chatPartnerId });
 				this.client.timeout(3000).on('newChat', (chat: Chat) => {
-					this._chats.set(chat.id, chat);
+					this.chats.update((currentChats) => {
+						currentChats.set(chat.id, chat);
+						return new Map(currentChats);
+					});
 					resolve(chat);
 				});
 			} catch (e) {
@@ -68,13 +80,17 @@ export class ChatClient {
 
 	public chatPreviews(): ChatPreview[] {
 		this.fetchChats();
-		return Array.from(this._chats.values()).map((chat) => {
-			const { messages, ...rest } = chat;
-			return {
-				...rest,
-				lastMessage: chat.messages[chat.messages.length - 1]
-			};
+		let previews: ChatPreview[] = [];
+		this.chats.subscribe((chats) => {
+			previews = Array.from(chats.values()).map((chat) => {
+				const { messages, ...rest } = chat;
+				return {
+					...rest,
+					lastMessage: chat.messages[chat.messages.length - 1]
+				};
+			});
 		});
+		return previews;
 	}
 
 	public sendMessage(chatId: number, message: string) {

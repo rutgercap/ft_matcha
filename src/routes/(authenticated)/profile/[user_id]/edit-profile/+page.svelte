@@ -5,7 +5,6 @@
 	import { Icon, Trash } from 'svelte-hero-icons';
 	import addToast from '$lib/toast/toastStore';
 	import { MAX_PICTURES } from '$lib/imageRepository';
-	import { invalidate } from '$app/navigation';
 
 	export let data: PageData;
 	$: user = data.user;
