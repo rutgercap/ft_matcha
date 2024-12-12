@@ -1,6 +1,6 @@
 import type { Database } from 'better-sqlite3';
 import { averages, fameRatingWeights, scoreWeights } from './domain/browse';
-import type { ReducedProfileInfo, CommonTagStats, BrowsingInfo } from './domain/browse';
+import type { CommonTagStats, BrowsingInfo } from './domain/browse';
 import { SexualPreference } from './domain/profile';
 
 class BrowsingRepositoryError extends Error {
@@ -33,7 +33,7 @@ class BrowsingRepository {
 		});
 	}
 
-	public browsingInfoFor(id: string): Promise<ReducedProfileInfo> {
+	public browsingInfoFor(id: string): Promise<BrowsingInfo> {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
@@ -45,6 +45,7 @@ class BrowsingRepository {
 				`;
 
 				const res = this.db.prepare<string>(sql).get(id);
+				res.mask = true
 				resolve(res);
 			} catch (error) {
 				reject(
@@ -219,13 +220,13 @@ class BrowsingRepository {
 		}
 	}
 
-	public async distanceAll(userCoordinate: BrowsingInfo, usersCoordinates: BrowsingInfo[]) : Promise<ReducedProfileInfo[]> {
+	public async distanceAll(userCoordinate: BrowsingInfo, usersCoordinates: BrowsingInfo[]) : Promise<BrowsingInfo[]> {
 		for (const other of usersCoordinates) {
-			other.localisation = (await this.haversineDistance(userCoordinate.latitude,
+			other.localisation = Number((await this.haversineDistance(userCoordinate.latitude,
 				userCoordinate.longitude,
 				other.latitude,
 				other.longitude
-			)).toFixed(2)
+			)).toFixed(2))
 		}
 		return usersCoordinates
 	}

@@ -40,13 +40,17 @@ export const scoreWeights = {
 
 export type BrowsingInfo = {
 	id: string;
+	userName: string;
+	biography: string;
 	gender: string;
 	fameRate: number;
+	age: number;
 	localisation: number;
     longitude: number;
     latitude:number;
 	score: number;
 	sexualPreferences: string;
+    mask: boolean;
 };
 
 export type CommonTagStats = {
@@ -54,15 +58,3 @@ export type CommonTagStats = {
     ntagsUser1: number;
     ntagsUser2: number;
 }
-
-export type ReducedProfileInfo = {
-	userName: string;
-	biography: string;
-	gender: string;
-	age: number;
-	fameRate: number;
-    longitude: number;
-    latitude:number;
-    localisation:number;
-    mask: boolean;
-};
