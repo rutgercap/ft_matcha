@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
-import type { ReducedProfileInfo } from '$lib/domain/browse';
+import type { BrowsingInfo } from '$lib/domain/browse';
 import type { PageServerLoad } from './$types';
 import { faker } from '@faker-js/faker';
 
@@ -11,20 +11,17 @@ export const load: PageServerLoad = async ({
 	}
 
 	try {
+
+		const fameStats = await browsingRepository.fameStats()
+		console.log('ICICIC', fameStats)
 		const userReducedProfile = await browsingRepository.browsingInfoFor(user.id)
 		let ids: string[] = await browsingRepository.allOtherUsers(user.id);
-		let profiles: ReducedProfileInfo[] = await Promise.all(ids.map((idObj: string) => browsingRepository.browsingInfoFor(idObj)));
+		let profiles: BrowsingInfo[] = await Promise.all(ids.map((idObj: string) => browsingRepository.browsingInfoFor(idObj)));
 		profiles = await browsingRepository.preFilter(userReducedProfile.sexual_preference, profiles)
-		profiles = await browsingRepository.fameRateAll(profiles)
+		profiles = await browsingRepository.fameRateAll(profiles, fameStats)
+		profiles = await browsingRepository.distanceAll(userReducedProfile, profiles)
 		profiles = await browsingRepository.scoreThemAll(user.id, profiles)
 		profiles = await browsingRepository.sort(profiles)
-
-		let idx = 0
-		for (const pr of profiles) {
-			pr.localisation = faker.number.int({ min: 0, max: 1000 })
-			pr.mask = true;
-			idx++
-		}
 		return { profiles };
 	} catch (error) {
 		console.error('Error loading browsing page:', error); // Log the error for debugging

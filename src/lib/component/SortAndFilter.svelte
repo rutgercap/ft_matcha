@@ -1,12 +1,13 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
+	import { tagList } from '$lib/domain/browse';
 
 	export let sortingCriteria = {
 		age: { order: 'none', range: [18, 99] },
 		localisation: { order: 'none', country: '' },
-		fameRate: { order: 'none', range: [0, 1] }
+		fameRate: { order: 'none', range: [0, 1] },
+		tags: []
 	};
-
 	export let closeComponent;
 
 	const dispatch = createEventDispatcher();
@@ -22,7 +23,8 @@
 		sortingCriteria = {
 			age: { order: 'none', range: [18, 99] },
 			localisation: { order: 'none', country: '' },
-			fameRate: { order: 'none', range: [0, 1] }
+			fameRate: { order: 'none', range: [0, 1] },
+			tags: []
 		};
 		dispatch('resetList', { sortingCriteria });
 		close();
@@ -32,6 +34,16 @@
 	const close = () => {
 		closeComponent = false;
 	};
+
+	const toggleTag = (tag, isSelected) => {
+		if (isSelected) {
+			sortingCriteria.tags = [...sortingCriteria.tags, tag];
+		} else {
+			sortingCriteria.tags = sortingCriteria.tags.filter((t) => t !== tag);
+		}
+	};
+
+
 </script>
 
 <div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
@@ -128,6 +140,22 @@
 							class="w-20 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
 						/>
 					</div>
+				</div>
+			</div>
+
+			<div class="mt-6">
+				<h3 class="text-sm font-medium text-gray-900">Exclude tags</h3>
+				<div class="mt-2 flex flex-wrap gap-2">
+					{#each tagList as tag}
+					<button
+						type="button"
+						class="px-3 py-1 rounded-full border text-sm
+						{sortingCriteria.tags.includes(tag) ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}"
+						on:click={() => toggleTag(tag, !sortingCriteria.tags.includes(tag))}
+					>
+						{tag}
+					</button>
+					{/each}
 				</div>
 			</div>
 
