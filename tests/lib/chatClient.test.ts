@@ -50,13 +50,6 @@ describe('chatClient', () => {
 		async ({ httpServer, savedUserFactory, chatRepository, authService, serverSocket }) => {
 			const [user, other] = await savedUserFactory(2);
 			const chat = await chatRepository.createChat(user.id, other.id);
-			const token = await authService.signIn(user.username, DEFAULT_PASSWORD);
-			const port = (httpServer.address() as AddressInfo).port;
-			const socket = io(`http://localhost:${port}`, {
-				auth: {
-					token: token.value
-				}
-			});
 			const chatClient = await createChatClient(user, authService, httpServer);
 
 			while (chatClient.loading) {
