@@ -78,50 +78,50 @@
 			{#if ids.length > 0}
 				{#each ids as id, index}
 					{#if filteredUsers[index].mask}
-						<li
-							class="group flex items-center space-x-4 p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-300"
-						>
-							<!-- User's Profile Picture -->
-							<img
-								src={`/api/pics/${id.id}/0`}
-								alt={id.id}
-								class="h-24 w-24 rounded-full bg-gray-200 object-cover"
-							/>
+						<a href={`/profile/${id.id}`} class="hover:underline">
+							<li
+								class="group flex items-center space-x-4 p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-300"
+							>
+								<!-- User's Profile Picture -->
+								<img
+									src={`/api/pics/${id.id}/0`}
+									alt={id.id}
+									class="h-24 w-24 rounded-full bg-gray-200 object-cover"
+								/>
 
-							<!-- User Details -->
-							<div class="flex-1">
-								<!-- Username and Gender -->
-								<h3 class="text-lg font-medium text-gray-900">
-									<a href={`/profile/${id.id}`} class="hover:underline">
+								<!-- User Details -->
+								<div class="flex-1">
+									<!-- Username and Gender -->
+									<h3 class="text-lg font-medium text-gray-900">
 										{filteredUsers[index].username}
-									</a>
-								</h3>
-								<p
-									class="text-l font-bold"
-									style="color: {filteredUsers[index].gender === 'man' ? '#0042ad' : '#ff0099'};"
-								>
-									{filteredUsers[index].gender}
-								</p>
+									</h3>
+									<p
+										class="text-l font-bold"
+										style="color: {filteredUsers[index].gender === 'man' ? '#0042ad' : '#ff0099'};"
+									>
+										{filteredUsers[index].gender}
+									</p>
 
-								<!-- Additional Details -->
-								<div class="mt-2">
-									<p class="text-sm text-gray-700">
-										<span class="font-semibold">Age:</span>
-										{filteredUsers[index].age} years
-									</p>
-									<p class="text-sm text-gray-700">
-										<span class="font-semibold">Fame Rate:</span>
-										{(filteredUsers[index].fameRate * 100).toFixed(1)}%
-									</p>
-									<p class="text-sm text-gray-700">
-										<span class="font-semibold">Localisation:</span>
-										{filteredUsers[index].localisation} km
-									</p>
+									<!-- Additional Details -->
+									<div class="mt-2">
+										<p class="text-sm text-gray-700">
+											<span class="font-semibold">Age:</span>
+											{filteredUsers[index].age} years
+										</p>
+										<p class="text-sm text-gray-700">
+											<span class="font-semibold">Fame Rate:</span>
+											{(filteredUsers[index].fameRate * 100).toFixed(1)}%
+										</p>
+										<p class="text-sm text-gray-700">
+											<span class="font-semibold">Localisation:</span>
+											{filteredUsers[index].localisation} km
+										</p>
+									</div>
 								</div>
-							</div>
-							<!-- User Biography -->
-							<p class="text-sm text-gray-500">{filteredUsers[index].biography}</p>
-						</li>
+								<!-- User Biography -->
+								<p class="text-sm text-gray-500">{filteredUsers[index].biography}</p>
+							</li>
+						</a>
 					{/if}
 				{/each}
 			{:else}
