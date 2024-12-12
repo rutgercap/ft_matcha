@@ -18,6 +18,6 @@ export const load: PageServerLoad = async ({
 		chat = await chatRepository.createChat(user.id, id);
 	}
 	return {
-		chat,
+		chat
 	};
 };

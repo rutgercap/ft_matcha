@@ -40,12 +40,14 @@ describe('chatRepository', () => {
 			id: expect.any(Number),
 			message: 'send more nudes',
 			senderId: users[0].id,
+			chatId: expect.any(Number),
 			sentAt: expect.any(Date)
 		});
 		chats = await chatRepository.chatsForUser(users[1].id);
 		latest = chats[0];
 		expect(latest.messages[0]).toStrictEqual({
 			id: expect.any(Number),
+			chatId: expect.any(Number),
 			message: 'send more nudes',
 			senderId: users[0].id,
 			sentAt: expect.any(Date)

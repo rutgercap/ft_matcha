@@ -14,6 +14,7 @@ export type ChatPreview = {
 
 export type Message = {
 	id: number;
+	chatId: number;
 	sender: string;
 	message: string;
 	sentAt: Date;

@@ -81,7 +81,7 @@ export class ChatRepository {
 									[number],
 									{ id: number; message: string; sender: string; sent_at: string }
 								>(
-									`SELECT id, sender_id, message, sent_at
+									`SELECT id, sender_id, message, sent_at, chat_id
 							FROM messages
 							WHERE chat_id = ?
 							ORDER BY sent_at DESC`

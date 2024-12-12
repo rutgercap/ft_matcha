@@ -79,7 +79,6 @@ export class ChatClient {
 	}
 
 	public chatPreviews(): ChatPreview[] {
-		this.fetchChats();
 		let previews: ChatPreview[] = [];
 		this.chats.subscribe((chats) => {
 			previews = Array.from(chats.values()).map((chat) => {
