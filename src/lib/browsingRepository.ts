@@ -1,6 +1,6 @@
 import type { Database } from 'better-sqlite3';
 import { averages, fameRatingWeights, scoreWeights } from './domain/browse';
-import type { CommonTagStats, BrowsingInfo } from './domain/browse';
+import type { CommonTagStats, BrowsingInfo, fameStats } from './domain/browse';
 import { SexualPreference } from './domain/profile';
 
 class BrowsingRepositoryError extends Error {
@@ -33,19 +33,35 @@ class BrowsingRepository {
 		});
 	}
 
-	public browsingInfoFor(id: string): Promise<BrowsingInfo> {
+	public async browsingInfoFor(id: string): Promise<BrowsingInfo> {
 		return new Promise((resolve, reject) => {
 			try {
 				const sql = `
-					SELECT u.id, u.username, p.biography, p.gender, p.age, p.sexual_preference, l.longitude, l.latitude
+					SELECT  u.id,
+							u.username,
+							p.biography,
+							p.gender,
+							p.age,
+							p.sexual_preference,
+							l.longitude,
+							l.latitude,
+							GROUP_CONCAT(t.tag) AS tags
 					FROM users AS u
 					INNER JOIN profile_info AS p ON u.id = p.user_id
 					INNER JOIN location AS l ON u.id = l.user_id
+					LEFT JOIN tags AS t ON u.id = t.user_id
 					WHERE u.id = ?
+					GROUP BY u.id
 				`;
 
 				const res = this.db.prepare<string>(sql).get(id);
 				res.mask = true
+				if (res.tags) {
+					res.tags = (res.tags as string).split(',');
+
+				} else {
+					res.tags = []
+				}
 				resolve(res);
 			} catch (error) {
 				reject(
@@ -97,8 +113,56 @@ class BrowsingRepository {
 
 	}
 
+	public async fameStats(): Promise<fameStats> {
+		try {
+			let total_user = this.db.prepare(`SELECT count(id) AS cnt FROM users`).get().cnt;
+			let total_view = this.db.prepare(`SELECT count(visited_user_id) AS cnt FROM profile_visits`).get().cnt;
+			let total_like = this.db.prepare(`SELECT count(liked_id) AS cnt FROM likes`).get().cnt;
+			let total_match = this.db.prepare(`SELECT count() AS cnt, l1.liked_id AS liked1, l1.liker_id AS liker1, l2.liked_id AS liked2, l2.liker_id AS liker2 FROM likes AS l1, likes AS l2
+				WHERE liker1 = liked2`).get().cnt;
 
-	public async fameRatingFor(userId: string): Promise<number> {
+
+			let ids = this.db.prepare(`SELECT id FROM users WHERE profile_is_setup = 1`).all()
+			ids = ids.map(v => v.id)
+
+			let view_list = await Promise.all(ids.map((idObj: string) => this.numberOfVisited(idObj)));
+			let like_list = await Promise.all(ids.map((idObj: string) => this.numberOfLiked(idObj)));
+			let match_list = await Promise.all(ids.map((idObj: string) => this.numberOfMatch(idObj)));
+
+			total_user = (total_user === 0) ? 1 : total_user;
+
+			let average_views = total_view / total_user;
+			let average_likes = total_like / total_user;
+			let average_match = total_match / total_user;
+
+
+			const view_var = view_list.reduce((sum, x) => sum + Math.pow((x - average_views), 2) / total_user, 0);
+			const like_var = like_list.reduce((sum, x) => sum + Math.pow((x - average_views), 2) / total_user, 0);
+			const match_var = match_list.reduce((sum, x) => sum + Math.pow((x - average_views), 2) / total_user, 0);
+
+			let standart_dev_views = Math.sqrt(view_var);
+			let standart_dev_likes = Math.sqrt(like_var);
+			let standart_dev_match = Math.sqrt(match_var);
+
+			let stats: fameStats = {
+				average_views: average_views,
+				average_likes: average_likes,
+				average_match: average_match,
+				standart_dev_views: standart_dev_views,
+				standart_dev_likes: standart_dev_likes,
+				standart_dev_match: standart_dev_match
+			}
+
+			return stats
+
+		} catch (e) {
+			console.log('IN THE FAME STATS FUNCTION:', e)
+			throw new BrowsingRepositoryError('an error occured trying to compute fame rate stats', e)
+		}
+
+	}
+
+	public async fameRatingFor(userId: string, stats: fameStats | null = null): Promise<number> {
 		try {
 			const views = await this.numberOfVisited(userId);
 			const likes = await this.numberOfLiked(userId);
@@ -108,11 +172,14 @@ class BrowsingRepository {
 			const b = fameRatingWeights.likes
 			const c = fameRatingWeights.match
 
-			const averageViews = averages.average_views
-			const averageLikes = averages.average_likes
-			const averageMatch = averages.average_match
+			const averageViews = (stats && stats.average_views != 0) ? stats.average_views : averages.average_views
+			const averageLikes = (stats && stats.average_likes != 0) ? stats.average_likes : averages.average_likes
+			const averageMatch = (stats && stats.average_match != 0) ? stats.average_match : averages.average_match
+			const stdViews = (stats && stats.standart_dev_views != 0) ? stats.standart_dev_views : averages.standart_dev_views
+			const stdLikes = (stats && stats.standart_dev_likes != 0) ? stats.standart_dev_likes : averages.standart_dev_likes
+			const stdMatch = (stats && stats.standart_dev_match != 0) ? stats.standart_dev_match : averages.standart_dev_match
 
-			const fameRating = a * (views / averageViews) + b * (likes / averageLikes) + c * (match / averageMatch)
+			const fameRating = a * ((views - averageViews) / stdViews) + b * ((likes - averageLikes) / stdLikes) + c * ((match - averageMatch) / stdMatch)
 			return fameRating
 		} catch (e) {
 			throw new BrowsingRepositoryError('Error occurs trying to compute fame Rating for user' + userId, e);
@@ -170,10 +237,10 @@ class BrowsingRepository {
 
 	}
 
-	public async fameRateAll(users: BrowsingInfo[]) {
+	public async fameRateAll(users: BrowsingInfo[], stats: fameStats | null = null) {
 		try {
 			for (const u of users) {
-				u.fameRate = await this.fameRatingFor(u.id)
+				u.fameRate = await this.fameRatingFor(u.id, stats)
 			}
 			return users
 		} catch (error) {

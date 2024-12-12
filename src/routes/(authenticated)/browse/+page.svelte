@@ -35,13 +35,13 @@
 	let sortingCriteria: SortingInfo = {
 		age: { order: 'none', range: [18, 99] },
 		localisation: { order: 'none', country: '' },
-		fameRate: { order: 'none', range: [0, 1] }
+		fameRate: { order: 'none', range: [0, 1] },
+		tags: []
 	};
 
 	// Apply the sorting and filtering logic
 	function applyFilters(event: CustomEvent) {
 		sortingCriteria = event.detail.sortingCriteria;
-
 		if (sortingCriteria.age.order) {
 			filteredUsers = sortByAge(filteredUsers, sortingCriteria.age.order);
 		}
@@ -57,7 +57,8 @@
 		filteredUsers = applyfilter(
 			filteredUsers,
 			sortingCriteria.age.range,
-			sortingCriteria.fameRate.range
+			sortingCriteria.fameRate.range,
+			sortingCriteria.tags
 		);
 		isFilterPopupOpen = false;
 	}

@@ -27,6 +27,7 @@ export interface SortingInfo {
 	age: AgeCriteria;
 	fameRate: FameCriteria;
 	localisation: LocalisationCriteria;
+	tags: string[];
 }
 
 function sortByAge(
@@ -96,18 +97,24 @@ function sortByLocalization(
 function applyfilter(
 	array: SortingCriteria[] | ReducedProfileInfo[],
 	ageRange: [number, number],
-	fameRange: [number, number]
+	fameRange: [number, number],
+	excludeTag: string[]
 ) {
+	const anyTag = (userTag:string[], excludeTag: string[]) => {
+
+	}
+
 	const filter = (
 		value: SortingCriteria | ReducedProfileInfo,
 		index: number,
-		array: SortingCriteria[] | ReducedProfileInfo[]
+		array: SortingCriteria[] | ReducedProfileInfo[],
 	) => {
 		if (
 			value.fameRate >= fameRange[0] &&
 			value.fameRate <= fameRange[1] &&
 			value.age >= ageRange[0] &&
-			value.age <= ageRange[1]
+			value.age <= ageRange[1] &&
+			!(value.tags.some(tag => excludeTag.includes(tag)))
 		) {
 			array[index].mask = true;
 		} else {

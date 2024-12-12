@@ -104,7 +104,6 @@
 				const response = fetch(url, {
 					method: 'POST',
 				}).then(value => {
-					console.log('location properly updated', value)
 
 				}).catch(error => {
 					console.error('Failed to post location dated:', error);

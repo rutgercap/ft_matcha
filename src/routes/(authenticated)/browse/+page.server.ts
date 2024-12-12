@@ -11,11 +11,14 @@ export const load: PageServerLoad = async ({
 	}
 
 	try {
+
+		const fameStats = await browsingRepository.fameStats()
+		console.log('ICICIC', fameStats)
 		const userReducedProfile = await browsingRepository.browsingInfoFor(user.id)
 		let ids: string[] = await browsingRepository.allOtherUsers(user.id);
 		let profiles: BrowsingInfo[] = await Promise.all(ids.map((idObj: string) => browsingRepository.browsingInfoFor(idObj)));
 		profiles = await browsingRepository.preFilter(userReducedProfile.sexual_preference, profiles)
-		profiles = await browsingRepository.fameRateAll(profiles)
+		profiles = await browsingRepository.fameRateAll(profiles, fameStats)
 		profiles = await browsingRepository.distanceAll(userReducedProfile, profiles)
 		profiles = await browsingRepository.scoreThemAll(user.id, profiles)
 		profiles = await browsingRepository.sort(profiles)

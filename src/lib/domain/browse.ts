@@ -20,22 +20,35 @@ export const tagList: string[] = ["Circuit Seductress",
                                             "Digital Deviant"
                                             ];
 
+export type fameStats = {
+    average_views:number;
+    average_likes:number;
+    average_match:number;
+    standart_dev_views:number;
+    standart_dev_likes:number;
+    standart_dev_match:number;
+
+}
+
 export const averages = {
-    'average_views':5,
-    'average_likes':1,
-    'average_match':0.5,
+    'average_views':0.5,
+    'average_likes':0.201980198019802,
+    'average_match':0.03762376237623762,
+    'standart_dev_views':0.5000000000000001,
+    'standart_dev_likes':0.5000000000000001,
+    'standart_dev_match':0.5000000000000001,
 }
 
 export const fameRatingWeights = {
     'views' : 0.2,
-    'likes' : 0.5,
-    'match' : 0.9,
+    'likes' : 0.3,
+    'match' : 0.5,
 }
 
 export const scoreWeights = {
-    'fameRating' : 0.2,
-    'tags' : 0.5,
-    'distance' : 0.9,
+    'fameRating' : 0.3,
+    'tags' : 0.3,
+    'distance' : 0.6,
 }
 
 export type BrowsingInfo = {
@@ -51,6 +64,7 @@ export type BrowsingInfo = {
 	score: number;
 	sexualPreferences: string;
     mask: boolean;
+    tags: string[];
 };
 
 export type CommonTagStats = {
