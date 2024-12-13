@@ -22,7 +22,6 @@ export async function POST({ params, locals: { user, userRepository }, getClient
 			userRepository.upsertLocation(user_id, response.location.longitude, response.location.latitude)
 
 		} else {
-			console.log('coordinate for user' + user.id, ':', longitude, latitude)
 			userRepository.upsertLocation(user_id, longitude, latitude)
 		}
 		return new Response('coordinate uploaded successfully', { status: 200 });
