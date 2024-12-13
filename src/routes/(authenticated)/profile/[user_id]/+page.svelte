@@ -5,13 +5,22 @@
 	import { Heart, Icon } from 'svelte-hero-icons';
 	import addToast from '$lib/toast/toastStore';
 	import { invalidate } from '$app/navigation';
+	import { Cog } from 'svelte-hero-icons';
+	import BlockReportUser from '$lib/component/BlockReportUser.svelte';
+
 
 	export let data: PageData;
+
+	let blockComponent = false
 
 	$: id = $page.params.user_id;
 	$: profileInfo = data.profileInfo;
 	$: isCurrentUserProfile = data.isCurrentUserProfile;
 	$: likedByCurrentUser = data.likedByCurrentUser;
+
+	function openBlockReportComponent() {
+		blockComponent = true
+	}
 
 	async function likeProfile() {
 		try {
@@ -54,6 +63,18 @@
 				>
 					<Icon class="h-5 w-5" src={Heart} solid={likedByCurrentUser} />
 				</button>
+				<button
+					type="button"
+					on:click={openBlockReportComponent}
+					class="ml-2 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+				>
+					<Icon class="h-5 w-5" src={Cog} />
+				</button>
+				{#if blockComponent}
+					<div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+						<BlockReportUser bind:blockComponent={blockComponent} />
+					</div>
+				{/if}
 			{/if}
 		</div>
 	</div>
