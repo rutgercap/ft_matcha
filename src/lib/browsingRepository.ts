@@ -55,11 +55,12 @@ class BrowsingRepository {
 				`;
 
 				const res = this.db.prepare<string>(sql).get(id);
-				res.mask = true
-				if (res.tags) {
+				if (res)
+					res.mask = true
+				if (res && res.tags) {
 					res.tags = (res.tags as string).split(',');
 
-				} else {
+				} else if (res) {
 					res.tags = []
 				}
 				resolve(res);
@@ -241,6 +242,15 @@ class BrowsingRepository {
 		try {
 			for (const u of users) {
 				u.fameRate = await this.fameRatingFor(u.id, stats)
+			}
+			const minval = users.reduce((min, u) =>
+				u.fameRate < min ? u.fameRate : min, Infinity);
+
+			const maxval = users.reduce((max, u) =>
+				u.fameRate > max ? u.fameRate : max, -Infinity);
+
+			for (const u of users) {
+				u.fameRate = (u.fameRate - minval) / (maxval - minval)
 			}
 			return users
 		} catch (error) {
