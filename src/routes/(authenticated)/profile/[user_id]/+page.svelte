@@ -11,15 +11,34 @@
 
 	export let data: PageData;
 
-	let blockComponent = false
-
+	
 	$: id = $page.params.user_id;
 	$: profileInfo = data.profileInfo;
 	$: isCurrentUserProfile = data.isCurrentUserProfile;
 	$: likedByCurrentUser = data.likedByCurrentUser;
-
+	
+	let blockComponent = false
 	function openBlockReportComponent() {
 		blockComponent = true
+	}
+	const blockUser = async () => {
+		try {
+			fetch(`/api/block/${id}`, {
+				method: 'POST'
+			}).then(async (response) => {
+				if (!response.ok) {
+				throw new Error('Failed to block user');
+				}
+				const result = await response.json();
+				blockComponent = false;
+				window.location.reload();
+			})
+			.catch((error) => {
+				console.log('Error blocking user:', error);
+			});
+		} catch (error) {
+			addToast({ message: 'Something went wrong liking profile', type: 'error' });
+		}
 	}
 
 	async function likeProfile() {
@@ -72,7 +91,9 @@
 				</button>
 				{#if blockComponent}
 					<div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
-						<BlockReportUser bind:blockComponent={blockComponent} />
+						<BlockReportUser 
+							bind:blockComponent={blockComponent} 
+							on:blockUser={blockUser}/>
 					</div>
 				{/if}
 			{/if}

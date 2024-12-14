@@ -20,9 +20,9 @@ class BrowsingRepository {
 			try {
 				const result = this.db
 					.prepare<string, { id: string }>(
-						`SELECT id
-   						FROM users
-						  WHERE id != ? AND profile_is_setup = 1`
+						`SELECT u.id
+   						FROM users AS u
+						WHERE u.id != ? AND u.profile_is_setup = 1`
 					)
 					.all(id)
 					.map((user) => user.id);
@@ -116,10 +116,10 @@ class BrowsingRepository {
 
 	public async fameStats(): Promise<fameStats> {
 		try {
-			let total_user = this.db.prepare(`SELECT count(id) AS cnt FROM users`).get().cnt;
-			let total_view = this.db.prepare(`SELECT count(visited_user_id) AS cnt FROM profile_visits`).get().cnt;
-			let total_like = this.db.prepare(`SELECT count(liked_id) AS cnt FROM likes`).get().cnt;
-			let total_match = this.db.prepare(`SELECT count() AS cnt, l1.liked_id AS liked1, l1.liker_id AS liker1, l2.liked_id AS liked2, l2.liker_id AS liker2 FROM likes AS l1, likes AS l2
+			let total_user: number = this.db.prepare(`SELECT count(id) AS cnt FROM users`).get().cnt;
+			let total_view: number = this.db.prepare(`SELECT count(visited_user_id) AS cnt FROM profile_visits`).get().cnt;
+			let total_like: number = this.db.prepare(`SELECT count(liked_id) AS cnt FROM likes`).get().cnt;
+			let total_match: number = this.db.prepare(`SELECT count() AS cnt, l1.liked_id AS liked1, l1.liker_id AS liker1, l2.liked_id AS liked2, l2.liker_id AS liker2 FROM likes AS l1, likes AS l2
 				WHERE liker1 = liked2`).get().cnt;
 
 

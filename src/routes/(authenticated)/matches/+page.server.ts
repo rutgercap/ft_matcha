@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({
-	locals: { user, connectionRepository, userRepository },
+	locals: { user, connectionRepository, userRepository, blockRepository },
 	depends
 }) => {
 	depends('app:matches');
@@ -17,9 +17,13 @@ export const load: PageServerLoad = async ({
 	let likedBy = await connectionRepository.userLikedBy(user.id);
 	likedBy = likedBy.filter((like) => !matches.some((match) => match.userTwo === like));
 	const likedByProfilePreviews = await userRepository.profilePreviews(likedBy);
+	const userblocks = await blockRepository.blocker(user.id)
+	const userblocksProfilepreview = await userRepository.profilePreviews(userblocks);
+
 	return {
 		matchPreviews,
 		likedProfilePreviews,
-		likedByProfilePreviews
+		likedByProfilePreviews,
+		userblocksProfilepreview
 	};
 };
