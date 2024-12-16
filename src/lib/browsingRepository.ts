@@ -176,11 +176,11 @@ class BrowsingRepository {
 			const averageViews = (stats && stats.average_views != 0) ? stats.average_views : averages.average_views
 			const averageLikes = (stats && stats.average_likes != 0) ? stats.average_likes : averages.average_likes
 			const averageMatch = (stats && stats.average_match != 0) ? stats.average_match : averages.average_match
-			const stdViews = (stats && stats.standart_dev_views != 0) ? stats.standart_dev_views : averages.standart_dev_views
-			const stdLikes = (stats && stats.standart_dev_likes != 0) ? stats.standart_dev_likes : averages.standart_dev_likes
-			const stdMatch = (stats && stats.standart_dev_match != 0) ? stats.standart_dev_match : averages.standart_dev_match
+			// const stdViews = (stats && stats.standart_dev_views != 0) ? stats.standart_dev_views : averages.standart_dev_views
+			// const stdLikes = (stats && stats.standart_dev_likes != 0) ? stats.standart_dev_likes : averages.standart_dev_likes
+			// const stdMatch = (stats && stats.standart_dev_match != 0) ? stats.standart_dev_match : averages.standart_dev_match
 
-			const fameRating = a * ((views - averageViews) / stdViews) + b * ((likes - averageLikes) / stdLikes) + c * ((match - averageMatch) / stdMatch)
+			const fameRating = a * (views / averageViews) + b * (likes / averageLikes) + c * (match / averageMatch)
 			return fameRating
 		} catch (e) {
 			throw new BrowsingRepositoryError('Error occurs trying to compute fame Rating for user' + userId, e);
@@ -233,8 +233,9 @@ class BrowsingRepository {
 		const tagStat = commonTags.commonTag / (commonTags.ntagsUser1 + commonTags.ntagsUser2)
 
 		const dist = distance // TODO update for distance metric to be relevant
+		const res = Number(((fameWeight * fameRate) + (tagStat * commonTagWeight) + (1/(1+dist) * distWeight)).toFixed(4))
 
-		return Number(((fameWeight * fameRate) + (tagStat * commonTagWeight) + (1/(1+dist) * distWeight)).toFixed(4))
+		return res
 
 	}
 

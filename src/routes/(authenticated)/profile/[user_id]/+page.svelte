@@ -11,12 +11,12 @@
 
 	export let data: PageData;
 
-	
+
 	$: id = $page.params.user_id;
 	$: profileInfo = data.profileInfo;
 	$: isCurrentUserProfile = data.isCurrentUserProfile;
 	$: likedByCurrentUser = data.likedByCurrentUser;
-	
+
 	let blockComponent = false
 	function openBlockReportComponent() {
 		blockComponent = true
@@ -39,6 +39,11 @@
 		} catch (error) {
 			addToast({ message: 'Something went wrong liking profile', type: 'error' });
 		}
+	}
+
+	const reportUser = async (username:string) => {
+		blockComponent = false;
+		addToast({ message: username + ' has been reported to the headquarters and will face justice any soon', type: 'success' })
 	}
 
 	async function likeProfile() {
@@ -91,9 +96,10 @@
 				</button>
 				{#if blockComponent}
 					<div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
-						<BlockReportUser 
-							bind:blockComponent={blockComponent} 
-							on:blockUser={blockUser}/>
+						<BlockReportUser
+							bind:blockComponent={blockComponent}
+							on:blockUser={blockUser}
+							on:reportUser={() => reportUser(profileInfo.firstName)}/>
 					</div>
 				{/if}
 			{/if}

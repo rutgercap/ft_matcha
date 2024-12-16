@@ -22,7 +22,7 @@ down :
 	${DOCKER} down
 
 test :
-	${DOCKER} exec matcha pnpm run test:unit 
+	${DOCKER} exec matcha pnpm run test:unit
 
 
 prune : down

@@ -6,12 +6,10 @@
 
 	const handleBlock = () => {
 		dispatch('blockUser'); // Emit an event to notify the parent that the user is being blocked
-		console.log('Block button clicked');
 	};
 
 	const handleReport = () => {
 		dispatch('reportUser'); // Emit an event to notify the parent that the user is being reported
-		console.log('Report button clicked');
 	};
 
 	const handleClose = () => {

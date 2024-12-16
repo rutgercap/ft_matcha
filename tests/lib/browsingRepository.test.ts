@@ -262,9 +262,12 @@ describe('BrowsingRepository', () => {
 			querylikes.run(o.id, user2.id);// everyone liked user2
 		}
 
+		const distance = 25
+		const distance2 = 25
+		const score = await browsingRepository.scoring(user.id, user2.id, distance);
+		const score2 = await browsingRepository.scoring(user2.id, user.id, distance2);
 
-		const score = await browsingRepository.scoring(user.id, user2.id);
-		const score2 = await browsingRepository.scoring(user2.id, user.id);
+		console.log('---- > score1 score2', score, score2)
 
 		const test = score > 0 ? true : false
 		expect(test).toBe(true)
