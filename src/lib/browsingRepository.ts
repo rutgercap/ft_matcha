@@ -20,9 +20,9 @@ class BrowsingRepository {
 			try {
 				const result = this.db
 					.prepare<string, { id: string }>(
-						`SELECT id
-   						FROM users
-						  WHERE id != ? AND profile_is_setup = 1`
+						`SELECT u.id
+   						FROM users AS u
+						WHERE u.id != ? AND u.profile_is_setup = 1`
 					)
 					.all(id)
 					.map((user) => user.id);
@@ -116,10 +116,10 @@ class BrowsingRepository {
 
 	public async fameStats(): Promise<fameStats> {
 		try {
-			let total_user = this.db.prepare(`SELECT count(id) AS cnt FROM users`).get().cnt;
-			let total_view = this.db.prepare(`SELECT count(visited_user_id) AS cnt FROM profile_visits`).get().cnt;
-			let total_like = this.db.prepare(`SELECT count(liked_id) AS cnt FROM likes`).get().cnt;
-			let total_match = this.db.prepare(`SELECT count() AS cnt, l1.liked_id AS liked1, l1.liker_id AS liker1, l2.liked_id AS liked2, l2.liker_id AS liker2 FROM likes AS l1, likes AS l2
+			let total_user: number = this.db.prepare(`SELECT count(id) AS cnt FROM users`).get().cnt;
+			let total_view: number = this.db.prepare(`SELECT count(visited_user_id) AS cnt FROM profile_visits`).get().cnt;
+			let total_like: number = this.db.prepare(`SELECT count(liked_id) AS cnt FROM likes`).get().cnt;
+			let total_match: number = this.db.prepare(`SELECT count() AS cnt, l1.liked_id AS liked1, l1.liker_id AS liker1, l2.liked_id AS liked2, l2.liker_id AS liker2 FROM likes AS l1, likes AS l2
 				WHERE liker1 = liked2`).get().cnt;
 
 
@@ -176,11 +176,11 @@ class BrowsingRepository {
 			const averageViews = (stats && stats.average_views != 0) ? stats.average_views : averages.average_views
 			const averageLikes = (stats && stats.average_likes != 0) ? stats.average_likes : averages.average_likes
 			const averageMatch = (stats && stats.average_match != 0) ? stats.average_match : averages.average_match
-			const stdViews = (stats && stats.standart_dev_views != 0) ? stats.standart_dev_views : averages.standart_dev_views
-			const stdLikes = (stats && stats.standart_dev_likes != 0) ? stats.standart_dev_likes : averages.standart_dev_likes
-			const stdMatch = (stats && stats.standart_dev_match != 0) ? stats.standart_dev_match : averages.standart_dev_match
+			// const stdViews = (stats && stats.standart_dev_views != 0) ? stats.standart_dev_views : averages.standart_dev_views
+			// const stdLikes = (stats && stats.standart_dev_likes != 0) ? stats.standart_dev_likes : averages.standart_dev_likes
+			// const stdMatch = (stats && stats.standart_dev_match != 0) ? stats.standart_dev_match : averages.standart_dev_match
 
-			const fameRating = a * ((views - averageViews) / stdViews) + b * ((likes - averageLikes) / stdLikes) + c * ((match - averageMatch) / stdMatch)
+			const fameRating = a * (views / averageViews) + b * (likes / averageLikes) + c * (match / averageMatch)
 			return fameRating
 		} catch (e) {
 			throw new BrowsingRepositoryError('Error occurs trying to compute fame Rating for user' + userId, e);
@@ -233,8 +233,9 @@ class BrowsingRepository {
 		const tagStat = commonTags.commonTag / (commonTags.ntagsUser1 + commonTags.ntagsUser2)
 
 		const dist = distance // TODO update for distance metric to be relevant
+		const res = Number(((fameWeight * fameRate) + (tagStat * commonTagWeight) + (1/(1+dist) * distWeight)).toFixed(4))
 
-		return Number(((fameWeight * fameRate) + (tagStat * commonTagWeight) + (1/(1+dist) * distWeight)).toFixed(4))
+		return res
 
 	}
 

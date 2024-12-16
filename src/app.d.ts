@@ -5,6 +5,7 @@ import type { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import type { BrowsingRepository } from '$lib/browsingRepository';
 import type { ConnectionRepository } from '$lib/server/connectionRepository';
 import type { AuthService } from '$lib/server/authService';
+import type { BlockRepository } from '$lib/blockRepository';
 
 declare global {
 	namespace App {
@@ -17,6 +18,7 @@ declare global {
 			profileVisitRepository: ProfileVisitRepository;
 			browsingRepository: BrowsingRepository;
 			connectionRepository: ConnectionRepository;
+			blockRepository: BlockRepository;
 			authService: AuthService;
 		}
 		// interface PageData {}

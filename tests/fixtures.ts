@@ -30,6 +30,7 @@ import { adapter, createLuciaInstance } from '$lib/auth';
 import { WebsocketServer } from '../vite.config';
 import { ServerSocket } from '$lib/server/serverSocket';
 import { BrowsingRepository } from '$lib/browsingRepository';
+import { BlockRepository } from '$lib/blockRepository';
 
 interface MyFixtures {
 	db: DatabaseType;
@@ -37,8 +38,11 @@ interface MyFixtures {
 	imageRepository: ImageRepositoryType;
 	savedUser: UserWithoutProfileSetup;
 	profileVisitRepository: ProfileVisitRepository;
+	browsingRepository: BrowsingRepository;
+	blockRepository: BlockRepository;
 	savedUserFactory: (n: number, overrides?: Partial<User>) => Promise<UserWithoutProfileSetup[]>;
 	image: Buffer;
+	image2: Buffer;
 	connectionRepository: ConnectionRepository;
 	serverSocket: ServerSocket;
 	clientSocket: ClientSocket;
@@ -77,6 +81,10 @@ export const itWithFixtures = it.extend<MyFixtures>({
 
 	browsingRepository : async({ db }, use) => {
 		await use(new BrowsingRepository(db))
+	},
+
+	blockRepository: async({ db }, use) => {
+		await use(new BlockRepository(db))
 	},
 
 	savedUserFactory: async ({ userRepository }, use) => {

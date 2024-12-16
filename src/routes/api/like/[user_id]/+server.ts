@@ -13,6 +13,6 @@ export async function POST({ params, locals: { user: currentUser, connectionRepo
 		return new Response(JSON.stringify({ isLiked }), { status: 200 });
 	} catch (error) {
 		console.error(error);
-		return new Response('Error processing image', { status: 500 });
+		return new Response('Error while liking user', { status: 500 });
 	}
 }

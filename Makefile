@@ -22,7 +22,7 @@ down :
 	${DOCKER} down
 
 test :
-	${DOCKER} exec matcha pnpm run test:unit /usr/src/app/tests/lib/userRepository.test.ts
+	${DOCKER} exec matcha pnpm run test:unit
 
 
 prune : down

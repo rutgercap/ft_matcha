@@ -12,6 +12,7 @@ import { AuthService } from '$lib/server/authService';
 import { NotificationService } from '$lib/server/notificationService';
 import { sequence } from '@sveltejs/kit/hooks';
 import { getServerSocket } from '$lib/server/serverSocket';
+import { BlockRepository } from '$lib/blockRepository';
 
 const authHandle: Handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
@@ -52,6 +53,7 @@ export const dependencyHandle: Handle = async ({ event, resolve }) => {
 	event.locals.browsingRepository = new BrowsingRepository(db);
 
 	event.locals.connectionRepository = new ConnectionRepository(db, notificationService);
+	event.locals.blockRepository = new BlockRepository(db)
 	event.locals.authService = new AuthService(event.locals.userRepository, lucia);
 	return resolve(event);
 };

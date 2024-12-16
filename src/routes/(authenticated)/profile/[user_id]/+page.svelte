@@ -5,13 +5,46 @@
 	import { Heart, Icon } from 'svelte-hero-icons';
 	import addToast from '$lib/toast/toastStore';
 	import { invalidate } from '$app/navigation';
+	import { Cog } from 'svelte-hero-icons';
+	import BlockReportUser from '$lib/component/BlockReportUser.svelte';
+
 
 	export let data: PageData;
+
 
 	$: id = $page.params.user_id;
 	$: profileInfo = data.profileInfo;
 	$: isCurrentUserProfile = data.isCurrentUserProfile;
 	$: likedByCurrentUser = data.likedByCurrentUser;
+
+	let blockComponent = false
+	function openBlockReportComponent() {
+		blockComponent = true
+	}
+	const blockUser = async () => {
+		try {
+			fetch(`/api/block/${id}`, {
+				method: 'POST'
+			}).then(async (response) => {
+				if (!response.ok) {
+				throw new Error('Failed to block user');
+				}
+				const result = await response.json();
+				blockComponent = false;
+				window.location.reload();
+			})
+			.catch((error) => {
+				console.log('Error blocking user:', error);
+			});
+		} catch (error) {
+			addToast({ message: 'Something went wrong liking profile', type: 'error' });
+		}
+	}
+
+	const reportUser = async (username:string) => {
+		blockComponent = false;
+		addToast({ message: username + ' has been reported to the headquarters and will face justice any soon', type: 'success' })
+	}
 
 	async function likeProfile() {
 		try {
@@ -54,6 +87,21 @@
 				>
 					<Icon class="h-5 w-5" src={Heart} solid={likedByCurrentUser} />
 				</button>
+				<button
+					type="button"
+					on:click={openBlockReportComponent}
+					class="ml-2 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+				>
+					<Icon class="h-5 w-5" src={Cog} />
+				</button>
+				{#if blockComponent}
+					<div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+						<BlockReportUser
+							bind:blockComponent={blockComponent}
+							on:blockUser={blockUser}
+							on:reportUser={() => reportUser(profileInfo.firstName)}/>
+					</div>
+				{/if}
 			{/if}
 		</div>
 	</div>
