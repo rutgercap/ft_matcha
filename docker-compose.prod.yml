@@ -1,0 +1,13 @@
+services:
+  matcha:
+    image: matcha-sveltkit-prod
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: Dockerfile.prod
+    container_name: matcha-sveltkit-prod
+    ports:
+      - 8080:8080
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
