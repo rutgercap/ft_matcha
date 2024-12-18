@@ -1,0 +1,50 @@
+# Development Stage
+FROM node:20 AS development
+ENV NODE_ENV=development
+ENV PUBLIC_BASE_URL=http://localhost:3000
+
+# Set the working directory for your app inside the container
+WORKDIR /usr/src/app
+
+# Install pnpm globally for package management
+RUN npm install -g pnpm
+
+# Copy package.json and pnpm-lock.yaml (this will be used to install dependencies)
+COPY package.json pnpm-lock.yaml ./
+
+# Install all dependencies, including dev dependencies
+RUN pnpm install
+
+
+# Copy the rest of the application files
+COPY . .
+RUN pnpm run db:migrate
+
+# Build the application (this will include dev dependencies)
+RUN pnpm run build
+
+# Production Stage
+FROM node:20 AS production
+ENV NODE_ENV=production
+ENV PORT=8080
+ENV PUBLIC_BASE_URL=http://127.0.0.1:8080
+ENV ORIGIN=http://127.0.0.1:8080
+# Set the working directory for your app inside the container
+WORKDIR /usr/src/app
+
+# Copy only the necessary production files from the previous stage (development stage)
+COPY --from=development /usr/src/app/build /usr/src/app/build
+COPY --from=development /usr/src/app/node_modules /usr/src/app/node_modules
+COPY package.json ./
+
+RUN npm install -g pnpm
+RUN pnpm install --prod
+
+
+# Expose the application port
+EXPOSE 8080
+
+# Define the entrypoint for the container
+ENTRYPOINT ["node", "build"]
+
+
