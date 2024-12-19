@@ -25,3 +25,4 @@ services:
       - ./database:/data
     environment:
       - SQLITE_DATABASE=/data/database.db
+      - PORT=8080
