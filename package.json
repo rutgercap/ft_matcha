@@ -14,8 +14,9 @@
 		"test:integration": "playwright test",
 		"test:unit": "vitest --run",
 		"db:reset": "tsx src/lib/database/reset.ts",
-		"db:migrate": "tsx src/lib/database/migrateUp.ts",
-		"script:fake_users": "tsx src/lib/scripts/fake_users.ts"
+		"db:migrate": "tsx src/lib/database/migrateUp.ts --verbose",
+		"script:fake_users": "tsx src/lib/scripts/fake_users.ts",
+		"script:prod_socket_server": "node ./prod-socket-server"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^9.2.0",
@@ -67,7 +68,8 @@
 		"socket.io": "^4.8.1",
 		"socket.io-client": "^4.8.1",
 		"svelte-hero-icons": "^5.2.0",
-		"uuid": "^10.0.0"
+		"uuid": "^10.0.0",
+		"express": "^4.18.2"
 	},
 	"engines": {
 		"node": ">=20.0.0"
