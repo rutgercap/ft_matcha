@@ -5,9 +5,26 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.prod
+    env_file:
+      - .env
     container_name: matcha-sveltkit-prod
     ports:
       - 8080:8080
     volumes:
-      - ./:/usr/src/app
+      - ./database:/usr/src/app/database
+      - ./profile-pictures:/usr/src/app/profile-pictures
       - /usr/src/app/node_modules
+  db_viz:
+    image: sqlite-web
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: Dockerfile.db-viz
+    container_name: sqlite-web
+    ports:
+      - 4565:4565
+    volumes:
+      - ./database:/data
+    environment:
+      - SQLITE_DATABASE=/data/database.db
+      - PORT=4565
