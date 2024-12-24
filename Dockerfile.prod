@@ -1,7 +1,7 @@
 # Development Stage
 FROM node:20 AS development
 ENV NODE_ENV=development
-ENV PUBLIC_BASE_URL=http://127.0.0.1:8080
+ENV PUBLIC_BASE_URL=http://127.0.0.1:3000
 
 # Set the working directory for your app inside the container
 WORKDIR /usr/src/app
@@ -24,10 +24,7 @@ RUN set -x && pnpm run db:migrate
 FROM node:20 AS production
 
 ENV NODE_ENV=production
-# ENV PORT=8080
-# ENV PUBLIC_BASE_URL=http://127.0.0.1:8080
-# ENV ORIGIN=http://127.0.0.1:8080
-# ENV BODY_SIZE_LIMIT=1M
+
 # Set the working directory for your app inside the container
 WORKDIR /usr/src/app
 
@@ -49,7 +46,7 @@ RUN pnpm install --prod
 
 
 # Expose the application port
-EXPOSE 8080
+EXPOSE 3000
 
 # Define the entrypoint for the container
 ENTRYPOINT ["/usr/src/app/entrypoint.prod.sh"]

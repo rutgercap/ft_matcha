@@ -4,7 +4,7 @@ import http from 'http';
 import express from 'express';
 import { handler } from '../build/handler.js';
 
-const port = 8080
+const port = 3000
 const app = express();
 const server = http.createServer(app);
 
@@ -96,5 +96,5 @@ authMiddleWare()
 app.use(handler);
 
 server.listen(port, () => {
-    console.log('Running on http://127.0.0.1:8080');
+    console.log(`Running on http://127.0.0.1:${port}`);
 });
