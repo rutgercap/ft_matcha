@@ -32,7 +32,7 @@ test :
 	${DOCKER_DEV} exec matcha pnpm run test:unit
 
 
-prune : down
+prune : down_dev down_prod
 	docker system prune -a --volumes -f
 
 db-clean :
