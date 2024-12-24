@@ -34,3 +34,8 @@ tests/lib/pictures-repo-test/*
 # dependencies
 node_modules/
 .pnpm-store/
+
+# ssl-certif
+
+*.key
+*.crt

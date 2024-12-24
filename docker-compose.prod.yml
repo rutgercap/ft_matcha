@@ -1,4 +1,20 @@
 services:
+  nginx:
+    image: nginx
+    build:
+      context: ./
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+      # - ./private.key:/etc/nginx/ssl/private.key
+      # - ./ssl-certif.crt:/etc/nginx/ssl/ssl-certif.crt
+    depends_on:
+      - matcha  # Ensures server starts before nginx
+    networks:
+      - app-network
+
   matcha:
     image: matcha-sveltkit-prod
     restart: on-failure
@@ -8,12 +24,15 @@ services:
     env_file:
       - .env
     container_name: matcha-sveltkit-prod
-    ports:
-      - 8080:8080
+    # ports:
+    #   - 3000:3000
     volumes:
       - ./database:/usr/src/app/database
       - ./profile-pictures:/usr/src/app/profile-pictures
       - /usr/src/app/node_modules
+    networks:
+      - app-network
+
   db_viz:
     image: sqlite-web
     restart: on-failure
@@ -28,3 +47,7 @@ services:
     environment:
       - SQLITE_DATABASE=/data/database.db
       - PORT=4565
+
+networks:
+  app-network:
+    driver: bridge
