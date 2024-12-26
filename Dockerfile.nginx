@@ -1,7 +1,7 @@
 FROM	nginx:latest
 
-# COPY	./private.key /etc/nginx/ssl/private.key
-# COPY	./ssl-certif.crt /etc/nginx/ssl/ssl-certif.crt
+COPY	./private.key /etc/nginx/ssl/private.key
+COPY	./ssl-certif.crt /etc/nginx/ssl/ssl-certif.crt
 COPY	./default.conf /etc/nginx/conf.d/.
 
 EXPOSE 8080

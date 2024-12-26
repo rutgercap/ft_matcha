@@ -1,8 +1,6 @@
 # Development Stage
 FROM node:20 AS development
 ENV NODE_ENV=development
-ENV PUBLIC_BASE_URL=http://127.0.0.1:3000
-
 # Set the working directory for your app inside the container
 WORKDIR /usr/src/app
 
@@ -22,8 +20,14 @@ RUN set -x && pnpm run db:migrate
 
 # Production Stage
 FROM node:20 AS production
+ARG SVELTE_PORT
+ARG PUBLIC_BASE_URL
+ARG ORIGIN
 
 ENV NODE_ENV=production
+ENV PORT=${SVELTE_PORT}
+ENV PUBLIC_BASE_URL=${PUBLIC_BASE_URL}
+ENV ORIGIN=${ORIGIN}
 
 # Set the working directory for your app inside the container
 WORKDIR /usr/src/app
@@ -43,10 +47,11 @@ COPY .env /usr/src/app/.env
 
 RUN npm install -g pnpm
 RUN pnpm install --prod
+RUN pnpm add dotenv
 
 
 # Expose the application port
-EXPOSE 3000
+EXPOSE $PORT
 
 # Define the entrypoint for the container
 ENTRYPOINT ["/usr/src/app/entrypoint.prod.sh"]

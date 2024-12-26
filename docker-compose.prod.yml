@@ -15,6 +15,7 @@ services:
     networks:
       - app-network
 
+
   matcha:
     image: matcha-sveltkit-prod
     restart: on-failure
@@ -24,8 +25,6 @@ services:
     env_file:
       - .env
     container_name: matcha-sveltkit-prod
-    # ports:
-    #   - 3000:3000
     volumes:
       - ./database:/usr/src/app/database
       - ./profile-pictures:/usr/src/app/profile-pictures
