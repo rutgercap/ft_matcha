@@ -49,6 +49,7 @@ export class WebsocketServer {
 			if (!session) {
 				return;
 			}
+			console.log('in socket server ', user, 'just connected')
 			this.connections.set(user.id, socket);
 			this.sessionTokenToUserId.set(token, user.id);
 			socket.on('disconnect', () => {
@@ -69,6 +70,7 @@ export class WebsocketServer {
 			this.svelteKitServerSocket = null;
 		});
 		socket.on('redirect', ({ to, eventName, content }) => {
+			console.log('redirect socket event has been emit')
 			this.sendMessageToUser(to, eventName, content);
 		});
 		this.svelteKitServerSocket.emit('connected', { id: this.id });
@@ -88,6 +90,7 @@ export class WebsocketServer {
 					return;
 				}
 				connection.emit(eventName, content);
+				console.log('just emitted a message: ', eventName, content)
 			})
 			.catch((error) => {
 				console.error('Error validating session:', error);

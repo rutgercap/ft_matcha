@@ -244,14 +244,20 @@ class BrowsingRepository {
 			for (const u of users) {
 				u.fameRate = await this.fameRatingFor(u.id, stats)
 			}
-			const minval = users.reduce((min, u) =>
+			let minval = users.reduce((min, u) =>
 				u.fameRate < min ? u.fameRate : min, Infinity);
 
 			const maxval = users.reduce((max, u) =>
 				u.fameRate > max ? u.fameRate : max, -Infinity);
 
-			for (const u of users) {
-				u.fameRate = (u.fameRate - minval) / (maxval - minval)
+			if (maxval == minval) {
+				minval = 0
+			}
+
+			if ((maxval - minval) != 0) {
+				for (const u of users) {
+					u.fameRate = (u.fameRate - minval) / (maxval - minval)
+				}
 			}
 			return users
 		} catch (error) {

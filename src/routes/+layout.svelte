@@ -35,7 +35,6 @@
 	let notificationSubscription: number | null = null;
 	$: {
 		if (data.session && $notificationClientStore === null) {
-			console.log('IN THE CONNECTION:', $page.url.origin);
 			const socket = io($page.url.origin, {
 				auth: {
 					token: data.session.id
