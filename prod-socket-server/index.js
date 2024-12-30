@@ -9,7 +9,11 @@ const app = express();
 const server = http.createServer(app);
 
 // Inject SocketIO
-const io = new Server(server)
+const io = new Server(server,{
+	cors: {
+	  origin: "*"
+	}});
+
 let svelteKitServerSocket
 const server_id = Math.floor(Math.random() * 1000000);
 let connections = new Map();
@@ -90,11 +94,16 @@ function authMiddleWare() {
 		});
 	});
 }
-authMiddleWare()
+
+try {
+	authMiddleWare()
+} catch (e) {
+	console.log('error setting the socket server:', error)
+}
 
 // SvelteKit handlers
 app.use(handler);
 
 server.listen(port, () => {
-    console.log(`Running on http://127.0.0.1:${port}`);
+    console.log(`Node Server up on port: ${port}`);
 });

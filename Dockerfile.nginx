@@ -1,9 +1,14 @@
 FROM	nginx:latest
 
+
+ARG NGINX_PORT
+ENV PORT=${NGINX_PORT}
+
+
 COPY	./private.key /etc/nginx/ssl/private.key
 COPY	./ssl-certif.crt /etc/nginx/ssl/ssl-certif.crt
 COPY	./default.conf /etc/nginx/conf.d/.
 
-EXPOSE 8080
+EXPOSE $PORT
 
 ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
