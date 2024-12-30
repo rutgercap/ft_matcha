@@ -41,8 +41,9 @@ export class NotificationClient {
 	}
 
 	private onConnectionError() {
-		this.client.on('connect_error', (error) => {
-			console.error('connection error: ' + error);
+		this.client.on('connect_error', (err) => {
+			console.log('err.message: ', err.message);
+
 		});
 	}
 
@@ -60,3 +61,4 @@ export class NotificationClient {
 		this.listeners.delete(id);
 	}
 }
+

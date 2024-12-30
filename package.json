@@ -16,7 +16,7 @@
 		"db:reset": "tsx src/lib/database/reset.ts",
 		"db:migrate": "tsx src/lib/database/migrateUp.ts --verbose",
 		"script:fake_users": "tsx src/lib/scripts/fake_users.ts",
-		"script:prod_socket_server": "ORIGIN=https://127.0.0.1:8080 node --env-file=.env ./prod-socket-server"
+		"script:prod_socket_server": "node --env-file=.env ./prod-socket-server"
 
 },
 	"devDependencies": {
