@@ -4,7 +4,7 @@ import { ImageRepository } from '$lib/imageRepository';
 import { EmailRepository, getTransporter } from '$lib/emailRepository';
 import { type Handle } from '@sveltejs/kit';
 import { lucia } from '$lib/auth';
-import { IMAGE_FOLDER } from '$env/static/private';
+import { IMAGE_FOLDER, INTERNAL_URL } from '$env/static/private';
 import { ProfileVisitRepository } from '$lib/profileVisitRepository';
 import { BrowsingRepository } from '$lib/browsingRepository';
 import { ConnectionRepository } from '$lib/server/connectionRepository';
@@ -45,7 +45,8 @@ const authHandle: Handle = async ({ event, resolve }) => {
 export const dependencyHandle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
 	const transporter = getTransporter();
-	const socket = getServerSocket(event.url.origin);
+	const socket = getServerSocket('http://localhost:3000');
+	// const socket = getServerSocket(INTERNAL_URL);
 	const imageRepo = new ImageRepository(IMAGE_FOLDER, db);
 	const notificationService = new NotificationService(socket);
 	event.locals.userRepository = new UserRepository(db, imageRepo);

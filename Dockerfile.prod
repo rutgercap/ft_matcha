@@ -23,12 +23,13 @@ FROM node:20 AS production
 ARG SVELTE_PORT
 ARG PUBLIC_BASE_URL
 ARG ORIGIN
+ARG INTERNAL_URL
 
 ENV NODE_ENV=production
 ENV PORT=${SVELTE_PORT}
 ENV PUBLIC_BASE_URL=${PUBLIC_BASE_URL}
 ENV ORIGIN=${ORIGIN}
-
+ENV INTERNAL_URL=${INTERNAL_URL}
 # Set the working directory for your app inside the container
 WORKDIR /usr/src/app
 

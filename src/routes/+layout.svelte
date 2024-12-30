@@ -37,7 +37,6 @@
 	let notificationSubscription: number | null = null;
 	$: {
 		if (data.session && $notificationClientStore === null) {
-			console.log('IN THE CONNECTION:', $page.url.origin);
 			const socket = io($page.url.origin, {
 				auth: {
 					token: data.session.id
@@ -50,32 +49,7 @@
 					addToast(notificationToToast(notification));
 				});
 			}
-		});
-		const notificationClient = new NotificationClient(socket);
-
-		const notificationSubscription = notificationClient.subscribe((notification: Notification) => {
-			addToast(notificationToToast(notification));
-		});
-
-		notificationClientStore.set({
-			client: notificationClient,
-			subscription: notificationSubscription
-		});
-		const chatClient = new ChatClient(socket, user.id);
-
-		chatClientStore.set(chatClient);
-	} else {
-		// User logged out, cleanup
-		notificationClientStore.update((state) => {
-			// Cleanup existing subscription if any
-			if (state.subscription) {
-				state.client?.unsubscribe(state.subscription);
-			}
-			return {
-				client: null,
-				subscription: null
-			};
-		});
+		}
 	}
 
 	onDestroy(() => {
