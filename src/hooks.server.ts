@@ -44,8 +44,8 @@ const authHandle: Handle = async ({ event, resolve }) => {
 export const dependencyHandle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
 	const transporter = getTransporter();
-	// const socket = getServerSocket('http://localhost:3000');
-	const socket = getServerSocket(INTERNAL_URL);
+	const socket = getServerSocket('http://localhost:3000');
+	// const socket = getServerSocket(INTERNAL_URL);
 	const imageRepo = new ImageRepository(IMAGE_FOLDER, db);
 	const notificationService = new NotificationService(socket);
 	event.locals.userRepository = new UserRepository(db, imageRepo);

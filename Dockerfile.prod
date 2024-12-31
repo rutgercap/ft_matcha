@@ -16,7 +16,7 @@ COPY . .
 RUN pnpm run build
 
 RUN set -x && pnpm run db:migrate
-
+RUN pnpm run script:fake_users --num=15
 
 # Production Stage
 FROM node:20 AS production

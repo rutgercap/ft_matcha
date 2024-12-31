@@ -25,6 +25,8 @@
 	import { io } from 'socket.io-client';
 	import addToast from '$lib/toast/toastStore';
 	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
+
 
 	$: url = $page.url.pathname;
 
@@ -49,6 +51,7 @@
 			}
 		}
 	}
+
 
 	onDestroy(() => {
 		if (notificationSubscription !== null) {
