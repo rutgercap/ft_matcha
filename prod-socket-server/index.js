@@ -33,7 +33,6 @@ function sendMessageToUser(id, eventName, content) {
 				return;
 			}
 			connection.emit(eventName, content);
-			console.log('just emitted a message: ', eventName, content)
 		})
 		.catch((error) => {
 			console.error('Error validating session:', error);
@@ -43,11 +42,9 @@ function sendMessageToUser(id, eventName, content) {
 function setupServerSocket(socket) {
 	svelteKitServerSocket = socket;
 	socket.on('disconnect', () => {
-		// console.warn('Server socket disconnected');
 		svelteKitServerSocket = null;
 	});
 	socket.on('redirect', ({ to, eventName, content }) => {
-		console.log('redirect socket event has been emit')
 		sendMessageToUser(to, eventName, content);
 	});
 	svelteKitServerSocket.emit('connected', { id: server_id });
@@ -80,7 +77,7 @@ function authMiddleWare() {
 			return;
 		}
 		const { session, user } = await l.validateSession(token);
-		console.log('in socket server ', user, 'just connected')
+
 		if (!session) {
 			return;
 		}

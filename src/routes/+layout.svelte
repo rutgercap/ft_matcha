@@ -25,8 +25,8 @@
 	import { io } from 'socket.io-client';
 	import addToast from '$lib/toast/toastStore';
 	import { onDestroy } from 'svelte';
-	import { ChatClient } from '$lib/chatClient';
 	import { chatClientStore } from '$lib/stores/chatClientStore';
+
 
 	$: url = $page.url.pathname;
 
@@ -51,6 +51,7 @@
 			}
 		}
 	}
+
 
 	onDestroy(() => {
 		notificationClientStore.update((state) => {
