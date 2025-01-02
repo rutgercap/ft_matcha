@@ -34,6 +34,7 @@ test :
 
 
 prune : down_dev down_prod
+	rm -rf build/*
 	docker system prune -a --volumes -f
 
 db-clean :
@@ -41,3 +42,4 @@ db-clean :
 	rm -rf ${DB_PATH}/migrations.lock
 	find ./profile-pictures -type f ! -name "default*" -delete
 
+fclean : db-clean prune

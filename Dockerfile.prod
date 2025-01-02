@@ -3,11 +3,11 @@ FROM node:20 AS development
 ENV NODE_ENV=development
 # Set the working directory for your app inside the container
 WORKDIR /usr/src/app
-
 # Install pnpm globally for package management
 RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
+RUN pnpm add dotenv
 
 # Copy the rest of the application files
 COPY . .
@@ -16,7 +16,7 @@ COPY . .
 RUN pnpm run build
 
 RUN set -x && pnpm run db:migrate
-RUN pnpm run script:fake_users --num=15
+RUN pnpm run script:fake_users
 
 # Production Stage
 FROM node:20 AS production
@@ -34,11 +34,11 @@ ENV INTERNAL_URL=${INTERNAL_URL}
 WORKDIR /usr/src/app
 
 # Copy only the necessary production files from the previous stage (development stage)
-COPY --from=development /usr/src/app/build /usr/src/app/build
+COPY --from=development /usr/src/app/build /usr/src/app/build-init
 COPY --from=development /usr/src/app/prod-socket-server /usr/src/app/prod-socket-server
 COPY --from=development /usr/src/app/database /usr/src/app/database-init
 COPY --from=development /usr/src/app/static/default_profile_picture.jpg /usr/src/app/static/default_profile_picture.jpg
-COPY --from=development /usr/src/app/profile-pictures /usr/src/app/static/profile-pictures
+COPY --from=development /usr/src/app/profile-pictures /usr/src/app/profile-pictures-init
 COPY --from=development /usr/src/app/node_modules /usr/src/app/node_modules
 
 COPY package.json ./

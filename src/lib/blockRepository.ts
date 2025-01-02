@@ -78,7 +78,19 @@ class BlockRepository {
 		}
 	}
 
-	public async isBlockedOrBlocker(userId1: string, userId2: string): Promise<Boolean> {
+	public async deleteConnection(blockerId:string, blockedId:string): Promise<void> {
+		try {
+			const sql = `DELETE FROM connections WHERE user_id_1 = ? AND user_id_2 = ?`;
+			const query = this.db.prepare<[string, string]>(sql)
+			query.run(blockerId, blockedId);
+			query.run(blockedId, blockerId);
+		} catch (e) {
+			throw new BlockRepositoryError(`Error occurs trying delete connection between blocker: ${blockerId}, blocked: ${blockedId}`, e)
+		}
+	}
+
+	public async isBlockedOrBlocker(userId1: string, userId2: string) : Promise<Boolean> {
+
 		try {
 			const sql = `SELECT count(*) as cnt FROM blocks WHERE blocked_id = ? AND blocker_id = ?`;
 			const query = this.db.prepare<[string, string], { cnt: number }>(sql);
@@ -98,9 +110,10 @@ class BlockRepository {
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction((blockerId: string, blockedId: string) => {
-					this.insertBlockUser(blockerId, blockedId);
-					this.deleteViews(blockerId, blockedId);
-					this.deleteLikes(blockerId, blockedId);
+					this.insertBlockUser(blockerId, blockedId)
+					this.deleteViews(blockerId, blockedId)
+					this.deleteLikes(blockerId, blockedId)
+					this.deleteConnection(blockerId, blockedId)
 				});
 				const result = transaction(blockerId, blockedId);
 				resolve(result);

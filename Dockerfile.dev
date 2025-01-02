@@ -17,6 +17,7 @@ COPY tsconfig.json ./
 RUN pnpm config set store-dir .pnpm-store
 RUN pnpm install
 RUN apt-get update && apt-get install -y vim
+RUN pnpm add dotenv
 COPY . .
 
 ENV PUBLIC_BASE_URL=http://localhost:3000
