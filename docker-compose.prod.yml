@@ -8,8 +8,6 @@ services:
       - "8080:8080"
     volumes:
       - ./default.conf:/etc/nginx/conf.d/default.conf
-      # - ./private.key:/etc/nginx/ssl/private.key
-      # - ./ssl-certif.crt:/etc/nginx/ssl/ssl-certif.crt
     depends_on:
       - matcha  # Ensures server starts before nginx
     networks:
@@ -28,6 +26,7 @@ services:
     volumes:
       - ./database:/usr/src/app/database
       - ./profile-pictures:/usr/src/app/profile-pictures
+      - ./build:/usr/src/app/build
       - /usr/src/app/node_modules
     networks:
       - app-network
