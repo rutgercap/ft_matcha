@@ -34,8 +34,6 @@ export const load: PageServerLoad = async ({
 		profiles = await browsingRepository.sort(profiles)
 		return { profiles };
 	} catch (error) {
-		console.error('Error loading browsing page:', error); // Log the error for debugging
-
 		// Return a fallback response for the UI or notify the user about the issue
 		return {
 			error: true,

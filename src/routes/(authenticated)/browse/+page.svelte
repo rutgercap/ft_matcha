@@ -14,15 +14,22 @@
 			return `${road}, ${city}, ${postcode}, ${country}`;
 		}
 		for (const u of users){
-		fetch(
-			`https://nominatim.openstreetmap.org/reverse?lat=${u.latitude}&lon=${u.longitude}&format=json`
-		).then((response) => {
-			response.json().then((data) => {
-				u.address = getFormattedAddress(data)
-			}).catch((error) => {
-				console.log('error fetching openstreet map:', error)
-			})
-		});
+			fetch(`https://nominatim.openstreetmap.org/reverse?lat=${u.latitude}&lon=${u.longitude}&format=json`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'Access-Control-Allow-Origin' : '*'
+				},
+			}).then((response) => {
+							response.json().then((data) => {
+					u.address = getFormattedAddress(data)
+				}).catch((error) => {
+					console.log('error fetching openstreet map:', error)
+				})
+			}).catch((reject) => {
+				console.log('open street map rejected the query')
+				console.log(reject)
+			});
 		}
   	});
 
@@ -129,7 +136,7 @@
 								km away from you
 								</p>
 								<p class="text-sm text-red-700">
-								<span class="font-semibold">score:</span> {user.score} TEST TEST
+								<span class="font-semibold">score:</span> {user.score} FOR DEMO PURPOSE
 								</p>
 							</div>
 						</div>
