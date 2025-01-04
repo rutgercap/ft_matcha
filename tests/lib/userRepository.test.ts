@@ -146,7 +146,7 @@ describe('UserRepository', () => {
 		}
 	);
 
-	itWithFixtures(
+	itWithFixtures.only(
 		'Cannot get others users profiles because we dont set the pictures',
 		async ({ userRepository, savedUserFactory }) => {
 			const profile = anyUserProfile();

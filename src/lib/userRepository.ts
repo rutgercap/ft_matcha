@@ -182,11 +182,6 @@ class UserRepository {
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
 
-		const updateProfileSet = this.db.prepare<[string]>(
-			'UPDATE users SET profile_is_setup = 1 WHERE id = ?'
-		);
-		updateProfileSet.run(id);
-
 		const profileImageIsSet = await this.profileImageIsSet(id);
 
 		return new Promise((resolve, reject) => {
