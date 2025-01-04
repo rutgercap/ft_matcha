@@ -64,16 +64,21 @@ describe('ImageRepository', () => {
 		}
 	);
 
-	itWithFixtures('should return false because user has not set profile picture', async ({ savedUser, imageRepository }) => {
-		const check = await imageRepository.checkIfImageProfileIsSet(savedUser.id);
-		expect(check).toBe(false)
-	});
+	itWithFixtures(
+		'should return false because user has not set profile picture',
+		async ({ savedUser, imageRepository }) => {
+			const check = await imageRepository.checkIfImageProfileIsSet(savedUser.id);
+			expect(check).toBe(false);
+		}
+	);
 
-	itWithFixtures('should return true because user has set profile picture', async ({ savedUser, imageRepository, image}) => {
-		await imageRepository.upsertImage(savedUser.id, 0, image);
+	itWithFixtures(
+		'should return true because user has set profile picture',
+		async ({ savedUser, imageRepository, image }) => {
+			await imageRepository.upsertImage(savedUser.id, 0, image);
 
-		const check = await imageRepository.checkIfImageProfileIsSet(savedUser.id);
-		expect(check).toBe(true)
-	});
-
+			const check = await imageRepository.checkIfImageProfileIsSet(savedUser.id);
+			expect(check).toBe(true);
+		}
+	);
 });

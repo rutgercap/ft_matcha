@@ -31,11 +31,13 @@ import { WebsocketServer } from '../vite.config';
 import { ServerSocket } from '$lib/server/serverSocket';
 import { BrowsingRepository } from '$lib/browsingRepository';
 import { BlockRepository } from '$lib/blockRepository';
+import { ChatRepository } from '$lib/server/chatRepository';
 
 interface MyFixtures {
 	db: DatabaseType;
 	userRepository: UserRepositoryType;
 	imageRepository: ImageRepositoryType;
+	chatRepository: ChatRepository;
 	savedUser: UserWithoutProfileSetup;
 	profileVisitRepository: ProfileVisitRepository;
 	browsingRepository: BrowsingRepository;
@@ -79,12 +81,12 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(new ProfileVisitRepository(db));
 	},
 
-	browsingRepository : async({ db }, use) => {
-		await use(new BrowsingRepository(db))
+	browsingRepository: async ({ db }, use) => {
+		await use(new BrowsingRepository(db));
 	},
 
-	blockRepository: async({ db }, use) => {
-		await use(new BlockRepository(db))
+	blockRepository: async ({ db }, use) => {
+		await use(new BlockRepository(db));
 	},
 
 	savedUserFactory: async ({ userRepository }, use) => {
@@ -159,5 +161,8 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		const luciaAdapter = adapter(db);
 		const lucia = createLuciaInstance(luciaAdapter);
 		await use(lucia);
+	},
+	chatRepository: async ({ db, notificationService }, use) => {
+		await use(new ChatRepository(db, notificationService));
 	}
 });
