@@ -50,7 +50,7 @@
 					addToast(notificationToToast(notification));
 				});
 			}
-			const chatClient = new ChatClient(socket);
+			const chatClient = new ChatClient(socket, user!.id);
 			chatClientStore.set(chatClient);
 		}
 	}

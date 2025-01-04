@@ -1,7 +1,34 @@
 <script lang="ts">
+	import type { PageData } from './$types';
+	import { chatClientStore } from '$lib/stores/chatClientStore';
 	import type { Message } from '$lib/domain/chat';
 
+	export let data: PageData;
+	const chatId = data.chat.id;
+	$: chatClient = $chatClientStore;
 	let messages: Message[] = [];
+	$: {
+		chatClient?.chats.subscribe((chats) => {
+			const chat = chats.get(chatId);
+			if (chat) {
+				messages = chat.messages;
+			} else {
+				messages = [];
+			}
+		});
+	} 
+
+	function sendMessage(event: Event) {
+		const input = event.target as HTMLInputElement;
+		chatClient?.sendMessage(chatId, input.value);
+		input.value = '';
+	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			sendMessage(event);
+		}
+	}
 </script>
 
 <div class="flex flex-row justify-center">
@@ -11,30 +38,21 @@
 			<p class="text-sm text-gray-500">No messages yet. Loser!</p>
 		{:else}
 			<ul role="list" class="divide-y divide-gray-100">
-				{#each messages as chat}
+				{#each messages as message}
 					<li class="flex items-center border px-4 rounded-xl justify-between gap-x-6 py-5">
 						<div class="flex min-w-0 gap-x-4">
-							<!-- <img
-								class="size-12 flex-none rounded-full bg-gray-50"
-								src={`/api/pics/${match.userId}/0`}
-								alt="profile"
-							/> -->
-							<div class="min-w-0 flex-auto">
-								<!-- <a
-									href={`/profile/${match.userId}`}
-									class="text-sm/6 hover:underline font-semibold text-gray-900"
-									>{match.firstName} {match.lastName}</a
-								> -->
-							</div>
+							<p>{message.message}</p>
 						</div>
-						<a
-							href="#"
-							class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-							>Chat</a
-						>
 					</li>
 				{/each}
 			</ul>
 		{/if}
+		<input
+			on:submit|preventDefault={sendMessage}
+			on:keydown={handleKeyDown}
+			type="text"
+			placeholder="Type your message here"
+			class="border border-gray-300 rounded-lg p-2 w-full mt-4"
+		/>
 	</div>
 </div>
