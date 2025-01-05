@@ -1,7 +1,6 @@
 import { describe, expect } from 'vitest';
 import { itWithFixtures } from '../fixtures';
 import { ImageRepositoryError } from '$lib/imageRepository';
-import { anyUser } from '../testHelpers';
 
 describe('ImageRepository', () => {
 	itWithFixtures(
@@ -18,10 +17,10 @@ describe('ImageRepository', () => {
 		'saving image on couple (userId, order) that already exist should update image',
 		async ({ savedUser, imageRepository, image, image2 }) => {
 			await imageRepository.upsertImage(savedUser.id, 0, image);
-			await imageRepository.upsertImage(savedUser.id, 0, image2)
+			await imageRepository.upsertImage(savedUser.id, 0, image2);
 
-			const found = await imageRepository.image(savedUser.id, 0)
-			expect(found).toEqual(image2)
+			const found = await imageRepository.image(savedUser.id, 0);
+			expect(found).toEqual(image2);
 		}
 	);
 

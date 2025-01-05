@@ -57,12 +57,11 @@ export const load: PageServerLoad = async ({
 	let isCurrentUserProfile = false;
 	let likedByCurrentUser = false;
 	if (currentUser.id === profileId) {
-
 		isCurrentUserProfile = true;
 	} else {
-		const isBlock = await blockRepository.isBlockedOrBlocker(currentUser.id, profileId)
+		const isBlock = await blockRepository.isBlockedOrBlocker(currentUser.id, profileId);
 		if (isBlock) {
-			redirect(302, '/browse')
+			redirect(302, '/browse');
 		}
 		profileVisitRepository.addVisit(currentUser.id, profileId);
 		likedByCurrentUser = await isLikedByCurrentUser(

@@ -12,7 +12,8 @@
 	let tagList = data.tagList;
 
 	const { enhance, form, errors, constraints, message, tainted, isTainted } = superForm(data.form, {
-		resetForm: false, dataType: 'json'
+		resetForm: false,
+		dataType: 'json'
 	});
 
 	const maxPictures = MAX_PICTURES;
@@ -75,59 +76,58 @@
 
 	const toggleTag = (tag: string, add: boolean) => {
 		if (add) {
-			form.update(
-				($form) => {
-					$form.tags.push(tag);
-					return $form;
-				},
-			);
+			form.update(($form) => {
+				$form.tags.push(tag);
+				return $form;
+			});
 		} else {
-			form.update(
-				($form) => {
-					$form.tags = $form.tags.filter(item => item !== tag);
-					return $form;
-				},
-			);
+			form.update(($form) => {
+				$form.tags = $form.tags.filter((item) => item !== tag);
+				return $form;
+			});
 		}
-  	};
+	};
 
 	if (typeof window !== 'undefined' && 'geolocation' in navigator) {
-		navigator.geolocation.getCurrentPosition(pos => {
-			let latitude = pos.coords.latitude
-			let longitude = pos.coords.longitude
+		navigator.geolocation.getCurrentPosition(
+			(pos) => {
+				let latitude = pos.coords.latitude;
+				let longitude = pos.coords.longitude;
 
-			const url = `/api/location/${user.id}/${longitude}/${latitude}`
-			try {
-				//${longitude}/${latitude}
-				const response = fetch(url, {
-					method: 'POST',
-				}).then(value => {
-
-				}).catch(error => {
-					console.error('Failed to post location dated:', error);
-				});
-			} catch (error) {
-				console.error('Error trying to upload location date', error);
+				const url = `/api/location/${user.id}/${longitude}/${latitude}`;
+				try {
+					//${longitude}/${latitude}
+					const response = fetch(url, {
+						method: 'POST'
+					})
+						.then((value) => {})
+						.catch((error) => {
+							console.error('Failed to post location dated:', error);
+						});
+				} catch (error) {
+					console.error('Error trying to upload location date', error);
+				}
+			},
+			(error) => {
+				console.log('the user block his location service');
+				const url = `/api/location/${user.id}/noconsent/noconsent`;
+				try {
+					//${longitude}/${latitude}
+					const response = fetch(url, {
+						method: 'POST'
+					})
+						.then((value) => {
+							console.log('location properly updated', value);
+						})
+						.catch((error) => {
+							console.error('Failed to post location dated:', error);
+						});
+				} catch (error) {
+					console.error('Error trying to upload location date', error);
+				}
 			}
-		}, error => {
-			console.log('the user block his location service')
-			const url = `/api/location/${user.id}/noconsent/noconsent`
-			try {
-				//${longitude}/${latitude}
-				const response = fetch(url, {
-					method: 'POST',
-				}).then(value => {
-					console.log('location properly updated', value)
-
-				}).catch(error => {
-					console.error('Failed to post location dated:', error);
-				});
-			} catch (error) {
-				console.error('Error trying to upload location date', error);
-			}
-		})
+		);
 	}
-
 </script>
 
 <div class="max-w-3xl mx-auto">
@@ -304,20 +304,19 @@
 
 					<div class="mt-2 flex flex-wrap gap-2">
 						{#each tagList as tag}
-						<button
-						type="button"
-						class="px-3 py-1 rounded-full border text-sm
+							<button
+								type="button"
+								class="px-3 py-1 rounded-full border text-sm
 						{$form.tags.includes(tag) ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}"
-						on:click={() => toggleTag(tag, $form.tags.includes(tag) ? false : true)}
-						>
-						  {tag}
-						</button>
-					  {/each}
+								on:click={() => toggleTag(tag, $form.tags.includes(tag) ? false : true)}
+							>
+								{tag}
+							</button>
+						{/each}
 					</div>
 					{#if $errors.tags && $tainted}
 						<p class="mt-2 text-sm text-red-600" id="tags-error">choose between 2 and 5 tag</p>
 					{/if}
-
 				</div>
 				{#if $message}
 					{#if $page.status == 200}

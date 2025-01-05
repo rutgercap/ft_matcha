@@ -100,21 +100,19 @@ function applyfilter(
 	fameRange: [number, number],
 	excludeTag: string[]
 ) {
-	const anyTag = (userTag:string[], excludeTag: string[]) => {
-
-	}
+	const anyTag = (userTag: string[], excludeTag: string[]) => {};
 
 	const filter = (
 		value: SortingCriteria | ReducedProfileInfo,
 		index: number,
-		array: SortingCriteria[] | ReducedProfileInfo[],
+		array: SortingCriteria[] | ReducedProfileInfo[]
 	) => {
 		if (
 			value.fameRate >= fameRange[0] &&
 			value.fameRate <= fameRange[1] &&
 			value.age >= ageRange[0] &&
 			value.age <= ageRange[1] &&
-			!(value.tags.some(tag => excludeTag.includes(tag)))
+			!value.tags.some((tag) => excludeTag.includes(tag))
 		) {
 			array[index].mask = true;
 		} else {

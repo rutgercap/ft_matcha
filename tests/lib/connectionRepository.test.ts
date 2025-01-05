@@ -6,18 +6,11 @@ import { describe, expect } from 'vitest';
 describe('ConnectionRepository notificaitons', () => {
 	itWithFixtures(
 		'Should get a notification when a user likes you',
-		async ({
-			connectionRepository,
-			lucia,
-			clientSocket,
-			notificationService,
-			notificationClient,
-			savedUser
-		}) => {
+		async ({ connectionRepository, lucia, clientSocket, notificationClient, savedUser }) => {
 			await waitUntilConnected(clientSocket);
 			const user = await getConnectedUser(clientSocket, lucia);
 
-			return new Promise<void>(async (resolve, reject) => {
+			return new Promise<void>((resolve, reject) => {
 				notificationClient.subscribe((notification) => {
 					try {
 						expect(notification).toEqual({ type: 'LIKE', from: savedUser.id });

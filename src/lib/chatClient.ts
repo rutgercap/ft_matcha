@@ -26,7 +26,6 @@ export class ChatClient {
 
 	private onMessage() {
 		this.client.on('message', (arg: { chatId: number; message: Message }) => {
-			console.log('message', arg);
 			this.chats.update((currentChats) => {
 				const chat = currentChats.get(arg.chatId);
 				if (chat) {

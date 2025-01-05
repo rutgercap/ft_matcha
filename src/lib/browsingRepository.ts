@@ -55,13 +55,11 @@ class BrowsingRepository {
 				`;
 
 				const res = this.db.prepare<string>(sql).get(id);
-				if (res)
-					res.mask = true
+				if (res) res.mask = true;
 				if (res && res.tags) {
 					res.tags = (res.tags as string).split(',');
-
 				} else if (res) {
-					res.tags = []
+					res.tags = [];
 				}
 				resolve(res);
 			} catch (error) {
@@ -83,22 +81,26 @@ class BrowsingRepository {
 			const result = query.get(userId);
 			return result.cnt;
 		} catch (e) {
-			throw new BrowsingRepositoryError('an error occured trying to get the number of like for user:' + userId, e)
+			throw new BrowsingRepositoryError(
+				'an error occured trying to get the number of like for user:' + userId,
+				e
+			);
 		}
-
 	}
 
 	public async numberOfMatch(userId: string) {
 		try {
 			const sql = `SELECT count() AS cnt, l1.liked_id AS liked1, l1.liker_id AS liker1, l2.liked_id AS liked2, l2.liker_id AS liker2 FROM likes AS l1, likes AS l2
-				WHERE liked1 = ? AND liker2 = ? AND liker1 = liked2`
+				WHERE liked1 = ? AND liker2 = ? AND liker1 = liked2`;
 			const query = this.db.prepare<string, string>(sql);
 			const result = query.get(userId, userId);
 			return result.cnt;
 		} catch (e) {
-			throw new BrowsingRepositoryError('an error occured trying to get the number of like for user:' + userId, e)
+			throw new BrowsingRepositoryError(
+				'an error occured trying to get the number of like for user:' + userId,
+				e
+			);
 		}
-
 	}
 
 	public async numberOfVisited(userId: string) {
@@ -109,37 +111,54 @@ class BrowsingRepository {
 			const result = query.get(userId);
 			return result.cnt;
 		} catch (e) {
-			throw new BrowsingRepositoryError('an error occured trying to get the number of visits for user:' + userId, e)
+			throw new BrowsingRepositoryError(
+				'an error occured trying to get the number of visits for user:' + userId,
+				e
+			);
 		}
-
 	}
 
 	public async fameStats(): Promise<fameStats> {
 		try {
 			let total_user: number = this.db.prepare(`SELECT count(id) AS cnt FROM users`).get().cnt;
-			let total_view: number = this.db.prepare(`SELECT count(visited_user_id) AS cnt FROM profile_visits`).get().cnt;
-			let total_like: number = this.db.prepare(`SELECT count(liked_id) AS cnt FROM likes`).get().cnt;
-			let total_match: number = this.db.prepare(`SELECT count() AS cnt, l1.liked_id AS liked1, l1.liker_id AS liker1, l2.liked_id AS liked2, l2.liker_id AS liker2 FROM likes AS l1, likes AS l2
-				WHERE liker1 = liked2`).get().cnt;
+			let total_view: number = this.db
+				.prepare(`SELECT count(visited_user_id) AS cnt FROM profile_visits`)
+				.get().cnt;
+			let total_like: number = this.db
+				.prepare(`SELECT count(liked_id) AS cnt FROM likes`)
+				.get().cnt;
+			let total_match: number = this.db
+				.prepare(
+					`SELECT count() AS cnt, l1.liked_id AS liked1, l1.liker_id AS liker1, l2.liked_id AS liked2, l2.liker_id AS liker2 FROM likes AS l1, likes AS l2
+				WHERE liker1 = liked2`
+				)
+				.get().cnt;
 
-
-			let ids = this.db.prepare(`SELECT id FROM users WHERE profile_is_setup = 1`).all()
-			ids = ids.map(v => v.id)
+			let ids = this.db.prepare(`SELECT id FROM users WHERE profile_is_setup = 1`).all();
+			ids = ids.map((v) => v.id);
 
 			let view_list = await Promise.all(ids.map((idObj: string) => this.numberOfVisited(idObj)));
 			let like_list = await Promise.all(ids.map((idObj: string) => this.numberOfLiked(idObj)));
 			let match_list = await Promise.all(ids.map((idObj: string) => this.numberOfMatch(idObj)));
 
-			total_user = (total_user === 0) ? 1 : total_user;
+			total_user = total_user === 0 ? 1 : total_user;
 
 			let average_views = total_view / total_user;
 			let average_likes = total_like / total_user;
 			let average_match = total_match / total_user;
 
-
-			const view_var = view_list.reduce((sum, x) => sum + Math.pow((x - average_views), 2) / total_user, 0);
-			const like_var = like_list.reduce((sum, x) => sum + Math.pow((x - average_views), 2) / total_user, 0);
-			const match_var = match_list.reduce((sum, x) => sum + Math.pow((x - average_views), 2) / total_user, 0);
+			const view_var = view_list.reduce(
+				(sum, x) => sum + Math.pow(x - average_views, 2) / total_user,
+				0
+			);
+			const like_var = like_list.reduce(
+				(sum, x) => sum + Math.pow(x - average_views, 2) / total_user,
+				0
+			);
+			const match_var = match_list.reduce(
+				(sum, x) => sum + Math.pow(x - average_views, 2) / total_user,
+				0
+			);
 
 			let standart_dev_views = Math.sqrt(view_var);
 			let standart_dev_likes = Math.sqrt(like_var);
@@ -152,122 +171,134 @@ class BrowsingRepository {
 				standart_dev_views: standart_dev_views,
 				standart_dev_likes: standart_dev_likes,
 				standart_dev_match: standart_dev_match
-			}
+			};
 
-			return stats
-
+			return stats;
 		} catch (e) {
-			console.log('IN THE FAME STATS FUNCTION:', e)
-			throw new BrowsingRepositoryError('an error occured trying to compute fame rate stats', e)
+			throw new BrowsingRepositoryError('an error occured trying to compute fame rate stats', e);
 		}
-
 	}
 
 	public async fameRatingFor(userId: string, stats: fameStats | null = null): Promise<number> {
 		try {
 			const views = await this.numberOfVisited(userId);
 			const likes = await this.numberOfLiked(userId);
-			const match = await this.numberOfMatch(userId)
+			const match = await this.numberOfMatch(userId);
 
-			const a = fameRatingWeights.views
-			const b = fameRatingWeights.likes
-			const c = fameRatingWeights.match
+			const a = fameRatingWeights.views;
+			const b = fameRatingWeights.likes;
+			const c = fameRatingWeights.match;
 
-			const averageViews = (stats && stats.average_views != 0) ? stats.average_views : averages.average_views
-			const averageLikes = (stats && stats.average_likes != 0) ? stats.average_likes : averages.average_likes
-			const averageMatch = (stats && stats.average_match != 0) ? stats.average_match : averages.average_match
+			const averageViews =
+				stats && stats.average_views != 0 ? stats.average_views : averages.average_views;
+			const averageLikes =
+				stats && stats.average_likes != 0 ? stats.average_likes : averages.average_likes;
+			const averageMatch =
+				stats && stats.average_match != 0 ? stats.average_match : averages.average_match;
 			// const stdViews = (stats && stats.standart_dev_views != 0) ? stats.standart_dev_views : averages.standart_dev_views
 			// const stdLikes = (stats && stats.standart_dev_likes != 0) ? stats.standart_dev_likes : averages.standart_dev_likes
 			// const stdMatch = (stats && stats.standart_dev_match != 0) ? stats.standart_dev_match : averages.standart_dev_match
 
-			const fameRating = a * (views / averageViews) + b * (likes / averageLikes) + c * (match / averageMatch)
-			return fameRating
+			const fameRating =
+				a * (views / averageViews) + b * (likes / averageLikes) + c * (match / averageMatch);
+			return fameRating;
 		} catch (e) {
-			throw new BrowsingRepositoryError('Error occurs trying to compute fame Rating for user' + userId, e);
+			throw new BrowsingRepositoryError(
+				'Error occurs trying to compute fame Rating for user' + userId,
+				e
+			);
 		}
 	}
 
-	public async commonTagsStats(userId:string, otherUserId: string): Promise<CommonTagStats> {
+	public async commonTagsStats(userId: string, otherUserId: string): Promise<CommonTagStats> {
 		try {
-			const sql = `SELECT * FROM tags WHERE user_id = ? OR user_id = ?`
+			const sql = `SELECT * FROM tags WHERE user_id = ? OR user_id = ?`;
 
-			const query = this.db.prepare<string, string>(sql)
+			const query = this.db.prepare<string, string>(sql);
 
-			const res = query.all(userId, otherUserId)
+			const res = query.all(userId, otherUserId);
 
-
-			const user1tags = res.filter(u => u.user_id == userId)
-			const user2tags = res.filter(u => u.user_id == otherUserId)
+			const user1tags = res.filter((u) => u.user_id == userId);
+			const user2tags = res.filter((u) => u.user_id == otherUserId);
 
 			let cnt = 0;
 
 			user1tags.forEach((u: any) => {
-				if (user2tags.some(u2 => u.tag === u2.tag))
-					cnt += 1
-			})
+				if (user2tags.some((u2) => u.tag === u2.tag)) cnt += 1;
+			});
 
 			return {
 				commonTag: cnt,
 				ntagsUser1: user1tags.length,
 				ntagsUser2: user2tags.length
-			}
-
+			};
 		} catch (e) {
-			console.log(e)
-			throw new BrowsingRepositoryError('Error occurs trying to compute common tag for ' + userId, e);
+			throw new BrowsingRepositoryError(
+				'Error occurs trying to compute common tag for ' + userId,
+				e
+			);
 		}
 	}
 
-	public async scoring(userId: string, userToScoreId: string, distance: number, fameRatingPreComp: number | null = null) {
-		const fameWeight = scoreWeights.fameRating
-		const commonTagWeight = scoreWeights.tags
-		const distWeight = scoreWeights.distance
+	public async scoring(
+		userId: string,
+		userToScoreId: string,
+		distance: number,
+		fameRatingPreComp: number | null = null
+	) {
+		const fameWeight = scoreWeights.fameRating;
+		const commonTagWeight = scoreWeights.tags;
+		const distWeight = scoreWeights.distance;
 
-		let fameRate = 0
+		let fameRate = 0;
 		if (!fameRatingPreComp) {
 			fameRate = await this.fameRatingFor(userToScoreId);
 		} else {
-			fameRate = fameRatingPreComp
+			fameRate = fameRatingPreComp;
 		}
 		const commonTags = await this.commonTagsStats(userId, userToScoreId);
-		const tagStat = commonTags.commonTag / (commonTags.ntagsUser1 + commonTags.ntagsUser2)
+		const tagStat = commonTags.commonTag / (commonTags.ntagsUser1 + commonTags.ntagsUser2);
 
-		const dist = distance // TODO update for distance metric to be relevant
-		const res = Number(((fameWeight * fameRate) + (tagStat * commonTagWeight) + (1/(1+dist) * distWeight)).toFixed(4))
+		const dist = distance; // TODO update for distance metric to be relevant
+		const res = Number(
+			(fameWeight * fameRate + tagStat * commonTagWeight + (1 / (1 + dist)) * distWeight).toFixed(4)
+		);
 
-		return res
-
+		return res;
 	}
 
 	public async fameRateAll(users: BrowsingInfo[], stats: fameStats | null = null) {
 		try {
 			for (const u of users) {
-				u.fameRate = await this.fameRatingFor(u.id, stats)
+				u.fameRate = await this.fameRatingFor(u.id, stats);
 			}
-			const minval = users.reduce((min, u) =>
-				u.fameRate < min ? u.fameRate : min, Infinity);
+			const minval = users.reduce((min, u) => (u.fameRate < min ? u.fameRate : min), Infinity);
 
-			const maxval = users.reduce((max, u) =>
-				u.fameRate > max ? u.fameRate : max, -Infinity);
+			const maxval = users.reduce((max, u) => (u.fameRate > max ? u.fameRate : max), -Infinity);
 
 			for (const u of users) {
-				u.fameRate = (u.fameRate - minval) / (maxval - minval)
+				u.fameRate = (u.fameRate - minval) / (maxval - minval);
 			}
-			return users
+			return users;
 		} catch (error) {
-			throw new BrowsingRepositoryError('Error occurs trying to compute fameRating for every users', error)
+			throw new BrowsingRepositoryError(
+				'Error occurs trying to compute fameRating for every users',
+				error
+			);
 		}
 	}
 
 	public async scoreThemAll(userId: string, users: BrowsingInfo[]) {
 		try {
 			for (const u of users) {
-				u.score = await this.scoring(userId, u.id, u.localisation, u.fameRate)
+				u.score = await this.scoring(userId, u.id, u.localisation, u.fameRate);
 			}
-			return users
+			return users;
 		} catch (error) {
-			console.log('in scoreThemAll', error)
-			throw new BrowsingRepositoryError('Error occurs trying to compute score for every users', error)
+			throw new BrowsingRepositoryError(
+				'Error occurs trying to compute score for every users',
+				error
+			);
 		}
 	}
 
@@ -276,42 +307,55 @@ class BrowsingRepository {
 			const compare = (a: any, b: any) => {
 				return b.score - a.score; // Sort by age in ascending order
 			};
-			users = users.sort(compare)
-			return users
+			users = users.sort(compare);
+			return users;
 		} catch (error) {
-			throw new BrowsingRepositoryError('Error occurs trying to sort the list by score', error)
+			throw new BrowsingRepositoryError('Error occurs trying to sort the list by score', error);
 		}
 	}
 
-	public async preFilter(userSexualPreference:string, users: BrowsingInfo[]) {
+	public async preFilter(userSexualPreference: string, users: BrowsingInfo[]) {
 		try {
-			if (userSexualPreference === 'all')
-					return users
+			if (userSexualPreference === 'all') return users;
 			let test = 'other';
-			if (userSexualPreference === 'men')
-				test = 'man'
-			else if (userSexualPreference === 'women')
-				test = 'woman'
-			return users.filter((u) => (u.gender === test))
+			if (userSexualPreference === 'men') test = 'man';
+			else if (userSexualPreference === 'women') test = 'woman';
+			return users.filter((u) => u.gender === test);
 		} catch (error) {
-			throw new BrowsingRepositoryError('Error occurs trying to pre filter the list by score', error)
+			throw new BrowsingRepositoryError(
+				'Error occurs trying to pre filter the list by score',
+				error
+			);
 		}
 	}
 
-	public async distanceAll(userCoordinate: BrowsingInfo, usersCoordinates: BrowsingInfo[]) : Promise<BrowsingInfo[]> {
+	public async distanceAll(
+		userCoordinate: BrowsingInfo,
+		usersCoordinates: BrowsingInfo[]
+	): Promise<BrowsingInfo[]> {
 		for (const other of usersCoordinates) {
-			other.localisation = Number((await this.haversineDistance(userCoordinate.latitude,
-				userCoordinate.longitude,
-				other.latitude,
-				other.longitude
-			)).toFixed(2))
+			other.localisation = Number(
+				(
+					await this.haversineDistance(
+						userCoordinate.latitude,
+						userCoordinate.longitude,
+						other.latitude,
+						other.longitude
+					)
+				).toFixed(2)
+			);
 		}
-		return usersCoordinates
+		return usersCoordinates;
 	}
 
-	public async haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) : Promise<number> {
+	public async haversineDistance(
+		lat1: number,
+		lon1: number,
+		lat2: number,
+		lon2: number
+	): Promise<number> {
 		try {
-			const toRadians = (degrees:number) => (degrees * Math.PI) / 180;
+			const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
 
 			// Convert degrees to radians
 			const lat1Rad = toRadians(lat1);
@@ -328,18 +372,17 @@ class BrowsingRepository {
 
 			// Haversine formula
 			const a =
-			Math.sin(dLat / 2) ** 2 +
-			Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) ** 2;
+				Math.sin(dLat / 2) ** 2 + Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) ** 2;
 
 			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
 			// Distance in kilometers
 			return R * c;
 		} catch (error) {
-			console.log('harvessing error -->', error)
-			throw new BrowsingRepositoryError('Error occurs trying to compute harvesing distance', error)
+			console.log('harvessing error -->', error);
+			throw new BrowsingRepositoryError('Error occurs trying to compute harvesing distance', error);
 		}
-	  }
+	}
 }
 
 export { BrowsingRepository, BrowsingRepositoryError };

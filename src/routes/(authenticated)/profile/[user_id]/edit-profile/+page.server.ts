@@ -18,7 +18,11 @@ const profileSchema = z.object({
 		.number()
 		.min(18, { message: 'Age must be at least 18' })
 		.max(99, { message: 'bro you too old for this shit' }),
-	tags: z.string().array().min(2, { message: 'you must choose at least 2 tag' }).max(5, { message: 'you cannot choose more than 5 tag' })
+	tags: z
+		.string()
+		.array()
+		.min(2, { message: 'you must choose at least 2 tag' })
+		.max(5, { message: 'you cannot choose more than 5 tag' })
 });
 
 export const load: PageServerLoad = async ({ locals: { user, userRepository }, params }) => {
@@ -28,7 +32,7 @@ export const load: PageServerLoad = async ({ locals: { user, userRepository }, p
 	}
 	const currentProfile = await userRepository.profileInfoFor(user.id);
 	const form = await superValidate(
-		currentProfile ? { ...currentProfile, tags: currentProfile.tags } : {},
+		currentProfile ? { ...currentProfile, tags: currentProfile.tags } : { age: 18 },
 		zod(profileSchema)
 	);
 	return { form, user, tagList };
