@@ -3,7 +3,6 @@ import type { UserRepository } from '$lib/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
 import type { PageServerLoad } from './$types';
 import type { ConnectionRepository } from '$lib/server/connectionRepository';
-import type { BlockRepository } from '$lib/blockRepository';
 
 async function profileInfoFor(
 	userId: string,

@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3';
 import type { ToSnakeCase } from './types/snakeCase';
+import type { NotificationService } from './server/notificationService';
 
 class ProfileVisitRepositoryError extends Error {
 	exception: unknown;
@@ -16,12 +17,16 @@ interface ProfileVisit {
 }
 
 export class ProfileVisitRepository {
-	constructor(private db: Database) {}
+	constructor(
+		private db: Database,
+		private notificationService: NotificationService
+	) {}
 
 	public async addVisit(visitorId: string, visitedId: string): Promise<void> {
+		this.notificationService.sendNotification(visitedId, 'VISIT', visitorId);
 		const result = this.db.prepare<[string, string]>(
-			`INSERT INTO profile_visits (visitor_id, visited_user_id) 
-			VALUES (?, ?) 
+			`INSERT INTO profile_visits (visitor_id, visited_user_id)
+			VALUES (?, ?)
 			ON CONFLICT (visitor_id, visited_user_id) DO NOTHING;`
 		);
 		return new Promise((resolve, reject) => {

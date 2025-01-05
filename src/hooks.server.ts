@@ -50,11 +50,17 @@ export const dependencyHandle: Handle = async ({ event, resolve }) => {
 	const notificationService = new NotificationService(socket);
 	event.locals.userRepository = new UserRepository(db, imageRepo);
 	event.locals.emailRepository = new EmailRepository(db, transporter);
-	event.locals.profileVisitRepository = new ProfileVisitRepository(db);
+	event.locals.profileVisitRepository = new ProfileVisitRepository(db, notificationService);
 	event.locals.browsingRepository = new BrowsingRepository(db);
-	event.locals.chatRepository = new ChatRepository(db);
+	const chatRepository = new ChatRepository(db);
+	event.locals.chatRepository = chatRepository;
 
-	event.locals.connectionRepository = new ConnectionRepository(db, notificationService, socket);
+	event.locals.connectionRepository = new ConnectionRepository(
+		db,
+		notificationService,
+		socket,
+		chatRepository
+	);
 	event.locals.blockRepository = new BlockRepository(db);
 	event.locals.authService = new AuthService(event.locals.userRepository, lucia);
 	return resolve(event);
