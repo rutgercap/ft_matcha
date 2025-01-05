@@ -4,6 +4,7 @@
 	import type { PageData } from './$types';
 	import { format } from 'date-fns';
 	import type { ChatPreview } from '$lib/domain/chat';
+	import { onMount } from 'svelte';
 
 	export let data: PageData;
 	let chatClient = $chatClientStore;
@@ -18,6 +19,10 @@
 	function otherUserId(chat: ChatPreview, user: User): string {
 		return chat.userOne === user.id ? chat.userTwo : chat.userOne;
 	}
+
+	onMount(() => {
+		chats = chatClient?.chatPreviews() ?? [];
+	});
 </script>
 
 <div class="flex flex-row justify-center">
@@ -34,18 +39,7 @@
 								<p class="font-bold">{otherUserId(chat, user)}</p>
 								<p>{chat.lastMessage?.sentAt ? format(chat.lastMessage?.sentAt, 'PPpp') : ''}</p>
 								<p>{chat.lastMessage?.message ?? 'No messages yet.'}</p>
-								<!-- <img
-								class="size-12 flex-none rounded-full bg-gray-50"
-								src={`/api/pics/${match.userId}/0`}
-								alt="profile"
-							/> -->
-								<div class="min-w-0 flex-auto">
-									<!-- <a
-									href={`/profile/${match.userId}`}
-									class="text-sm/6 hover:underline font-semibold text-gray-900"
-									>{match.firstName} {match.lastName}</a
-								> -->
-								</div>
+								<div class="min-w-0 flex-auto">> --></div>
 							</div>
 						</li>
 					</a>

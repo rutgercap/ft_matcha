@@ -1,6 +1,7 @@
 import type { MatchStatus } from '$lib/domain/match';
 import type { NotificationService } from '$lib/server/notificationService';
 import type { Database } from 'better-sqlite3';
+import type { ServerSocket } from './serverSocket';
 import type { ChatRepository } from './chatRepository';
 
 export class ConnectionRepositoryError extends Error {
@@ -14,7 +15,8 @@ export class ConnectionRepository {
 	constructor(
 		private db: Database,
 		private notificationService: NotificationService,
-		private chatService: ChatRepository
+		private serverSocket: ServerSocket,
+		private chatRepository: ChatRepository
 	) {}
 
 	public async flipLikeUser(userId: string, targetId: string): Promise<boolean> {
@@ -58,6 +60,8 @@ export class ConnectionRepository {
 						if (result.changes) {
 							this.notificationService.sendNotification(targetId, 'UNMATCH', userId);
 							this.notificationService.sendNotification(userId, 'UNMATCH', targetId);
+							this.sendDeleteChatMessage(userId, targetId);
+							this.chatRepository.deleteChatBetweenUsers(userId, targetId);
 						} else {
 							this.notificationService.sendNotification(targetId, 'UNLIKE', userId);
 						}
@@ -70,6 +74,11 @@ export class ConnectionRepository {
 				reject(new ConnectionRepositoryError('Failed to like user'));
 			}
 		});
+	}
+
+	public async sendDeleteChatMessage(userId: string, targetId: string): Promise<void> {
+		this.serverSocket.sendMessageToUser(targetId, 'deleteChat', { id: userId });
+		this.serverSocket.sendMessageToUser(userId, 'deleteChat', { id: targetId });
 	}
 
 	public async userLikedBy(id: string): Promise<string[]> {

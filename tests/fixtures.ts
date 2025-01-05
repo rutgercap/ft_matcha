@@ -123,8 +123,8 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		use(image);
 	},
 
-	connectionRepository: async ({ db, notificationService }, use) => {
-		use(new ConnectionRepository(db, notificationService));
+	connectionRepository: async ({ db, notificationService, serverSocket }, use) => {
+		use(new ConnectionRepository(db, notificationService, serverSocket));
 	},
 	httpServer: async ({}, use) => {
 		const server = createServer();

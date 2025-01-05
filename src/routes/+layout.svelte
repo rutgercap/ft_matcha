@@ -78,6 +78,9 @@
 				subscription: null
 			};
 		});
+		chatClientStore.subscribe((chatClient) => {
+			chatClient?.destroy();
+		});
 	});
 
 	type MenuState = 'NOTIFICATIONS' | 'NONE' | 'PROFILE';

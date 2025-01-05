@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3';
-import type { Chat, ChatPreview, Message } from '$lib/domain/chat';
+import type { Chat, Message } from '$lib/domain/chat';
 import { parse } from 'date-fns';
 import { SqliteError } from 'better-sqlite3';
 import _ from 'lodash';
@@ -8,7 +8,7 @@ export class ChatRepositoryError extends Error {
 	exception: unknown;
 	constructor(message: string, exception: unknown) {
 		super(message);
-		this.name = 'UserRepositoryError';
+		this.name = 'ChatRepositoryError';
 		this.exception = exception;
 	}
 }
@@ -56,13 +56,35 @@ export class ChatRepository {
 		});
 	}
 
+	public async deleteChatBetweenUsers(userOneId: string, userTwoId: string): Promise<void> {
+		return new Promise((resolve, reject) => {
+			try {
+				this.db
+					.prepare<[string, string, string, string], { changes: number }>(
+						`DELETE FROM chat
+                    WHERE (user_id_1 = ? AND user_id_2 = ?)
+                    OR (user_id_1 = ? AND user_id_2 = ?)`
+					)
+					.run(userOneId, userTwoId, userTwoId, userOneId);
+				resolve();
+			} catch (e) {
+				reject(
+					new ChatRepositoryError(
+						`Something went wrong deleting chat between users: ${userOneId} and ${userTwoId}`,
+						e
+					)
+				);
+			}
+		});
+	}
+
 	public async chatsForUser(userId: string): Promise<Chat[]> {
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction((userId) => {
 					const chats = this.db
 						.prepare<[string, string], { id: number; user_id_1: string; user_id_2: string }>(
-							`SELECT id, user_id_1, user_id_2 
+							`SELECT id, user_id_1, user_id_2
 							FROM chat
 							WHERE user_id_1 = ? OR user_id_2 = ?`
 						)

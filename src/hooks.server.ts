@@ -54,7 +54,7 @@ export const dependencyHandle: Handle = async ({ event, resolve }) => {
 	event.locals.browsingRepository = new BrowsingRepository(db);
 	event.locals.chatRepository = new ChatRepository(db);
 
-	event.locals.connectionRepository = new ConnectionRepository(db, notificationService);
+	event.locals.connectionRepository = new ConnectionRepository(db, notificationService, socket);
 	event.locals.blockRepository = new BlockRepository(db);
 	event.locals.authService = new AuthService(event.locals.userRepository, lucia);
 	return resolve(event);

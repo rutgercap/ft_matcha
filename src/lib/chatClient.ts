@@ -22,6 +22,8 @@ export class ChatClient {
 		this.onMessage();
 		this.onConnectionError();
 		this.fetchChats();
+		this.onDeleteChat();
+		this.onNewChat();
 	}
 
 	private onMessage() {
@@ -36,9 +38,18 @@ export class ChatClient {
 		});
 	}
 
+	private onNewChat() {
+		this.client.on('newChat', (chat: Chat) => {
+			this.chats.update((currentChats) => {
+				currentChats.set(chat.id, chat);
+				return new Map(currentChats);
+			});
+		});
+	}
+
 	private async fetchChats() {
 		this.client.emit('fetchChats');
-		this.client.on('fetchChatsResponse', (response: Chat[]) => {
+		this.client.once('fetchChatsResponse', (response: Chat[]) => {
 			this.chats.set(new Map(response.map((chat: Chat) => [chat.id, chat])));
 			this.loading = false;
 		});
@@ -50,28 +61,52 @@ export class ChatClient {
 		});
 	}
 
+	private onDeleteChat() {
+		this.client.on('deleteChat', ({ id }) => {
+			console.log(id);
+			this.chats.update((currentChats) => {
+				const chatToDelete = Array.from(currentChats.values()).find(
+					(chat) => chat.userOne === id || chat.userTwo === id
+				);
+
+				if (chatToDelete) {
+					console.log(chatToDelete);
+					const newChats = new Map(currentChats);
+					newChats.delete(chatToDelete.id);
+					return newChats;
+				}
+
+				return currentChats;
+			});
+		});
+	}
+
 	public messages(chatId: number): Message[] {
 		let chat: undefined | Chat;
-		this.chats.subscribe((chats) => (chat = chats.get(chatId)));
+		const unsubscribe = this.chats.subscribe((chats) => (chat = chats.get(chatId)));
+		unsubscribe(); // Clean up subscription
 		if (!chat) {
 			return [];
 		}
 		return chat.messages;
 	}
 
-	public async createChat(chatPartnerId: string): Promise<Chat> {
+	public async createChat(chatPartnerId: string): Promise<void> {
 		return new Promise((resolve, reject) => {
 			try {
-				this.client.emit('createChat', { chatPartnerId });
-				this.client.timeout(3000).on('newChat', (chat: Chat) => {
-					this.chats.update((currentChats) => {
-						currentChats.set(chat.id, chat);
-						return new Map(currentChats);
-					});
-					resolve(chat);
+				const timeout = setTimeout(() => {
+					reject(new ChatClientError('Chat creation timeout', new Error('Timeout')));
+				}, 5000);
+
+				this.client.emit('createChat', { chatPartnerId }, (error: any) => {
+					clearTimeout(timeout);
+					if (error) {
+						reject(new ChatClientError('Server rejected chat creation', error));
+					} else {
+						resolve();
+					}
 				});
 			} catch (e) {
-				console.log(e);
 				reject(new ChatClientError('Something went wrong creating chat', e));
 			}
 		});
@@ -92,9 +127,19 @@ export class ChatClient {
 	}
 
 	public sendMessage(chatId: number, message: string) {
-		const chat = this.chatPreviews().find((chat) => chat.id === chatId)!;
+		const chat = this.chatPreviews().find((chat) => chat.id === chatId);
+		if (!chat) {
+			throw new ChatClientError('Chat not found', new Error(`Chat ${chatId} not found`));
+		}
 		const to = chat.userOne === this.userId ? chat.userTwo : chat.userOne;
-		console.log(chat);
 		this.client.emit('sendMessage', { userId: this.userId, chatId, message, to });
+	}
+
+	public destroy() {
+		this.client.off('message');
+		this.client.off('deleteChat');
+		this.client.off('fetchChatsResponse');
+		this.client.off('connect_error');
+		this.client.off('newChat');
 	}
 }

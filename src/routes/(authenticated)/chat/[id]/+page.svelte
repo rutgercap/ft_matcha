@@ -2,20 +2,30 @@
 	import type { PageData } from './$types';
 	import { chatClientStore } from '$lib/stores/chatClientStore';
 	import type { Message } from '$lib/domain/chat';
+	import { redirect } from '@sveltejs/kit';
+	import type { Unsubscriber } from 'svelte/store';
+	import { onDestroy } from 'svelte';
 
 	export let data: PageData;
 	const chatId = data.chat.id;
+
 	$: chatClient = $chatClientStore;
 	let messages: Message[] = [];
+	let unsubscribe: Unsubscriber | null = null;
+
+	// Setup subscription when chatClient changes
 	$: {
-		chatClient?.chats.subscribe((chats) => {
-			const chat = chats.get(chatId);
-			if (chat) {
-				messages = chat.messages;
-			} else {
-				messages = [];
-			}
-		});
+		// Clean up previous subscription if it exists
+		if (chatClient && !unsubscribe) {
+			unsubscribe = chatClient.chats.subscribe((chats) => {
+				const chat = chats.get(chatId);
+				if (chat) {
+					messages = chat.messages;
+				} else {
+					throw redirect(300, '/');
+				}
+			});
+		}
 	}
 
 	function sendMessage(event: Event) {
@@ -29,6 +39,12 @@
 			sendMessage(event);
 		}
 	}
+
+	onDestroy(() => {
+		if (unsubscribe) {
+			unsubscribe();
+		}
+	});
 </script>
 
 <div class="flex flex-row justify-center my-4">
