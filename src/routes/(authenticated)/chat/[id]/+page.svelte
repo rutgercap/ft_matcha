@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { chatClientStore } from '$lib/stores/chatClientStore';
 	import type { Message } from '$lib/domain/chat';
+	import { ChatClientError } from '$lib/chatClient';
 	import { redirect } from '@sveltejs/kit';
 	import type { Unsubscriber } from 'svelte/store';
 	import { onDestroy } from 'svelte';
@@ -30,8 +31,14 @@
 
 	function sendMessage(event: Event) {
 		const input = event.target as HTMLInputElement;
-		chatClient?.sendMessage(chatId, input.value);
-		input.value = '';
+		try {
+			chatClient?.sendMessage(chatId, input.value);
+			input.value = '';
+		} catch (e) {
+			if (e instanceof ChatClientError) {
+				redirect(300, '/');
+			}
+		}
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {

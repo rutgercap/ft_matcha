@@ -2,7 +2,7 @@ import type { Socket } from 'socket.io-client';
 import type { Chat, ChatPreview, Message } from './domain/chat';
 import { writable, type Writable } from 'svelte/store';
 
-class ChatClientError extends Error {
+export class ChatClientError extends Error {
 	exception: unknown;
 	constructor(message: string, exception: unknown) {
 		super(message);
