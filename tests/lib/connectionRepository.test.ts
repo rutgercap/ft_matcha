@@ -10,7 +10,7 @@ describe('ConnectionRepository notificaitons', () => {
 			await waitUntilConnected(clientSocket);
 			const user = await getConnectedUser(clientSocket, lucia);
 
-			return new Promise<void>((resolve, reject) => {
+			return new Promise<void>(async (resolve, reject) => {
 				notificationClient.subscribe((notification) => {
 					try {
 						expect(notification).toEqual({ type: 'LIKE', from: savedUser.id });

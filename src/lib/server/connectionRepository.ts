@@ -1,6 +1,7 @@
 import type { MatchStatus } from '$lib/domain/match';
 import type { NotificationService } from '$lib/server/notificationService';
 import type { Database } from 'better-sqlite3';
+import type { ChatRepository } from './chatRepository';
 
 export class ConnectionRepositoryError extends Error {
 	constructor(message: string) {
@@ -12,7 +13,8 @@ export class ConnectionRepositoryError extends Error {
 export class ConnectionRepository {
 	constructor(
 		private db: Database,
-		private notificationService: NotificationService
+		private notificationService: NotificationService,
+		private chatService: ChatRepository
 	) {}
 
 	public async flipLikeUser(userId: string, targetId: string): Promise<boolean> {
@@ -26,7 +28,7 @@ export class ConnectionRepository {
 			'SELECT * FROM likes WHERE liker_id = ? AND liked_id = ?'
 		);
 		const insertMatch = this.db.prepare<[string, string]>(
-			`INSERT INTO connections (user_id_1, user_id_2, status) 
+			`INSERT INTO connections (user_id_1, user_id_2, status)
 				VALUES (?, ?, 'MATCHED')
 				ON CONFLICT (user_id_1, user_id_2)
 				DO UPDATE SET status = 'MATCHED';`

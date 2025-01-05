@@ -1,7 +1,4 @@
 import type { Database } from 'better-sqlite3';
-import { averages, fameRatingWeights, scoreWeights } from './domain/browse';
-import type { CommonTagStats, BrowsingInfo, fameStats } from './domain/browse';
-import { SexualPreference } from './domain/profile';
 
 class BlockRepositoryError extends Error {
 	exception: unknown;

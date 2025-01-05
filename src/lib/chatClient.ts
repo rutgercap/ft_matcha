@@ -92,6 +92,9 @@ export class ChatClient {
 	}
 
 	public sendMessage(chatId: number, message: string) {
-		this.client.emit('sendMessage', { userId: this.userId, chatId, message });
+		const chat = this.chatPreviews().find((chat) => chat.id === chatId)!;
+		const to = chat.userOne === this.userId ? chat.userTwo : chat.userOne;
+		console.log(chat);
+		this.client.emit('sendMessage', { userId: this.userId, chatId, message, to });
 	}
 }

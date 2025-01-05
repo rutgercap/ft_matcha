@@ -82,6 +82,37 @@ describe('chatClient', () => {
 	);
 
 	// keep serversocket
+	itWithFixtures.only(
+		'Unmatching removes the chat',
+		async ({
+			savedUserFactory,
+			chatClient,
+			authService,
+			httpServer,
+			serverSocket,
+			connectionRepository
+		}) => {
+			const [other] = await savedUserFactory(2);
+			const otherUserClient = await createChatClient(other, authService, httpServer);
+			const chat = await chatClient.createChat(other.id);
+			connectionRepository.flipLikeUser(chat.userOne, chat.userTwo);
+			connectionRepository.flipLikeUser(chat.userTwo, chat.userOne);
+			while (chatClient.loading) {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+			}
+
+			chatClient.sendMessage(chat.id, 'Hello');
+			// might have to increase this delay if the test fails
+			await new Promise((resolve) => setTimeout(resolve, 300));
+
+			connectionRepository.flipLikeUser(chat.userOne, chat.userTwo);
+
+			const chats = chatClient.chatPreviews();
+			expect(chats).toHaveLength(0);
+		}
+	);
+
+	// keep serversocket
 	itWithFixtures(
 		'Can send messages',
 		async ({ savedUserFactory, chatClient, authService, httpServer, serverSocket }) => {

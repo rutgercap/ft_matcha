@@ -70,9 +70,10 @@ export class WebsocketServer {
 				const chat = await this.chatRepository.createChat(user.id, chatPartnerId);
 				this.server.emit('newChat', chat);
 			});
-			socket.on('sendMessage', async ({ userId, chatId, message }) => {
+			socket.on('sendMessage', async ({ userId, chatId, message, to }) => {
 				try {
 					const createdMessage = await this.chatRepository.saveMessage(chatId, userId, message);
+					this.sendMessageToUser(to, 'notification', { from: userId, type: 'MESSAGE' });
 					this.server.emit('message', { chatId, message: createdMessage });
 				} catch (e) {
 					console.error('Error saving message:', e);
