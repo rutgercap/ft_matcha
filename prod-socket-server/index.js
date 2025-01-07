@@ -102,5 +102,6 @@ authMiddleWare()
 app.use(handler);
 
 server.listen(port, () => {
-    console.log(`Node Server up on port: ${port}`);
+    console.log(`Internal Node Server up on port: ${port}`);
+    console.log(`external Server up on port: 8080`);
 });

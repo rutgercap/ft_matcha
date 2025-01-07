@@ -48,7 +48,6 @@ COPY .env /usr/src/app/.env
 
 RUN npm install -g pnpm
 RUN pnpm install --prod
-RUN pnpm add dotenv
 
 
 # Expose the application port
