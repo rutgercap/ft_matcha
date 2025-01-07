@@ -3,6 +3,8 @@ import { l } from '../build/server/chunks/auth-mbJyYzDT.js';
 import http from 'http';
 import express from 'express';
 import { handler } from '../build/handler.js';
+import { createChat, chatsForUser, saveMessage } from './chat_repo.js'
+
 
 const port = 3000
 const app = express();
@@ -45,7 +47,6 @@ function setupServerSocket(socket) {
 		svelteKitServerSocket = null;
 	});
 	socket.on('redirect', ({ to, eventName, content }) => {
-		console.log('message to user: ', to, eventName, content)
 		sendMessageToUser(to, eventName, content);
 	});
 	svelteKitServerSocket.emit('connected', { id: server_id });
@@ -92,26 +93,24 @@ function authMiddleWare() {
 				sessionTokenToUserId.delete(token);
 			}
 		});
-		/**
-		 * 
+
 		socket.on('fetchChats', async () => {
-			const chats = await this.chatRepository.chatsForUser(user.id);
+			const chats = await chatsForUser(user.id);
 			socket.emit('fetchChatsResponse', chats);
 		});
 		socket.on('createChat', async ({ chatPartnerId }) => {
-			const chat = await this.chatRepository.createChat(user.id, chatPartnerId);
-			this.server.emit('newChat', chat);
+			const chat = await createChat(user.id, chatPartnerId);
+			io.emit('newChat', chat);
 		});
 		socket.on('sendMessage', async ({ userId, chatId, message, to }) => {
 			try {
-				const createdMessage = await this.chatRepository.saveMessage(chatId, userId, message);
-				this.sendMessageToUser(to, 'notification', { from: userId, type: 'MESSAGE' });
-				this.server.emit('message', { chatId, message: createdMessage });
+				const createdMessage = await saveMessage(chatId, userId, message);
+				sendMessageToUser(to, 'notification', { from: userId, type: 'MESSAGE' });
+				io.emit('message', { chatId, message: createdMessage });
 			} catch (e) {
 				console.error('Error saving message:', e);
 			}
 		});
-		 */
 
 		});
 }
