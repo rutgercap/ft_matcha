@@ -1,11 +1,10 @@
-import { error, redirect } from '@sveltejs/kit';
-import { faker } from '@faker-js/faker';
+import { error } from '@sveltejs/kit';
 import { Reader } from '@maxmind/geoip2-node';
 import * as fs from 'fs';
 
 const DATABASE_PATH = 'database/GeoLite2-City.mmdb';
 
-export async function POST({ params, locals: { user, userRepository }, getClientAddress}) {
+export async function POST({ params, locals: { user, userRepository } }) {
 	const user_id = params.user_id;
 	const longitude = Number(params.longitude);
 	const latitude = Number(params.latitude);
@@ -15,14 +14,17 @@ export async function POST({ params, locals: { user, userRepository }, getClient
 	try {
 		if (isNaN(longitude) && isNaN(latitude)) {
 			// for the moment I hard code 42 ip adress because app is running locally inside a docker.
-			const clientAddress = "62.210.34.29" // getClientAddress()
+			const clientAddress = '62.210.34.29'; // getClientAddress()
 			const dbBuffer = await fs.readFileSync(DATABASE_PATH);
 			const reader = Reader.openBuffer(dbBuffer);
 			const response = reader.city(clientAddress);
-			userRepository.upsertLocation(user_id, response.location.longitude, response.location.latitude)
-
+			userRepository.upsertLocation(
+				user_id,
+				response.location.longitude,
+				response.location.latitude
+			);
 		} else {
-			userRepository.upsertLocation(user_id, longitude, latitude)
+			userRepository.upsertLocation(user_id, longitude, latitude);
 		}
 		return new Response('coordinate uploaded successfully', { status: 200 });
 	} catch (error) {

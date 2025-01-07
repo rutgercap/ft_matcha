@@ -4,6 +4,8 @@ import { Server, type Socket as ServerSocket } from 'socket.io';
 import type { Lucia } from 'lucia';
 import { lucia } from './src/lib/auth';
 import type { JsonSerializable } from '$lib/types/jsonSerializable';
+import { ChatRepository } from './src/lib/server/chatRepository';
+import { getDb } from './src/lib/database/database';
 
 export class WebsocketServer {
 	public id: number;
@@ -14,7 +16,8 @@ export class WebsocketServer {
 
 	constructor(
 		private server: Server,
-		private lucia: Lucia
+		private lucia: Lucia,
+		private chatRepository: ChatRepository
 	) {
 		this.authMiddleWare();
 		this.id = Math.floor(Math.random() * 1000000);
@@ -59,13 +62,29 @@ export class WebsocketServer {
 					this.sessionTokenToUserId.delete(token);
 				}
 			});
+			socket.on('fetchChats', async () => {
+				const chats = await this.chatRepository.chatsForUser(user.id);
+				socket.emit('fetchChatsResponse', chats);
+			});
+			socket.on('createChat', async ({ chatPartnerId }) => {
+				const chat = await this.chatRepository.createChat(user.id, chatPartnerId);
+				this.server.emit('newChat', chat);
+			});
+			socket.on('sendMessage', async ({ userId, chatId, message, to }) => {
+				try {
+					const createdMessage = await this.chatRepository.saveMessage(chatId, userId, message);
+					this.sendMessageToUser(to, 'notification', { from: userId, type: 'MESSAGE' });
+					this.server.emit('message', { chatId, message: createdMessage });
+				} catch (e) {
+					console.error('Error saving message:', e);
+				}
+			});
 		});
 	}
 
 	private setupServerSocket(socket: ServerSocket) {
 		this.svelteKitServerSocket = socket;
 		socket.on('disconnect', () => {
-			// console.warn('Server socket disconnected');
 			this.svelteKitServerSocket = null;
 		});
 		socket.on('redirect', ({ to, eventName, content }) => {
@@ -102,9 +121,11 @@ const webSocketServer = {
 			return;
 		}
 		const io = new Server(server.httpServer);
+		const db = getDb();
+		const chatRepository = new ChatRepository(db);
 		// need to keep this as a variable to prevent it from being garbage collected
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const dontDelete = new WebsocketServer(io, lucia);
+		const dontDelete = new WebsocketServer(io, lucia, chatRepository);
 	}
 };
 

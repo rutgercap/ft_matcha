@@ -8,43 +8,45 @@
 	import { Cog } from 'svelte-hero-icons';
 	import BlockReportUser from '$lib/component/BlockReportUser.svelte';
 
-
 	export let data: PageData;
-
 
 	$: id = $page.params.user_id;
 	$: profileInfo = data.profileInfo;
 	$: isCurrentUserProfile = data.isCurrentUserProfile;
 	$: likedByCurrentUser = data.likedByCurrentUser;
 
-	let blockComponent = false
+	let blockComponent = false;
 	function openBlockReportComponent() {
-		blockComponent = true
+		blockComponent = true;
 	}
 	const blockUser = async () => {
 		try {
 			fetch(`/api/block/${id}`, {
 				method: 'POST'
-			}).then(async (response) => {
-				if (!response.ok) {
-				throw new Error('Failed to block user');
-				}
-				const result = await response.json();
-				blockComponent = false;
-				window.location.reload();
 			})
-			.catch((error) => {
-				console.log('Error blocking user:', error);
-			});
+				.then(async (response) => {
+					if (!response.ok) {
+						throw new Error('Failed to block user');
+					}
+					const result = await response.json();
+					blockComponent = false;
+					window.location.reload();
+				})
+				.catch((error) => {
+					console.log('Error blocking user:', error);
+				});
 		} catch (error) {
 			addToast({ message: 'Something went wrong liking profile', type: 'error' });
 		}
-	}
+	};
 
-	const reportUser = async (username:string) => {
+	const reportUser = async (username: string) => {
 		blockComponent = false;
-		addToast({ message: username + ' has been reported to the headquarters and will face justice any soon', type: 'success' })
-	}
+		addToast({
+			message: username + ' has been reported to the headquarters and will face justice any soon',
+			type: 'success'
+		});
+	};
 
 	async function likeProfile() {
 		try {
@@ -54,6 +56,7 @@
 			if (response.ok) {
 				invalidate('app:matches');
 				const result: { isLiked: boolean } = await response.json();
+				console.log(result);
 				likedByCurrentUser = result.isLiked;
 			}
 		} catch (error) {
@@ -95,11 +98,14 @@
 					<Icon class="h-5 w-5" src={Cog} />
 				</button>
 				{#if blockComponent}
-					<div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+					<div
+						class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50"
+					>
 						<BlockReportUser
-							bind:blockComponent={blockComponent}
+							bind:blockComponent
 							on:blockUser={blockUser}
-							on:reportUser={() => reportUser(profileInfo.firstName)}/>
+							on:reportUser={() => reportUser(profileInfo.firstName)}
+						/>
 					</div>
 				{/if}
 			{/if}

@@ -13,18 +13,21 @@
 			const { road, city, postcode, country } = data.address;
 			return `${road}, ${city}, ${postcode}, ${country}`;
 		}
-		for (const u of users){
-		fetch(
-			`https://nominatim.openstreetmap.org/reverse?lat=${u.latitude}&lon=${u.longitude}&format=json`
-		).then((response) => {
-			response.json().then((data) => {
-				u.address = getFormattedAddress(data)
-			}).catch((error) => {
-				console.log('error fetching openstreet map:', error)
-			})
-		});
+		for (const u of users) {
+			fetch(
+				`https://nominatim.openstreetmap.org/reverse?lat=${u.latitude}&lon=${u.longitude}&format=json`
+			).then((response) => {
+				response
+					.json()
+					.then((data) => {
+						u.address = getFormattedAddress(data);
+					})
+					.catch((error) => {
+						console.log('error fetching openstreet map:', error);
+					});
+			});
 		}
-  	});
+	});
 
 	// I make a copy of the array to keep a reset option
 	let filteredUsers: ReducedProfileInfo[] | SortingCriteria[] = structuredClone(users);
@@ -94,55 +97,62 @@
 
 		<ul class="mt-6 space-y-6">
 			{#if filteredUsers.length > 0}
-				{#each filteredUsers as user, index}
+				{#each filteredUsers as user}
 					{#if user.mask}
-						<li class="group flex items-center space-x-4 p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-300">
+						<li
+							class="group flex items-center space-x-4 p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-300"
+						>
 							<!-- User's Profile Picture -->
 							<img
-							src={`/api/pics/${user.id}/0`}
-							alt={user.id.id}
-							class="h-24 w-24 rounded-full bg-gray-200 object-cover"
+								src={`/api/pics/${user.id}/0`}
+								alt={user.id.id}
+								class="h-24 w-24 rounded-full bg-gray-200 object-cover"
 							/>
 
 							<!-- User Details -->
 							<div class="flex-1">
-							<!-- Username and Gender -->
-							<h3 class="text-lg font-medium text-gray-900">
-								<a href={`/profile/${user.id}`} class="hover:underline">
-								{user.username}
-								</a>
-							</h3>
-							<p class="text-l font-bold" style="color: {user.gender === 'man' ? '#0042ad' : '#ff0099'};">
-								{user.gender}
-							</p>
+								<!-- Username and Gender -->
+								<h3 class="text-lg font-medium text-gray-900">
+									<a href={`/profile/${user.id}`} class="hover:underline">
+										{user.username}
+									</a>
+								</h3>
+								<p
+									class="text-l font-bold"
+									style="color: {user.gender === 'man' ? '#0042ad' : '#ff0099'};"
+								>
+									{user.gender}
+								</p>
 
-							<!-- Additional Details -->
-							<div class="mt-2">
-								<p class="text-sm text-gray-700">
-								<span class="font-semibold">Age:</span> {user.age} years
-								</p>
-								<p class="text-sm text-gray-700">
-								<span class="font-semibold">Fame Rate:</span> {(user.fameRate * 100).toFixed(1)}%
-								</p>
-								<span class="text-gray-700">{user.localisation}</span>
-								<p class="text-gray-700 text-sm font-semibold">
-								km away from you
-								</p>
-								<p class="text-sm text-red-700">
-								<span class="font-semibold">score:</span> {user.score} TEST TEST
-								</p>
+								<!-- Additional Details -->
+								<div class="mt-2">
+									<p class="text-sm text-gray-700">
+										<span class="font-semibold">Age:</span>
+										{user.age} years
+									</p>
+									<p class="text-sm text-gray-700">
+										<span class="font-semibold">Fame Rate:</span>
+										{(user.fameRate * 100).toFixed(1)}%
+									</p>
+									<span class="text-gray-700">{user.localisation}</span>
+									<p class="text-gray-700 text-sm font-semibold">km away from you</p>
+									<p class="text-sm text-red-700">
+										<span class="font-semibold">score:</span>
+										{user.score} TEST TEST
+									</p>
+								</div>
 							</div>
-						</div>
 
-						{#if user.address}
-							<div class="mt-2">
-							<p class="text-sm text-gray-700">
-								<span class="font-semibold">Address:</span> {user.address}
-							</p>
-							</div>
-						{/if}
-						<!-- User Biography -->
-						<p class="text-sm text-gray-500">{user.biography}</p>
+							{#if user.address}
+								<div class="mt-2">
+									<p class="text-sm text-gray-700">
+										<span class="font-semibold">Address:</span>
+										{user.address}
+									</p>
+								</div>
+							{/if}
+							<!-- User Biography -->
+							<p class="text-sm text-gray-500">{user.biography}</p>
 						</li>
 					{/if}
 				{/each}

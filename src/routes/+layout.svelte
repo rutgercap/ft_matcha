@@ -25,6 +25,8 @@
 	import { io } from 'socket.io-client';
 	import addToast from '$lib/toast/toastStore';
 	import { onDestroy } from 'svelte';
+	import { ChatClient } from '$lib/chatClient';
+	import { chatClientStore } from '$lib/stores/chatClientStore';
 
 	$: url = $page.url.pathname;
 
@@ -32,28 +34,53 @@
 	$: user = data.user;
 	$: initials = data.personalInfo ? getInitials(data.personalInfo) : 'XX';
 
-	let notificationSubscription: number | null = null;
-	$: {
-		if (data.session && $notificationClientStore === null) {
-			const socket = io($page.url.origin, {
-				auth: {
-					token: data.session.id
-				}
-			});
-			const notificationClient = new NotificationClient(socket);
-			notificationClientStore.set(notificationClient);
-			if (!notificationSubscription) {
-				notificationSubscription = notificationClient.subscribe((notification: Notification) => {
-					addToast(notificationToToast(notification));
-				});
+	$: if (user) {
+		const socket = io($page.url.origin, {
+			auth: {
+				token: data.session!.id
 			}
-		}
+		});
+		const notificationClient = new NotificationClient(socket);
+
+		const notificationSubscription = notificationClient.subscribe((notification: Notification) => {
+			addToast(notificationToToast(notification));
+		});
+
+		notificationClientStore.set({
+			client: notificationClient,
+			subscription: notificationSubscription
+		});
+		const chatClient = new ChatClient(socket, user.id);
+
+		chatClientStore.set(chatClient);
+	} else {
+		// User logged out, cleanup
+		notificationClientStore.update((state) => {
+			// Cleanup existing subscription if any
+			if (state.subscription) {
+				state.client?.unsubscribe(state.subscription);
+			}
+			return {
+				client: null,
+				subscription: null
+			};
+		});
 	}
 
 	onDestroy(() => {
-		if (notificationSubscription !== null) {
-			$notificationClientStore?.unsubscribe(notificationSubscription);
-		}
+		notificationClientStore.update((state) => {
+			// Cleanup existing subscription if any
+			if (state.subscription) {
+				state.client?.unsubscribe(state.subscription);
+			}
+			return {
+				client: null,
+				subscription: null
+			};
+		});
+		chatClientStore.subscribe((chatClient) => {
+			chatClient?.destroy();
+		});
 	});
 
 	type MenuState = 'NOTIFICATIONS' | 'NONE' | 'PROFILE';
@@ -140,6 +167,13 @@
 								? 'border-indigo-500 text-gray-900'
 								: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
 							>Matches</a
+						>
+						<a
+							href={`/chat`}
+							class="{isActive(url, 'chat')
+								? 'border-indigo-500 text-gray-900'
+								: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}  inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
+							>Chat</a
 						>
 					</div>
 				{/if}
@@ -258,6 +292,13 @@
 					? 'bg-indigo-50 border-indigo-500 text-indigo-700'
 					: 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
 				>Matches</a
+			>
+			<a
+				href={`/chat`}
+				class="block {isActive(url, 'chat')
+					? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+					: 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'} border-l-4 py-2 pl-3 pr-4 text-base font-medium"
+				>Chat</a
 			>
 			<a
 				href={`/visits`}

@@ -3,7 +3,6 @@ import type { UserRepository } from '$lib/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
 import type { PageServerLoad } from './$types';
 import type { ConnectionRepository } from '$lib/server/connectionRepository';
-import type { BlockRepository } from '$lib/blockRepository';
 
 async function profileInfoFor(
 	userId: string,
@@ -44,7 +43,7 @@ export const load: PageServerLoad = async ({
 	params
 }) => {
 	if (session === null || currentUser === null) {
-		return redirect(402, '/login');
+		return redirect(401, '/login');
 	}
 
 	const profileId = params.user_id;
@@ -57,12 +56,11 @@ export const load: PageServerLoad = async ({
 	let isCurrentUserProfile = false;
 	let likedByCurrentUser = false;
 	if (currentUser.id === profileId) {
-
 		isCurrentUserProfile = true;
 	} else {
-		const isBlock = await blockRepository.isBlockedOrBlocker(currentUser.id, profileId)
+		const isBlock = await blockRepository.isBlockedOrBlocker(currentUser.id, profileId);
 		if (isBlock) {
-			redirect(302, '/browse')
+			redirect(302, '/browse');
 		}
 		profileVisitRepository.addVisit(currentUser.id, profileId);
 		likedByCurrentUser = await isLikedByCurrentUser(

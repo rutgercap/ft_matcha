@@ -31,11 +31,17 @@ import { WebsocketServer } from '../vite.config';
 import { ServerSocket } from '$lib/server/serverSocket';
 import { BrowsingRepository } from '$lib/browsingRepository';
 import { BlockRepository } from '$lib/blockRepository';
+import { ChatRepository } from '$lib/server/chatRepository';
+import { ChatClient } from '$lib/chatClient';
+import { ChatService } from '$lib/server/chatService';
+import { getConnectedUser, waitUntilConnected } from './lib/server/notificationService.test';
 
 interface MyFixtures {
 	db: DatabaseType;
 	userRepository: UserRepositoryType;
+	chatClient: ChatClient;
 	imageRepository: ImageRepositoryType;
+	chatRepository: ChatRepository;
 	savedUser: UserWithoutProfileSetup;
 	profileVisitRepository: ProfileVisitRepository;
 	browsingRepository: BrowsingRepository;
@@ -51,6 +57,7 @@ interface MyFixtures {
 	httpServer: HttpServer;
 	authService: AuthService;
 	lucia: Lucia;
+	chatService: ChatService;
 }
 
 export const DEFAULT_PASSWORD = 'password';
@@ -79,12 +86,12 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(new ProfileVisitRepository(db));
 	},
 
-	browsingRepository : async({ db }, use) => {
-		await use(new BrowsingRepository(db))
+	browsingRepository: async ({ db }, use) => {
+		await use(new BrowsingRepository(db));
 	},
 
-	blockRepository: async({ db }, use) => {
-		await use(new BlockRepository(db))
+	blockRepository: async ({ db }, use) => {
+		await use(new BlockRepository(db));
 	},
 
 	savedUserFactory: async ({ userRepository }, use) => {
@@ -116,8 +123,8 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		use(image);
 	},
 
-	connectionRepository: async ({ db, notificationService }, use) => {
-		use(new ConnectionRepository(db, notificationService));
+	connectionRepository: async ({ db, notificationService, serverSocket }, use) => {
+		use(new ConnectionRepository(db, notificationService, serverSocket));
 	},
 	httpServer: async ({}, use) => {
 		const server = createServer();
@@ -125,9 +132,9 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		await use(server);
 		server.close();
 	},
-	serverSocket: async ({ httpServer, lucia }, use) => {
+	serverSocket: async ({ httpServer, lucia, chatRepository }, use) => {
 		const io = new Server(httpServer);
-		const dontDelete = new WebsocketServer(io, lucia);
+		const dontDelete = new WebsocketServer(io, lucia, chatRepository);
 		const port = (httpServer.address() as AddressInfo).port;
 		const socket = new ServerSocket(`http://localhost:${port}`);
 		await use(socket);
@@ -159,5 +166,15 @@ export const itWithFixtures = it.extend<MyFixtures>({
 		const luciaAdapter = adapter(db);
 		const lucia = createLuciaInstance(luciaAdapter);
 		await use(lucia);
+	},
+	chatRepository: async ({ db }, use) => {
+		await use(new ChatRepository(db));
+	},
+	chatClient: async ({ clientSocket, lucia }, use) => {
+		const user = await getConnectedUser(clientSocket, lucia);
+		await use(new ChatClient(clientSocket, user.id));
+	},
+	chatService: async ({ chatRepository }, use) => {
+		await use(new ChatService(chatRepository));
 	}
 });

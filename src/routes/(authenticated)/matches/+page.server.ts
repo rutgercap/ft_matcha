@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({
 	let likedBy = await connectionRepository.userLikedBy(user.id);
 	likedBy = likedBy.filter((like) => !matches.some((match) => match.userTwo === like));
 	const likedByProfilePreviews = await userRepository.profilePreviews(likedBy);
-	const userblocks = await blockRepository.blocker(user.id)
+	const userblocks = await blockRepository.blocker(user.id);
 	const userblocksProfilepreview = await userRepository.profilePreviews(userblocks);
 
 	return {

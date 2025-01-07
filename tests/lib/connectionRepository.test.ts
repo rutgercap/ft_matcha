@@ -6,14 +6,7 @@ import { describe, expect } from 'vitest';
 describe('ConnectionRepository notificaitons', () => {
 	itWithFixtures(
 		'Should get a notification when a user likes you',
-		async ({
-			connectionRepository,
-			lucia,
-			clientSocket,
-			notificationService,
-			notificationClient,
-			savedUser
-		}) => {
+		async ({ connectionRepository, lucia, clientSocket, notificationClient, savedUser }) => {
 			await waitUntilConnected(clientSocket);
 			const user = await getConnectedUser(clientSocket, lucia);
 

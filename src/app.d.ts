@@ -6,6 +6,7 @@ import type { BrowsingRepository } from '$lib/browsingRepository';
 import type { ConnectionRepository } from '$lib/server/connectionRepository';
 import type { AuthService } from '$lib/server/authService';
 import type { BlockRepository } from '$lib/blockRepository';
+import type { ChatRepository } from '$lib/server/chatRepository';
 
 declare global {
 	namespace App {
@@ -20,6 +21,7 @@ declare global {
 			connectionRepository: ConnectionRepository;
 			blockRepository: BlockRepository;
 			authService: AuthService;
+			chatRepository: ChatRepository;
 		}
 		// interface PageData {}
 		// interface PageState {}

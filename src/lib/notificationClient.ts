@@ -1,7 +1,7 @@
 import type { Socket } from 'socket.io-client';
 import type { ToastWithoutId } from './toast/toastStore';
 
-export type NotificationType = 'LIKE' | 'MATCH' | 'UNMATCH' | 'UNLIKE';
+export type NotificationType = 'LIKE' | 'MATCH' | 'UNMATCH' | 'UNLIKE' | 'MESSAGE' | 'VISIT';
 export type Notification = {
 	type: string;
 	from: NotificationType;
@@ -17,6 +17,10 @@ export function notificationToToast(notification: Notification): ToastWithoutId 
 			return { message: `Your match with ${notification.from} is over`, type: 'info' };
 		case 'UNLIKE':
 			return { message: `You unliked ${notification.from}`, type: 'info' };
+		case 'MESSAGE':
+			return { message: `You have a new message from ${notification.from}`, type: 'info' };
+		case 'VISIT':
+			return { message: `This person visited your profile ${notification.from}`, type: 'info' };
 		default:
 			return { message: `This notification should not show`, type: 'info' };
 	}
@@ -34,7 +38,6 @@ export class NotificationClient {
 
 	private onNotification() {
 		this.client.on('notification', (arg: Notification) => {
-			console.log('notification: ' + arg);
 			this._notifications.push(arg);
 			this.listeners.forEach((listener) => listener(arg));
 		});

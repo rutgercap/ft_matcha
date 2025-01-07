@@ -148,14 +148,13 @@ class UserRepository {
 					const camelCaseObject = _.mapKeys(result, (value, key) => _.camelCase(key));
 					if (camelCaseObject.tags) {
 						camelCaseObject.tags = (camelCaseObject.tags as string).split(',');
-
 					} else {
-						camelCaseObject.tags = []
+						camelCaseObject.tags = [];
 					}
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
-				console.log('e -->', e)
+				console.log('e -->', e);
 				reject(
 					new UserRepositoryError('Something went wrong fetching user for username: ' + id, e)
 				);
@@ -177,14 +176,14 @@ class UserRepository {
 				last_name=excluded.last_name,
 				gender=excluded.gender,
 				sexual_preference=excluded.sexual_preference,
-				biography=excluded.biography,
-				age=excluded.age;`
-		);
+				biography=excluded.biography;`);
 		const deleteTags = this.db.prepare<[string]>(`DELETE FROM tags WHERE user_id = ?`);
 		const insertTag = this.db.prepare<[string, string, string]>(
 			`INSERT INTO tags (id, user_id, tag) VALUES (?, ?, ?)`
 		);
-		const profileImageIsSet = await this.profileImageIsSet(id)
+
+		const profileImageIsSet = await this.profileImageIsSet(id);
+
 		return new Promise((resolve, reject) => {
 			try {
 				const transaction = this.db.transaction(
@@ -203,7 +202,7 @@ class UserRepository {
 							insertTag.run(uuidv4(), id, tag);
 						});
 						if (profileImageIsSet) {
-							this.upsertProfileIsSetup(id, true)
+							this.upsertProfileIsSetup(id, true);
 						}
 					}
 				);
@@ -217,7 +216,7 @@ class UserRepository {
 		});
 	}
 
-	public async profileInfoIsSet(userId:string): Promise<boolean> {
+	public async profileInfoIsSet(userId: string): Promise<boolean> {
 		try {
 			const sql = `SELECT count(*) AS cnt
 						FROM profile_info AS p
@@ -229,12 +228,12 @@ class UserRepository {
 						AND p.biography IS NOT NULL
 						AND p.age IS NOT NULL
 						AND p.sexual_preference IS NOT NULL
-						AND t.tag IS NOT NULL;`
-			const qu = this.db.prepare<string>(sql)
-			const res = qu.get(userId)
-			return res.cnt == 0 ? false : true
+						AND t.tag IS NOT NULL;`;
+			const qu = this.db.prepare<string, { cnt: number }>(sql);
+			const res = qu.get(userId);
+			return res && res.cnt == 0 ? false : true;
 		} catch (error) {
-			throw new UserRepositoryError('Error occurs trying to check if profileInfo is set', error)
+			throw new UserRepositoryError('Error occurs trying to check if profileInfo is set', error);
 		}
 	}
 
@@ -315,7 +314,6 @@ class UserRepository {
 			const res = sql.run(val, userId);
 			return res;
 		} catch (error) {
-			console.log('error in the userRepository:upsertProfileIsSetup:', error);
 			throw new UserRepositoryError('Error occur in the upsertProfileIsSetup function', error);
 		}
 	}
@@ -369,9 +367,8 @@ class UserRepository {
 	public async updateUserEmail(userId: string, email: string) {
 		try {
 			const sql = this.db.prepare<[string, string]>(`UPDATE users SET email = ? WHERE id = ?`);
-			const res = sql.run(email, userId);
+			sql.run(email, userId);
 		} catch (error) {
-			console.log('error occur at updateUserEmail: ', error);
 			throw new UserRepositoryError(
 				'error occur trying to update new email for user:' + userId,
 				error
@@ -393,7 +390,6 @@ class UserRepository {
 			);
 			sql.run(passwordHash, userId);
 		} catch (error) {
-			console.log('error occur at updateUserPswd: ', error);
 			throw new UserRepositoryError(
 				'error occur trying to update new password for user:' + userId,
 				error
@@ -420,18 +416,18 @@ class UserRepository {
 	public async saveUserImage(userId: string, order: number, image: Buffer): Promise<number> {
 		try {
 			const res_order = await this.imageRepo.upsertImage(userId, order, image);
-			const profileInfoIsSet = await this.profileInfoIsSet(userId)
+			const profileInfoIsSet = await this.profileInfoIsSet(userId);
 			if (profileInfoIsSet && order === 0) {
-				this.upsertProfileIsSetup(userId, true)
+				this.upsertProfileIsSetup(userId, true);
 			}
-			return res_order
+			return res_order;
 		} catch (error) {
 			throw new UserRepositoryError('Error occurs trying to save image for: ' + userId, error);
 		}
 	}
 
-	public async profileImageIsSet(userId:string): Promise<boolean> {
-		return this.imageRepo.checkIfImageProfileIsSet(userId)
+	public async profileImageIsSet(userId: string): Promise<boolean> {
+		return this.imageRepo.checkIfImageProfileIsSet(userId);
 	}
 
 	public async upsertLocation(userId: string, longitude: number, latitude: number) {
@@ -441,25 +437,31 @@ class UserRepository {
 						ON CONFLICT(user_id)
 						DO UPDATE SET
 							longitude = excluded.longitude,
-							latitude = excluded.latitude;`
+							latitude = excluded.latitude;`;
 
-			const req = this.db.prepare<string, number, number>(sql);
-			const ret = req.run(userId, longitude, latitude)
+			const req = this.db.prepare<[string, number, number]>(sql);
+			req.run(userId, longitude, latitude);
 		} catch (e) {
-			throw new UserRepositoryError('Error occur trying to upsert location coordinate for user: ' + userId, e)
+			throw new UserRepositoryError(
+				'Error occur trying to upsert location coordinate for user: ' + userId,
+				e
+			);
 		}
 	}
 
 	public async location(userId: string) {
 		try {
-			const sql = `SELECT longitude, latitude FROM location WHERE user_id = ?`
+			const sql = `SELECT longitude, latitude FROM location WHERE user_id = ?`;
 
 			const req = this.db.prepare<string>(sql);
-			const ret = req.get(userId)
-			return ret
+			const ret = req.get(userId);
+			return ret;
 		} catch (e) {
-			console.log('Error occur trying in get location:', e)
-			throw new UserRepositoryError('Error occur trying to get location coordinate for user: ' + userId, e)
+			console.log('Error occur trying in get location:', e);
+			throw new UserRepositoryError(
+				'Error occur trying to get location coordinate for user: ' + userId,
+				e
+			);
 		}
 	}
 }

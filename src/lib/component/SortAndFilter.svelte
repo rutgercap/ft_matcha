@@ -42,8 +42,6 @@
 			sortingCriteria.tags = sortingCriteria.tags.filter((t) => t !== tag);
 		}
 	};
-
-
 </script>
 
 <div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
@@ -147,14 +145,14 @@
 				<h3 class="text-sm font-medium text-gray-900">Exclude tags</h3>
 				<div class="mt-2 flex flex-wrap gap-2">
 					{#each tagList as tag}
-					<button
-						type="button"
-						class="px-3 py-1 rounded-full border text-sm
+						<button
+							type="button"
+							class="px-3 py-1 rounded-full border text-sm
 						{sortingCriteria.tags.includes(tag) ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}"
-						on:click={() => toggleTag(tag, !sortingCriteria.tags.includes(tag))}
-					>
-						{tag}
-					</button>
+							on:click={() => toggleTag(tag, !sortingCriteria.tags.includes(tag))}
+						>
+							{tag}
+						</button>
 					{/each}
 				</div>
 			</div>
