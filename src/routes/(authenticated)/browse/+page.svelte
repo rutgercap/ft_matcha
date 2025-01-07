@@ -13,20 +13,6 @@
 			const { road, city, postcode, country } = data.address;
 			return `${road}, ${city}, ${postcode}, ${country}`;
 		}
-<<<<<<< HEAD
-		for (const u of users) {
-			fetch(
-				`https://nominatim.openstreetmap.org/reverse?lat=${u.latitude}&lon=${u.longitude}&format=json`
-			).then((response) => {
-				response
-					.json()
-					.then((data) => {
-						u.address = getFormattedAddress(data);
-					})
-					.catch((error) => {
-						console.log('error fetching openstreet map:', error);
-					});
-=======
 		for (const u of users){
 			fetch(`https://nominatim.openstreetmap.org/reverse?lat=${u.latitude}&lon=${u.longitude}&format=json`, {
 				method: 'GET',
@@ -43,7 +29,6 @@
 			}).catch((reject) => {
 				console.log('open street map rejected the query')
 				console.log(reject)
->>>>>>> ed841092 (handling some errors)
 			});
 		}
 	});

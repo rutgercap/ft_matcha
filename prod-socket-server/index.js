@@ -45,6 +45,7 @@ function setupServerSocket(socket) {
 		svelteKitServerSocket = null;
 	});
 	socket.on('redirect', ({ to, eventName, content }) => {
+		console.log('message to user: ', to, eventName, content)
 		sendMessageToUser(to, eventName, content);
 	});
 	svelteKitServerSocket.emit('connected', { id: server_id });
@@ -91,7 +92,28 @@ function authMiddleWare() {
 				sessionTokenToUserId.delete(token);
 			}
 		});
-	});
+		/**
+		 * 
+		socket.on('fetchChats', async () => {
+			const chats = await this.chatRepository.chatsForUser(user.id);
+			socket.emit('fetchChatsResponse', chats);
+		});
+		socket.on('createChat', async ({ chatPartnerId }) => {
+			const chat = await this.chatRepository.createChat(user.id, chatPartnerId);
+			this.server.emit('newChat', chat);
+		});
+		socket.on('sendMessage', async ({ userId, chatId, message, to }) => {
+			try {
+				const createdMessage = await this.chatRepository.saveMessage(chatId, userId, message);
+				this.sendMessageToUser(to, 'notification', { from: userId, type: 'MESSAGE' });
+				this.server.emit('message', { chatId, message: createdMessage });
+			} catch (e) {
+				console.error('Error saving message:', e);
+			}
+		});
+		 */
+
+		});
 }
 
 
