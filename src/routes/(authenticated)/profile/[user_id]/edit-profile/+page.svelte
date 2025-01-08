@@ -88,13 +88,8 @@
 		}
 	};
 
-	if (typeof window !== 'undefined' && 'geolocation' in navigator) {
-		navigator.geolocation.getCurrentPosition(
-			(pos) => {
-				let latitude = pos.coords.latitude;
-				let longitude = pos.coords.longitude;
-
-				const url = `/api/location/${user.id}/${longitude}/${latitude}`;
+	const fetch_loc = (user_id: string, longitude:string, latitude:string) => {
+		const url = `/api/location/${user_id}/${longitude}/${latitude}`;
 				try {
 					//${longitude}/${latitude}
 					const response = fetch(url, {
@@ -107,27 +102,35 @@
 				} catch (error) {
 					console.error('Error trying to upload location date', error);
 				}
+	}
+
+
+	if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+		navigator.geolocation.getCurrentPosition(
+			(pos) => {
+				let latitude = pos.coords.latitude;
+				let longitude = pos.coords.longitude;
+				fetch_loc(user.id, String(longitude), String(latitude))
 			},
 			(error) => {
 				console.log('the user block his location service');
-				const url = `/api/location/${user.id}/noconsent/noconsent`;
-				try {
-					//${longitude}/${latitude}
-					const response = fetch(url, {
-						method: 'POST'
-					})
-						.then((value) => {
-							console.log('location properly updated', value);
-						})
-						.catch((error) => {
-							console.error('Failed to post location dated:', error);
-						});
-				} catch (error) {
-					console.error('Error trying to upload location date', error);
-				}
+				fetch_loc(user.id, 'noconsent', 'noconsent')
 			}
 		);
 	}
+
+	// for manual entry of the coordinates 
+	let longitude = '';
+    let latitude = '';
+
+    function myLoc() {
+        // Function logic to get user's location
+        console.log('Getting user location...');
+		if (longitude != '' && latitude != '' && !isNaN(Number(longitude)) && !isNaN(Number(latitude))) {
+			fetch_loc(user.id, longitude, latitude)
+		}
+    }
+
 </script>
 
 <div class="max-w-3xl mx-auto">
@@ -325,6 +328,48 @@
 						<p class="mt-2 text-sm text-red-600">{$message}</p>
 					{/if}
 				{/if}
+
+
+				<div class="col-span-full">
+					<label for="location" class="block text-sm font-medium leading-6 text-gray-900">
+						Location
+					</label>
+					<div class="mt-2 grid grid-cols-2 gap-4">
+						<div>
+							<label for="longitude" class="block text-sm font-medium text-gray-900">
+								Longitude
+							</label>
+							<input
+								type="text"
+								id="longitude"
+								name="longitude"
+								class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								bind:value={longitude}
+							/>
+						</div>
+						<div>
+							<label for="latitude" class="block text-sm font-medium text-gray-900">
+								Latitude
+							</label>
+							<input
+								type="text"
+								id="latitude"
+								name="latitude"
+								class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								bind:value={latitude}
+							/>
+						</div>
+					</div>
+					<div class="mt-4">
+						<button
+							type="button"
+							on:click={myLoc}
+							class="inline-flex justify-center rounded-md bg-indigo-600 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+						>
+							Use My Location
+						</button>
+					</div>
+
 				<div class="mt-6 flex items-center w-full h-full justify-end gap-x-6">
 					<a
 						href={`/profile/${user?.id}`}

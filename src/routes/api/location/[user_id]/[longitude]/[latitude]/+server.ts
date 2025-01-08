@@ -1,8 +1,13 @@
 import { error } from '@sveltejs/kit';
 import { Reader } from '@maxmind/geoip2-node';
 import * as fs from 'fs';
+import { getClientAddress } from '@sveltejs/kit';
 
 const DATABASE_PATH = 'database/GeoLite2-City.mmdb';
+
+function isValidCoordinates(latitude: number, longitude: number) {
+    return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
+}
 
 export async function POST({ params, locals: { user, userRepository } }) {
 	const user_id = params.user_id;
@@ -14,6 +19,7 @@ export async function POST({ params, locals: { user, userRepository } }) {
 	try {
 		if (isNaN(longitude) && isNaN(latitude)) {
 			// for the moment I hard code 42 ip adress because app is running locally inside a docker.
+			console.log('location API client address --->', getClientAddress())
 			const clientAddress = '62.210.34.29'; // getClientAddress()
 			const dbBuffer = await fs.readFileSync(DATABASE_PATH);
 			const reader = Reader.openBuffer(dbBuffer);
@@ -24,7 +30,9 @@ export async function POST({ params, locals: { user, userRepository } }) {
 				response.location.latitude
 			);
 		} else {
-			userRepository.upsertLocation(user_id, longitude, latitude);
+			if (isValidCoordinates(latitude, longitude)) {
+				userRepository.upsertLocation(user_id, longitude, latitude);
+			}
 		}
 		return new Response('coordinate uploaded successfully', { status: 200 });
 	} catch (error) {
