@@ -9,29 +9,21 @@ import { Gender, SexualPreference } from '../domain/profile';
 import { tagList } from '$lib/domain/browse';
 import * as fs from 'fs';
 import * as path from 'path';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 // Access variables
 
-// const args = process.argv.slice(2); // Get arguments after the `node` and script name
-// const numUsersArg = args.find((arg) => arg.startsWith('--num='));
-
-const num_fake_user = process.env.NUM_FAKE_PROFILE;
-let numUsers = num_fake_user; // Default value
-numUsers = parseInt(numUsers);
-if (isNaN(numUsers)) {
-	console.error('Invalid number of users provided');
-	process.exit(1);
+const args = process.argv.slice(2); // Get arguments after the `node` and script name
+const numUsersArg = args.find((arg) => arg.startsWith('--num='));
+let numUsers = 0
+if (numUsersArg) {
+	numUsers = parseInt(numUsersArg.split('=')[1], 10);
+	if (isNaN(numUsers)) {
+		console.error('Invalid number of users provided');
+		process.exit(1);
+	}
 }
-// if (numUsersArg) {
-// 	numUsers = parseInt(numUsersArg.split('=')[1], 10);
-// 	if (isNaN(numUsers)) {
-// 		console.error('Invalid number of users provided');
-// 		process.exit(1);
-// 	}
-// }
+
+console.log('-----------> in fake users = ', numUsers)
 
 function getRandomTags(tags: string[], maxTags = 5) {
 	// Randomly shuffle the array using Fisher-Yates algorithm

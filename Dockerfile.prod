@@ -41,6 +41,8 @@ COPY --from=development /usr/src/app/static/default_profile_picture.jpg /usr/src
 COPY --from=development /usr/src/app/profile-pictures /usr/src/app/profile-pictures-init
 COPY --from=development /usr/src/app/node_modules /usr/src/app/node_modules
 
+COPY static/fake_user.cjs ./
+COPY static/profile_pictures ./static/profile_pictures
 COPY package.json ./
 COPY entrypoint.prod.sh ./
 RUN chmod +x entrypoint.prod.sh

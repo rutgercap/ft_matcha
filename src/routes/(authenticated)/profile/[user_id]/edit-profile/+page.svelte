@@ -111,6 +111,8 @@
 				let latitude = pos.coords.latitude;
 				let longitude = pos.coords.longitude;
 				fetch_loc(user.id, String(longitude), String(latitude))
+				addToast({ message: 'Successfully upload location via navigator', type: 'success' });
+
 			},
 			(error) => {
 				console.log('the user block his location service');
@@ -119,7 +121,7 @@
 		);
 	}
 
-	// for manual entry of the coordinates 
+	// for manual entry of the coordinates
 	let longitude = '';
     let latitude = '';
 
@@ -128,7 +130,10 @@
         console.log('Getting user location...');
 		if (longitude != '' && latitude != '' && !isNaN(Number(longitude)) && !isNaN(Number(latitude))) {
 			fetch_loc(user.id, longitude, latitude)
+			addToast({ message: 'Successfully upload location via user defined coordinate', type: 'success' });
 		}
+		addToast({ message: 'invalid coordinate entry, old coordinates kept', type: 'error' });
+
     }
 
 </script>
@@ -334,9 +339,9 @@
 					<label for="location" class="block text-sm font-medium leading-6 text-gray-900">
 						Location
 					</label>
-					<div class="mt-2 grid grid-cols-2 gap-4">
+					<div class="mt-2 flex items-center gap-4">
 						<div>
-							<label for="longitude" class="block text-sm font-medium text-gray-900">
+							<label for="longitude" class="block text-sm leading-6 text-gray-600">
 								Longitude
 							</label>
 							<input
@@ -348,7 +353,7 @@
 							/>
 						</div>
 						<div>
-							<label for="latitude" class="block text-sm font-medium text-gray-900">
+							<label for="latitude" class="block text-sm leading-6 text-gray-600">
 								Latitude
 							</label>
 							<input
@@ -359,16 +364,21 @@
 								bind:value={latitude}
 							/>
 						</div>
+						<div class="mt-5 sm:mt-0">
+							<label for="button" class="block text-sm leading-6 text-gray-600">
+								<br>
+ 							</label>
+							<button
+								type="button"
+								on:click={myLoc}
+								class="px-3 py-1 rounded-full border text-sm bg-indigo-600 text-white ">
+								Use My Location
+							</button>
+						</div>
 					</div>
-					<div class="mt-4">
-						<button
-							type="button"
-							on:click={myLoc}
-							class="inline-flex justify-center rounded-md bg-indigo-600 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-						>
-							Use My Location
-						</button>
-					</div>
+				</div>
+
+
 
 				<div class="mt-6 flex items-center w-full h-full justify-end gap-x-6">
 					<a

@@ -22,6 +22,9 @@ dev :
 fake_users:
 	${DOCKER_DEV} exec matcha pnpm run script:fake_users -- --num=${num}
 
+fake_users_prod:
+	${DOCKER_DEV} exec matcha pnpm run script:fake_users_prod -- --num=${num}
+
 down_dev :
 	${DOCKER_DEV} down
 

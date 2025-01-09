@@ -9,7 +9,7 @@ function isValidCoordinates(latitude: number, longitude: number) {
     return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
 }
 
-export async function POST({ params, locals: { user, userRepository } }) {
+export async function POST({ params, locals: { user, userRepository }, getClientAddress }) {
 	const user_id = params.user_id;
 	const longitude = Number(params.longitude);
 	const latitude = Number(params.latitude);
