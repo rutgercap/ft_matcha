@@ -131,8 +131,9 @@
 		if (longitude != '' && latitude != '' && !isNaN(Number(longitude)) && !isNaN(Number(latitude))) {
 			fetch_loc(user.id, longitude, latitude)
 			addToast({ message: 'Successfully upload location via user defined coordinate', type: 'success' });
+		} else {
+			addToast({ message: 'invalid coordinate entry, old coordinates kept', type: 'error' });
 		}
-		addToast({ message: 'invalid coordinate entry, old coordinates kept', type: 'error' });
 
     }
 
