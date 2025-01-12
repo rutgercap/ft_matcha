@@ -11,7 +11,7 @@ DB_PATH := ./database
 all: ${NAME}
 
 prod :
-	${DOCKER_PROD} up --build
+	${DOCKER_PROD} up --build -d
 
 migrate:
 	${DOCKER_DEV} exec matcha pnpm run db:migrate
