@@ -81,7 +81,7 @@ let generateIdFromEntropySize;
         return {
             id: userId,
             email: faker.internet.email(),
-            username: faker.internet.username(),
+            username: faker.internet.userName(),
             profileIsSetup: 1,
             emailIsSetup: 1,
             passwordHash: passwordHash,
