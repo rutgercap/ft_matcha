@@ -8,7 +8,6 @@ import { ChatRepository } from './src/lib/server/chatRepository';
 import { getDb } from './src/lib/database/database';
 
 export class WebsocketServer {
-	public id: number;
 	private svelteKitServerSocket: ServerSocket | null = null;
 	private connections: Map<string, ServerSocket> = new Map();
 	// userId to socket
@@ -20,12 +19,12 @@ export class WebsocketServer {
 		private chatRepository: ChatRepository
 	) {
 		this.authMiddleWare();
-		this.id = Math.floor(Math.random() * 1000000);
 	}
 
 	private authMiddleWare() {
 		this.server.use(async (socket, next) => {
 			const token = socket.handshake.auth.token;
+			console.log('connected');
 			if (token === 'server') {
 				return next();
 			}
@@ -52,7 +51,6 @@ export class WebsocketServer {
 			if (!session) {
 				return;
 			}
-			console.log('in socket server ', user, 'just connected')
 			this.connections.set(user.id, socket);
 			this.sessionTokenToUserId.set(token, user.id);
 			socket.on('disconnect', () => {
@@ -67,13 +65,10 @@ export class WebsocketServer {
 				const chats = await this.chatRepository.chatsForUser(user.id);
 				socket.emit('fetchChatsResponse', chats);
 			});
-			socket.on('createChat', async ({ chatPartnerId }) => {
-				const chat = await this.chatRepository.createChat(user.id, chatPartnerId);
-				this.server.emit('newChat', chat);
-			});
 			socket.on('sendMessage', async ({ userId, chatId, message, to }) => {
 				try {
 					const createdMessage = await this.chatRepository.saveMessage(chatId, userId, message);
+					console.log('vite sendMessage');
 					this.sendMessageToUser(to, 'notification', { from: userId, type: 'MESSAGE' });
 					this.server.emit('message', { chatId, message: createdMessage });
 				} catch (e) {
@@ -89,10 +84,8 @@ export class WebsocketServer {
 			this.svelteKitServerSocket = null;
 		});
 		socket.on('redirect', ({ to, eventName, content }) => {
-			console.log('redirect socket event has been emit')
 			this.sendMessageToUser(to, eventName, content);
 		});
-		this.svelteKitServerSocket.emit('connected', { id: this.id });
 	}
 
 	public sendMessageToUser(id: string, eventName: string, content: JsonSerializable) {
@@ -109,7 +102,6 @@ export class WebsocketServer {
 					return;
 				}
 				connection.emit(eventName, content);
-				console.log('just emitted a message: ', eventName, content)
 			})
 			.catch((error) => {
 				console.error('Error validating session:', error);
@@ -136,6 +128,5 @@ export default defineConfig({
 	plugins: [sveltekit(), webSocketServer],
 	test: {
 		include: ['tests/**/*.{test,spec}.{js,ts}']
-	},
-
+	}
 });

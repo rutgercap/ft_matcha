@@ -3,6 +3,7 @@ import type { NotificationService } from '$lib/server/notificationService';
 import type { Database } from 'better-sqlite3';
 import type { ServerSocket } from './serverSocket';
 import type { ChatRepository } from './chatRepository';
+import { chatToSerializable, type Chat } from '$lib/domain/chat';
 
 export class ConnectionRepositoryError extends Error {
 	constructor(message: string) {
@@ -50,6 +51,9 @@ export class ConnectionRepository {
 							insertMatch.run(userId, targetId);
 							this.notificationService.sendNotification(targetId, 'MATCH', userId);
 							this.notificationService.sendNotification(userId, 'MATCH', targetId);
+							this.chatRepository.createChat(targetId, userId).then((chat) => {
+								this.sendNewChatMessage(chat, userId, targetId);
+							});
 						} else {
 							this.notificationService.sendNotification(targetId, 'LIKE', userId);
 						}
@@ -70,7 +74,7 @@ export class ConnectionRepository {
 				});
 				const isLiked = transaction(userId, targetId);
 				resolve(isLiked);
-			} catch (e) {
+			} catch {
 				reject(new ConnectionRepositoryError('Failed to like user'));
 			}
 		});
@@ -79,6 +83,11 @@ export class ConnectionRepository {
 	public async sendDeleteChatMessage(userId: string, targetId: string): Promise<void> {
 		this.serverSocket.sendMessageToUser(targetId, 'deleteChat', { id: userId });
 		this.serverSocket.sendMessageToUser(userId, 'deleteChat', { id: targetId });
+	}
+
+	public async sendNewChatMessage(chat: Chat, userId: string, targetId: string): Promise<void> {
+		this.serverSocket.sendMessageToUser(targetId, 'newChat', chatToSerializable(chat));
+		this.serverSocket.sendMessageToUser(userId, 'newChat', chatToSerializable(chat));
 	}
 
 	public async userLikedBy(id: string): Promise<string[]> {

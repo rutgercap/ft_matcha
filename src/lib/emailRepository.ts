@@ -227,7 +227,6 @@ class EmailRepository {
 			}
 			return res;
 		} catch (error) {
-			console.log('console log error from emailSessionByUserId', error);
 			throw new EmailRepositoryError(
 				'Error occurs trying to get e-mail session for userId:' + userId,
 				error
@@ -245,7 +244,6 @@ class EmailRepository {
 			const res = sql.get(tokenId);
 			return res;
 		} catch (error) {
-			console.log('console log error from emailSession', error);
 			throw new EmailRepositoryError(
 				'Error occurs trying to get e-mail session for sessionid:' + tokenId,
 				error
@@ -263,7 +261,6 @@ class EmailRepository {
 			const res = sql.get(tokenId);
 			return res;
 		} catch (error) {
-			console.log('console log error from passwordSession', error);
 			throw new EmailRepositoryError(
 				'Error occurs trying to get reset password session for sessionid:' + tokenId,
 				error
@@ -279,7 +276,6 @@ class EmailRepository {
 			const res = sql.run(id);
 			return res;
 		} catch (error) {
-			console.log('console log error from deleteEmailsession', error);
 			throw new EmailRepositoryError(
 				'Error occurs trying to delete e-mail session for user:' + id,
 				error
@@ -295,7 +291,6 @@ class EmailRepository {
 			const res = sql.run(id);
 			return res;
 		} catch (error) {
-			console.log('console log error from deleteResetPasswordSession', error);
 			throw new EmailRepositoryError(
 				'Error occurs trying to delete reset password session for user:' + id,
 				error
@@ -311,7 +306,6 @@ class EmailRepository {
 			const res = sql.run(userId);
 			return res;
 		} catch (error) {
-			console.log('console log error from deleteResetPasswordSession', error);
 			throw new EmailRepositoryError(
 				'Error occurs trying to delete reset password session for user:' + userId,
 				error

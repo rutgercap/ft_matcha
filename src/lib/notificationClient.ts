@@ -30,14 +30,18 @@ export class NotificationClient {
 	private _notifications: Notification[] = [];
 	private listeners: Map<number, (data: Notification) => void> = new Map();
 	private nextListenerId: number = 1;
+	private id: number;
 
 	constructor(private client: Socket) {
 		this.onNotification();
 		this.onConnectionError();
+		this.id = Math.random();
+		console.log('creating notificationclient');
 	}
 
 	private onNotification() {
 		this.client.on('notification', (arg: Notification) => {
+			console.log(this.id);
 			this._notifications.push(arg);
 			this.listeners.forEach((listener) => listener(arg));
 		});
@@ -46,9 +50,6 @@ export class NotificationClient {
 	private onConnectionError() {
 		this.client.on('connect_error', (err) => {
 			console.log('err.message: ', err.message);
-			console.log('err.description:', err.description);
-			console.log('err.context:', err.context);
-
 		});
 	}
 
@@ -66,4 +67,3 @@ export class NotificationClient {
 		this.listeners.delete(id);
 	}
 }
-

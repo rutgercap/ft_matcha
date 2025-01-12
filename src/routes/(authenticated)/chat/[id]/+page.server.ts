@@ -1,4 +1,4 @@
-import { redirect, error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({
@@ -15,18 +15,14 @@ export const load: PageServerLoad = async ({
 	}
 
 	const allChats = await chatRepository.chatsForUser(user.id);
-	let chat = allChats.find((c) => c.userOne === id || c.userTwo === id);
+	const chat = allChats.find((c) => c.userOne === id || c.userTwo === id);
 
 	if (!chat) {
-		try {
-			chat = await chatRepository.createChat(user.id, id);
-		} catch (e) {
-			console.error('Error creating chat:', e);
-			throw error(500, 'Failed to create chat');
-		}
+		throw error(500);
 	}
 
 	return {
+		user,
 		chat
 	};
 };

@@ -100,8 +100,6 @@ function applyfilter(
 	fameRange: [number, number],
 	excludeTag: string[]
 ) {
-	const anyTag = (userTag: string[], excludeTag: string[]) => {};
-
 	const filter = (
 		value: SortingCriteria | ReducedProfileInfo,
 		index: number,

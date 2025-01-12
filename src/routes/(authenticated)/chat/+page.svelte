@@ -1,15 +1,27 @@
 <script lang="ts">
-	import { chatClientStore } from '$lib/stores/chatClientStore';
+	import { chatStore } from '$lib/stores/chatStore';
 	import type { User } from 'lucia';
 	import type { PageData } from './$types';
 	import { format } from 'date-fns';
-	import type { ChatPreview } from '$lib/domain/chat';
-	import { onMount } from 'svelte';
+	import type { Chat, ChatPreview } from '$lib/domain/chat';
 
 	export let data: PageData;
-	let chatClient = $chatClientStore;
-	$: chats = chatClient?.chatPreviews() ?? [];
+
+	$: chats = chatPreviews(Array.from($chatStore.values()));
 	const user = data.user!;
+
+	function chatPreviews(chats: Chat[]): ChatPreview[] {
+		let previews: ChatPreview[] = [];
+		previews = Array.from(chats.values()).map((chat) => {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { messages, ...rest } = chat;
+			return {
+				...rest,
+				lastMessage: chat.messages[chat.messages.length - 1]
+			};
+		});
+		return previews;
+	}
 
 	function chatLink(chat: ChatPreview, user: User): string {
 		const otherUserId = chat.userOne === user.id ? chat.userTwo : chat.userOne;
@@ -19,10 +31,6 @@
 	function otherUserId(chat: ChatPreview, user: User): string {
 		return chat.userOne === user.id ? chat.userTwo : chat.userOne;
 	}
-
-	onMount(() => {
-		chats = chatClient?.chatPreviews() ?? [];
-	});
 </script>
 
 <div class="flex flex-row justify-center">

@@ -18,7 +18,7 @@
 					if (!response.ok) {
 						throw new Error('Failed to unblock user');
 					}
-					const result = await response.json();
+					await response.json();
 				})
 				.catch((error) => {
 					console.log('Error blocking user:', error);
@@ -31,7 +31,7 @@
 				}
 			}
 			userblocksProfilepreview = tmp;
-		} catch (error) {
+		} catch {
 			addToast({ message: 'Something went unblocking profile', type: 'error' });
 		}
 	};

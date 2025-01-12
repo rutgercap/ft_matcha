@@ -1,6 +1,12 @@
 import type { Socket } from 'socket.io-client';
-import type { Chat, ChatPreview, Message } from './domain/chat';
-import { writable, type Writable } from 'svelte/store';
+import {
+	chatFromSerializable,
+	type Chat,
+	type ChatPreview,
+	type Message,
+	type SerializableChat
+} from './domain/chat';
+import { type Writable } from 'svelte/store';
 
 export class ChatClientError extends Error {
 	exception: unknown;
@@ -10,15 +16,15 @@ export class ChatClientError extends Error {
 		this.exception = exception;
 	}
 }
-
 export class ChatClient {
 	public loading = true;
-	public chats: Writable<Map<number, Chat>> = writable(new Map());
+	id: number;
 
 	constructor(
 		private client: Socket,
-		private userId: string
+		private chats: Writable<Map<number, Chat>>
 	) {
+		this.id = Math.random();
 		this.onMessage();
 		this.onConnectionError();
 		this.fetchChats();
@@ -39,9 +45,9 @@ export class ChatClient {
 	}
 
 	private onNewChat() {
-		this.client.on('newChat', (chat: Chat) => {
+		this.client.on('newChat', (chat: SerializableChat) => {
 			this.chats.update((currentChats) => {
-				currentChats.set(chat.id, chat);
+				currentChats.set(chat.id, chatFromSerializable(chat));
 				return new Map(currentChats);
 			});
 		});
@@ -63,14 +69,12 @@ export class ChatClient {
 
 	private onDeleteChat() {
 		this.client.on('deleteChat', ({ id }) => {
-			console.log(id);
 			this.chats.update((currentChats) => {
 				const chatToDelete = Array.from(currentChats.values()).find(
 					(chat) => chat.userOne === id || chat.userTwo === id
 				);
 
 				if (chatToDelete) {
-					console.log(chatToDelete);
 					const newChats = new Map(currentChats);
 					newChats.delete(chatToDelete.id);
 					return newChats;
@@ -116,6 +120,7 @@ export class ChatClient {
 		let previews: ChatPreview[] = [];
 		this.chats.subscribe((chats) => {
 			previews = Array.from(chats.values()).map((chat) => {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const { messages, ...rest } = chat;
 				return {
 					...rest,
@@ -126,13 +131,13 @@ export class ChatClient {
 		return previews;
 	}
 
-	public sendMessage(chatId: number, message: string) {
+	public sendMessage(userId: string, chatId: number, message: string) {
 		const chat = this.chatPreviews().find((chat) => chat.id === chatId);
 		if (!chat) {
 			throw new ChatClientError('Chat not found', new Error(`Chat ${chatId} not found`));
 		}
-		const to = chat.userOne === this.userId ? chat.userTwo : chat.userOne;
-		this.client.emit('sendMessage', { userId: this.userId, chatId, message, to });
+		const to = chat.userOne === userId ? chat.userTwo : chat.userOne;
+		this.client.emit('sendMessage', { userId: userId, chatId, message, to });
 	}
 
 	public destroy() {

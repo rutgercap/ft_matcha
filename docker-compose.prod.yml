@@ -5,12 +5,11 @@ services:
       context: ./
       dockerfile: ./nginxProxy/Dockerfile.nginx
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
-      - matcha  # Ensures server starts before nginx
+      - matcha # Ensures server starts before nginx
     networks:
       - app-network
-
 
   matcha:
     image: matcha-sveltkit-prod

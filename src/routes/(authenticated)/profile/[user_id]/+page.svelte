@@ -35,7 +35,7 @@
 				.catch((error) => {
 					console.log('Error blocking user:', error);
 				});
-		} catch (error) {
+		} catch {
 			addToast({ message: 'Something went wrong liking profile', type: 'error' });
 		}
 	};
@@ -56,7 +56,6 @@
 			if (response.ok) {
 				invalidate('app:matches');
 				const result: { isLiked: boolean } = await response.json();
-				console.log(result);
 				likedByCurrentUser = result.isLiked;
 			}
 		} catch (error) {

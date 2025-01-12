@@ -36,7 +36,7 @@ export const load: PageServerLoad = async ({ cookies, params, locals }) => {
 		throw error(404, 'Token is out of date, hit forgot password again');
 	}
 
-	const res = await locals.userRepository.updateEmailIsSetup(user.id, true);
+	await locals.userRepository.updateEmailIsSetup(user.id, true);
 	const session = await lucia.createSession(user.id, {});
 	const sessionCookie = lucia.createSessionCookie(session.id);
 
@@ -50,12 +50,7 @@ export const load: PageServerLoad = async ({ cookies, params, locals }) => {
 };
 
 export const actions: Actions = {
-	new_password: async ({
-		params,
-		request,
-		cookies,
-		locals: { user, userRepository, emailRepository }
-	}) => {
+	new_password: async ({ params, request, locals: { user, userRepository, emailRepository } }) => {
 		const newpswd = await superValidate(request, zod(newPassword));
 		if (!newpswd) {
 			return fail(400, { newpswd });

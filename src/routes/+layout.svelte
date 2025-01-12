@@ -16,71 +16,27 @@
 	import { page } from '$app/stores';
 	import { initials as getInitials } from '$lib/domain/profile';
 	import { toasts } from '$lib/toast/toastStore';
-	import {
-		NotificationClient,
-		notificationToToast,
-		type Notification
-	} from '$lib/notificationClient';
-	import { notificationClientStore } from '$lib/stores/notificationClientStore';
-	import { io } from 'socket.io-client';
-	import addToast from '$lib/toast/toastStore';
-	import { onDestroy } from 'svelte';
-	import { ChatClient } from '$lib/chatClient';
-	import { chatClientStore } from '$lib/stores/chatClientStore';
+	import { onDestroy, onMount } from 'svelte';
+	import { notificationStore } from '$lib/stores/notificationStore';
+	import { socketStore } from '$lib/stores/socketStore';
+	import { chatClientStore } from '$lib/stores/chatStore';
 
 	$: url = $page.url.pathname;
 
+	$: initials = data.personalInfo ? getInitials(data.personalInfo) : 'XX';
 	export let data: LayoutData;
 	$: user = data.user;
-	$: initials = data.personalInfo ? getInitials(data.personalInfo) : 'XX';
 
-	$: if (user) {
-		const socket = io($page.url.origin, {
-			auth: {
-				token: data.session!.id
-			}
-		});
-		const notificationClient = new NotificationClient(socket);
-
-		const notificationSubscription = notificationClient.subscribe((notification: Notification) => {
-			addToast(notificationToToast(notification));
-		});
-
-		notificationClientStore.set({
-			client: notificationClient,
-			subscription: notificationSubscription
-		});
-		const chatClient = new ChatClient(socket, user.id);
-
-		chatClientStore.set(chatClient);
-	} else {
-		// User logged out, cleanup
-		notificationClientStore.update((state) => {
-			// Cleanup existing subscription if any
-			if (state.subscription) {
-				state.client?.unsubscribe(state.subscription);
-			}
-			return {
-				client: null,
-				subscription: null
-			};
-		});
-	}
+	onMount(() => {
+		if (user) {
+			socketStore.connect($page.url.origin, data.session!.id);
+		}
+	});
 
 	onDestroy(() => {
-		notificationClientStore.update((state) => {
-			// Cleanup existing subscription if any
-			if (state.subscription) {
-				state.client?.unsubscribe(state.subscription);
-			}
-			return {
-				client: null,
-				subscription: null
-			};
-		});
-		chatClientStore.subscribe((chatClient) => {
-			chatClient?.destroy();
-		});
+		notificationStore.cleanup();
+		chatClientStore.cleanup();
+		socketStore.disconnect();
 	});
 
 	type MenuState = 'NOTIFICATIONS' | 'NONE' | 'PROFILE';

@@ -154,7 +154,6 @@ class UserRepository {
 					resolve(camelCaseObject as ProfileInfo);
 				}
 			} catch (e) {
-				console.log('e -->', e);
 				reject(
 					new UserRepositoryError('Something went wrong fetching user for username: ' + id, e)
 				);
@@ -457,7 +456,6 @@ class UserRepository {
 			const ret = req.get(userId);
 			return ret;
 		} catch (e) {
-			console.log('Error occur trying in get location:', e);
 			throw new UserRepositoryError(
 				'Error occur trying to get location coordinate for user: ' + userId,
 				e

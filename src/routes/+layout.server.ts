@@ -4,7 +4,7 @@ import type { UserRepository } from '$lib/userRepository';
 import type { ProfileInfo } from '$lib/domain/profile';
 import { error } from '@sveltejs/kit';
 
-export const ssr = false
+export const ssr = false;
 
 async function personalInfoFor(
 	user: User,

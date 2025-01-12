@@ -14,7 +14,7 @@ import * as path from 'path';
 
 const args = process.argv.slice(2); // Get arguments after the `node` and script name
 const numUsersArg = args.find((arg) => arg.startsWith('--num='));
-let numUsers = 0
+let numUsers = 0;
 if (numUsersArg) {
 	numUsers = parseInt(numUsersArg.split('=')[1], 10);
 	if (isNaN(numUsers)) {
@@ -23,7 +23,7 @@ if (numUsersArg) {
 	}
 }
 
-console.log('-----------> in fake users = ', numUsers)
+console.log('-----------> in fake users = ', numUsers);
 
 function getRandomTags(tags: string[], maxTags = 5) {
 	// Randomly shuffle the array using Fisher-Yates algorithm
@@ -127,10 +127,9 @@ function getDb(path: string = DATABASE_PATH): DatabaseType {
 }
 
 async function createUsers(n: number) {
-
 	if (n === 0) {
-		console.log('NUMBER OF FAKE USER SET TO 0')
-		return ;
+		console.log('NUMBER OF FAKE USER SET TO 0');
+		return;
 	}
 
 	const db = getDb(DATABASE_PATH);

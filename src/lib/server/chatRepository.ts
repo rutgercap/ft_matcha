@@ -151,7 +151,6 @@ export class ChatRepository {
 					sentAt: date
 				});
 			} catch (e) {
-				console.log(e);
 				reject(
 					new ChatRepositoryError(`Something went wrong fetching chats for user: ${userId}`, null)
 				);

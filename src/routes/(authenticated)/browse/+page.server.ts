@@ -1,7 +1,6 @@
-import { error, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import type { BrowsingInfo } from '$lib/domain/browse';
 import type { PageServerLoad } from './$types';
-import { faker } from '@faker-js/faker';
 
 export const load: PageServerLoad = async ({
 	locals: { user, browsingRepository, blockRepository }
@@ -34,7 +33,7 @@ export const load: PageServerLoad = async ({
 		profiles = await browsingRepository.scoreThemAll(user.id, profiles);
 		profiles = await browsingRepository.sort(profiles);
 		return { profiles };
-	} catch (error) {
+	} catch {
 		// Return a fallback response for the UI or notify the user about the issue
 		return {
 			error: true,
