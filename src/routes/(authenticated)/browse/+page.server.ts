@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({
 	locals: { user, browsingRepository, blockRepository }
 }) => {
 	if (!user) {
-		throw redirect(401, '/login');
+		throw redirect(301, '/login');
 	}
 
 	try {

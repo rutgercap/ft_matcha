@@ -7,7 +7,7 @@ export const load: PageServerLoad = async ({
 }) => {
 	depends('app:matches');
 	if (!user) {
-		throw redirect(401, '/login');
+		throw redirect(301, '/login');
 	}
 	const matches = await connectionRepository.matchesForUser(user.id);
 	const matchPreviews = await userRepository.profilePreviews(matches.map((match) => match.userTwo));

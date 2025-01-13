@@ -45,8 +45,8 @@ const authHandle: Handle = async ({ event, resolve }) => {
 export const dependencyHandle: Handle = async ({ event, resolve }) => {
 	const db = getDb();
 	const transporter = getTransporter();
-	const socket = getServerSocket(event.url.origin);
-	// const socket = getServerSocket(INTERNAL_URL);
+	// const socket = getServerSocket(event.url.origin);
+	const socket = getServerSocket('http://localhost:3000');
 	const imageRepo = new ImageRepository(IMAGE_FOLDER, db);
 	const notificationService = new NotificationService(socket);
 	event.locals.userRepository = new UserRepository(db, imageRepo);
@@ -62,7 +62,8 @@ export const dependencyHandle: Handle = async ({ event, resolve }) => {
 		socket,
 		chatRepository
 	);
-	event.locals.blockRepository = new BlockRepository(db);
+	event.locals.blockRepository = new BlockRepository(db, event.locals.connectionRepository);
+	// event.locals.blockRepository = new BlockRepository(db);
 	event.locals.authService = new AuthService(event.locals.userRepository, lucia);
 	return resolve(event);
 };

@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3';
+import type { ConnectionRepository } from './server/connectionRepository';
 
 class BlockRepositoryError extends Error {
 	exception: unknown;
@@ -10,7 +11,7 @@ class BlockRepositoryError extends Error {
 }
 
 class BlockRepository {
-	constructor(private db: Database) {}
+	constructor(private db: Database, private connectionRepository: ConnectionRepository) {}
 
 	public async insertBlockUser(blockerId: string, blockedId: string): Promise<void> {
 		try {
@@ -113,9 +114,11 @@ class BlockRepository {
 			try {
 				const transaction = this.db.transaction((blockerId: string, blockedId: string) => {
 					this.insertBlockUser(blockerId, blockedId);
+					this.connectionRepository.flipLikeUser(blockerId, blockedId);
+					this.connectionRepository.flipLikeUser(blockedId, blockerId);
 					this.deleteViews(blockerId, blockedId);
-					this.deleteLikes(blockerId, blockedId);
-					this.deleteConnection(blockerId, blockedId);
+					// this.deleteLikes(blockerId, blockedId);
+					// this.deleteConnection(blockerId, blockedId);
 				});
 				const result = transaction(blockerId, blockedId);
 				resolve(result);

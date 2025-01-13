@@ -27,11 +27,11 @@
 	export let data: LayoutData;
 	$: user = data.user;
 
-	onMount(() => {
+	$: {
 		if (user) {
 			socketStore.connect($page.url.origin, data.session!.id);
 		}
-	});
+	}
 
 	onDestroy(() => {
 		notificationStore.cleanup();
