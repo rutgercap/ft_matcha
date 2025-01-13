@@ -1,7 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { Reader } from '@maxmind/geoip2-node';
 import * as fs from 'fs';
-import { getClientAddress } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 
 
@@ -19,10 +18,10 @@ export async function POST({ request, params, locals: { user, userRepository }, 
 		throw error(403, 'Forbidden');
 	}
 
-	const forwardedFor = request.headers.get('X-Forwarded-For');
-    const clientIp = forwardedFor ? forwardedFor.split(',')[0] : request.connection.remoteAddress;
-	console.log('from forwarded ------> ', clientIp)
-	console.log('location API client address --->', getClientAddress())
+	// const forwardedFor = request.headers.get('X-Forwarded-For');
+    // const clientIp = forwardedFor ? forwardedFor.split(',')[0] : request.connection.remoteAddress;
+	// console.log('from forwarded ------> ', clientIp)
+	// console.log('location API client address --->', getClientAddress())
 
 	try {
 		if (isNaN(longitude) && isNaN(latitude)) {
