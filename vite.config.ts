@@ -52,7 +52,6 @@ export class WebsocketServer {
 			if (!session) {
 				return;
 			}
-			console.log('in socket server ', user, 'just connected');
 			this.connections.set(user.id, socket);
 			this.sessionTokenToUserId.set(token, user.id);
 			socket.on('disconnect', () => {
