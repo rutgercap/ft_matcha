@@ -270,26 +270,27 @@ class BrowsingRepository {
 	public async fameRateAll(users: BrowsingInfo[], stats: fameStats | null = null) {
 		try {
 			for (const u of users) {
-				u.fameRate = await this.fameRatingFor(u.id, stats)
+				u.fameRate = await this.fameRatingFor(u.id, stats);
 			}
-			let minval = users.reduce((min, u) =>
-				u.fameRate < min ? u.fameRate : min, Infinity);
+			let minval = users.reduce((min, u) => (u.fameRate < min ? u.fameRate : min), Infinity);
 
-			const maxval = users.reduce((max, u) =>
-				u.fameRate > max ? u.fameRate : max, -Infinity);
+			const maxval = users.reduce((max, u) => (u.fameRate > max ? u.fameRate : max), -Infinity);
 
 			if (maxval == minval) {
-				minval = 0
+				minval = 0;
 			}
 
-			if ((maxval - minval) != 0) {
+			if (maxval - minval != 0) {
 				for (const u of users) {
-					u.fameRate = (u.fameRate - minval) / (maxval - minval)
+					u.fameRate = (u.fameRate - minval) / (maxval - minval);
 				}
 			}
-			return users
+			return users;
 		} catch (error) {
-			throw new BrowsingRepositoryError('Error occurs trying to compute fameRating for every users', error)
+			throw new BrowsingRepositoryError(
+				'Error occurs trying to compute fameRating for every users',
+				error
+			);
 		}
 	}
 

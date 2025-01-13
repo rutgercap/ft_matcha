@@ -48,7 +48,6 @@ export class NotificationClient {
 			console.log('err.message: ', err.message);
 			console.log('err.description:', err.description);
 			console.log('err.context:', err.context);
-
 		});
 	}
 
@@ -66,4 +65,3 @@ export class NotificationClient {
 		this.listeners.delete(id);
 	}
 }
-

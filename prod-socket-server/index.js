@@ -3,20 +3,20 @@ import { l } from '../build/server/chunks/auth-mbJyYzDT.js';
 import http from 'http';
 import express from 'express';
 import { handler } from '../build/handler.js';
-import { createChat, chatsForUser, saveMessage } from './chat_repo.js'
+import { createChat, chatsForUser, saveMessage } from './chat_repo.js';
 
-
-const port = 3000
+const port = 3000;
 const app = express();
 const server = http.createServer(app);
 
 // Inject SocketIO
-const io = new Server(server,{
+const io = new Server(server, {
 	cors: {
-	  origin: "*"
-	}});
+		origin: '*'
+	}
+});
 
-let svelteKitServerSocket
+let svelteKitServerSocket;
 const server_id = Math.floor(Math.random() * 1000000);
 let connections = new Map();
 let sessionTokenToUserId = new Map();
@@ -27,8 +27,7 @@ function sendMessageToUser(id, eventName, content) {
 		return;
 	}
 	const token = connection.handshake.auth.token;
-	l
-		.validateSession(token)
+	l.validateSession(token)
 		.then(({ session }) => {
 			if (!session) {
 				connections.delete(id);
@@ -51,7 +50,6 @@ function setupServerSocket(socket) {
 	});
 	svelteKitServerSocket.emit('connected', { id: server_id });
 }
-
 
 function authMiddleWare() {
 	io.use(async (socket, next) => {
@@ -111,18 +109,15 @@ function authMiddleWare() {
 				console.error('Error saving message:', e);
 			}
 		});
-
-		});
+	});
 }
 
-
-authMiddleWare()
-
+authMiddleWare();
 
 // SvelteKit handlers
 app.use(handler);
 
 server.listen(port, () => {
-    console.log(`Internal Node Server up on port: ${port}`);
-    console.log(`external Server up on port: 8080`);
+	console.log(`Internal Node Server up on port: ${port}`);
+	console.log(`external Server up on port: 8080`);
 });

@@ -6,9 +6,8 @@
 	import { redirect } from '@sveltejs/kit';
 	import type { Unsubscriber } from 'svelte/store';
 	import { onDestroy } from 'svelte';
-	import { goto } from '$app/navigation'
+	import { goto } from '$app/navigation';
 
-	
 	export let data: PageData;
 	const chatId = data.chat.id;
 

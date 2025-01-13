@@ -3,14 +3,18 @@ import { Reader } from '@maxmind/geoip2-node';
 import * as fs from 'fs';
 import { json } from '@sveltejs/kit';
 
-
 const DATABASE_PATH = 'database/GeoLite2-City.mmdb';
 
 function isValidCoordinates(latitude: number, longitude: number) {
-    return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
+	return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
 }
 
-export async function POST({ request, params, locals: { user, userRepository }, getClientAddress }) {
+export async function POST({
+	request,
+	params,
+	locals: { user, userRepository },
+	getClientAddress
+}) {
 	const user_id = params.user_id;
 	const longitude = Number(params.longitude);
 	const latitude = Number(params.latitude);
@@ -19,7 +23,7 @@ export async function POST({ request, params, locals: { user, userRepository }, 
 	}
 
 	// const forwardedFor = request.headers.get('X-Forwarded-For');
-    // const clientIp = forwardedFor ? forwardedFor.split(',')[0] : request.connection.remoteAddress;
+	// const clientIp = forwardedFor ? forwardedFor.split(',')[0] : request.connection.remoteAddress;
 	// console.log('from forwarded ------> ', clientIp)
 	// console.log('location API client address --->', getClientAddress())
 

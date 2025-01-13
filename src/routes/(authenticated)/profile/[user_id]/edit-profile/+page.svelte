@@ -88,55 +88,59 @@
 		}
 	};
 
-	const fetch_loc = (user_id: string, longitude:string, latitude:string) => {
+	const fetch_loc = (user_id: string, longitude: string, latitude: string) => {
 		const url = `/api/location/${user_id}/${longitude}/${latitude}`;
-				try {
-					//${longitude}/${latitude}
-					const response = fetch(url, {
-						method: 'POST'
-					})
-						.then((value) => {})
-						.catch((error) => {
-							console.error('Failed to post location dated:', error);
-						});
-				} catch (error) {
-					console.error('Error trying to upload location date', error);
-				}
-	}
-
+		try {
+			//${longitude}/${latitude}
+			const response = fetch(url, {
+				method: 'POST'
+			})
+				.then((value) => {})
+				.catch((error) => {
+					console.error('Failed to post location dated:', error);
+				});
+		} catch (error) {
+			console.error('Error trying to upload location date', error);
+		}
+	};
 
 	if (typeof window !== 'undefined' && 'geolocation' in navigator) {
 		navigator.geolocation.getCurrentPosition(
 			(pos) => {
 				let latitude = pos.coords.latitude;
 				let longitude = pos.coords.longitude;
-				fetch_loc(user.id, String(longitude), String(latitude))
+				fetch_loc(user.id, String(longitude), String(latitude));
 				addToast({ message: 'Successfully upload location via navigator', type: 'success' });
-
 			},
 			(error) => {
 				console.log('the user block his location service');
-				fetch_loc(user.id, 'noconsent', 'noconsent')
+				fetch_loc(user.id, 'noconsent', 'noconsent');
 			}
 		);
 	}
 
 	// for manual entry of the coordinates
 	let longitude = '';
-    let latitude = '';
+	let latitude = '';
 
-    function myLoc() {
-        // Function logic to get user's location
-        console.log('Getting user location...');
-		if (longitude != '' && latitude != '' && !isNaN(Number(longitude)) && !isNaN(Number(latitude))) {
-			fetch_loc(user.id, longitude, latitude)
-			addToast({ message: 'Successfully upload location via user defined coordinate', type: 'success' });
+	function myLoc() {
+		// Function logic to get user's location
+		console.log('Getting user location...');
+		if (
+			longitude != '' &&
+			latitude != '' &&
+			!isNaN(Number(longitude)) &&
+			!isNaN(Number(latitude))
+		) {
+			fetch_loc(user.id, longitude, latitude);
+			addToast({
+				message: 'Successfully upload location via user defined coordinate',
+				type: 'success'
+			});
 		} else {
 			addToast({ message: 'invalid coordinate entry, old coordinates kept', type: 'error' });
 		}
-
-    }
-
+	}
 </script>
 
 <div class="max-w-3xl mx-auto">
@@ -335,7 +339,6 @@
 					{/if}
 				{/if}
 
-
 				<div class="col-span-full">
 					<label for="location" class="block text-sm font-medium leading-6 text-gray-900">
 						Location
@@ -354,9 +357,7 @@
 							/>
 						</div>
 						<div>
-							<label for="latitude" class="block text-sm leading-6 text-gray-600">
-								Latitude
-							</label>
+							<label for="latitude" class="block text-sm leading-6 text-gray-600"> Latitude </label>
 							<input
 								type="text"
 								id="latitude"
@@ -367,19 +368,18 @@
 						</div>
 						<div class="mt-5 sm:mt-0">
 							<label for="button" class="block text-sm leading-6 text-gray-600">
-								<br>
- 							</label>
+								<br />
+							</label>
 							<button
 								type="button"
 								on:click={myLoc}
-								class="px-3 py-1 rounded-full border text-sm bg-indigo-600 text-white ">
+								class="px-3 py-1 rounded-full border text-sm bg-indigo-600 text-white"
+							>
 								Use My Location
 							</button>
 						</div>
 					</div>
 				</div>
-
-
 
 				<div class="mt-6 flex items-center w-full h-full justify-end gap-x-6">
 					<a
