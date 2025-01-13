@@ -6,6 +6,7 @@
 	import { redirect } from '@sveltejs/kit';
 	import type { Unsubscriber } from 'svelte/store';
 	import { onDestroy } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	export let data: PageData;
 	const chatId = data.chat.id;
@@ -23,7 +24,7 @@
 				if (chat) {
 					messages = chat.messages;
 				} else {
-					throw redirect(300, '/');
+					goto('/');
 				}
 			});
 		}
@@ -36,7 +37,7 @@
 			input.value = '';
 		} catch (e) {
 			if (e instanceof ChatClientError) {
-				redirect(300, '/');
+				goto('/');
 			}
 		}
 	}

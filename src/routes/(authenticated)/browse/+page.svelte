@@ -15,17 +15,29 @@
 		}
 		for (const u of users) {
 			fetch(
-				`https://nominatim.openstreetmap.org/reverse?lat=${u.latitude}&lon=${u.longitude}&format=json`
-			).then((response) => {
-				response
-					.json()
-					.then((data) => {
-						u.address = getFormattedAddress(data);
-					})
-					.catch((error) => {
-						console.log('error fetching openstreet map:', error);
-					});
-			});
+				`https://nominatim.openstreetmap.org/reverse?lat=${u.latitude}&lon=${u.longitude}&format=json`,
+				{
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin': '*'
+					}
+				}
+			)
+				.then((response) => {
+					response
+						.json()
+						.then((data) => {
+							u.address = getFormattedAddress(data);
+						})
+						.catch((error) => {
+							console.log('error fetching openstreet map:', error);
+						});
+				})
+				.catch((reject) => {
+					console.log('open street map rejected the query');
+					console.log(reject);
+				});
 		}
 	});
 
@@ -138,21 +150,21 @@
 									<p class="text-gray-700 text-sm font-semibold">km away from you</p>
 									<p class="text-sm text-red-700">
 										<span class="font-semibold">score:</span>
-										{user.score} TEST TEST
+										{user.score} FOR DEMO PURPOSE
 									</p>
 								</div>
-							</div>
 
-							{#if user.address}
-								<div class="mt-2">
-									<p class="text-sm text-gray-700">
-										<span class="font-semibold">Address:</span>
-										{user.address}
-									</p>
-								</div>
-							{/if}
-							<!-- User Biography -->
-							<p class="text-sm text-gray-500">{user.biography}</p>
+								{#if user.address}
+									<div class="mt-2">
+										<p class="text-sm text-gray-700">
+											<span class="font-semibold">Address:</span>
+											{user.address}
+										</p>
+									</div>
+								{/if}
+								<!-- User Biography -->
+								<p class="text-sm text-gray-500">{user.biography}</p>
+							</div>
 						</li>
 					{/if}
 				{/each}

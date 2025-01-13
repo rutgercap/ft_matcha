@@ -25,9 +25,7 @@ export async function GET({ params, locals }) {
 
 	const user = locals.user;
 	if (!user || user.email !== token.email) {
-		return new Response(null, {
-			status: 400
-		});
+		throw error(404, 'This is not what you are looking for');
 	}
 	await lucia.invalidateUserSessions(user.id);
 	const res = await locals.userRepository.updateEmailIsSetup(user.id, true);

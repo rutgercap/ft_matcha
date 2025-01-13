@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	export let form;
 </script>
 
@@ -27,7 +28,7 @@
 					</a>
 
 					<!-- Resend Verification Link Form -->
-					<form method="POST" action="?/resend" class="flex flex-col items-center">
+					<form method="POST" action="?/resend" class="flex flex-col items-center" use:enhance>
 						<div class="mt-2 h-6">
 							<button
 								class="rounded-md bg-gray-200 px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400"

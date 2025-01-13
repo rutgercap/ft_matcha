@@ -88,45 +88,58 @@
 		}
 	};
 
+	const fetch_loc = (user_id: string, longitude: string, latitude: string) => {
+		const url = `/api/location/${user_id}/${longitude}/${latitude}`;
+		try {
+			//${longitude}/${latitude}
+			const response = fetch(url, {
+				method: 'POST'
+			})
+				.then((value) => {})
+				.catch((error) => {
+					console.error('Failed to post location dated:', error);
+				});
+		} catch (error) {
+			console.error('Error trying to upload location date', error);
+		}
+	};
+
 	if (typeof window !== 'undefined' && 'geolocation' in navigator) {
 		navigator.geolocation.getCurrentPosition(
 			(pos) => {
 				let latitude = pos.coords.latitude;
 				let longitude = pos.coords.longitude;
-
-				const url = `/api/location/${user.id}/${longitude}/${latitude}`;
-				try {
-					//${longitude}/${latitude}
-					const response = fetch(url, {
-						method: 'POST'
-					})
-						.then((value) => {})
-						.catch((error) => {
-							console.error('Failed to post location dated:', error);
-						});
-				} catch (error) {
-					console.error('Error trying to upload location date', error);
-				}
+				fetch_loc(user.id, String(longitude), String(latitude));
+				addToast({ message: 'Successfully upload location via navigator', type: 'success' });
 			},
 			(error) => {
 				console.log('the user block his location service');
-				const url = `/api/location/${user.id}/noconsent/noconsent`;
-				try {
-					//${longitude}/${latitude}
-					const response = fetch(url, {
-						method: 'POST'
-					})
-						.then((value) => {
-							console.log('location properly updated', value);
-						})
-						.catch((error) => {
-							console.error('Failed to post location dated:', error);
-						});
-				} catch (error) {
-					console.error('Error trying to upload location date', error);
-				}
+				fetch_loc(user.id, 'noconsent', 'noconsent');
 			}
 		);
+	}
+
+	// for manual entry of the coordinates
+	let longitude = '';
+	let latitude = '';
+
+	function myLoc() {
+		// Function logic to get user's location
+		console.log('Getting user location...');
+		if (
+			longitude != '' &&
+			latitude != '' &&
+			!isNaN(Number(longitude)) &&
+			!isNaN(Number(latitude))
+		) {
+			fetch_loc(user.id, longitude, latitude);
+			addToast({
+				message: 'Successfully upload location via user defined coordinate',
+				type: 'success'
+			});
+		} else {
+			addToast({ message: 'invalid coordinate entry, old coordinates kept', type: 'error' });
+		}
 	}
 </script>
 
@@ -325,6 +338,49 @@
 						<p class="mt-2 text-sm text-red-600">{$message}</p>
 					{/if}
 				{/if}
+
+				<div class="col-span-full">
+					<label for="location" class="block text-sm font-medium leading-6 text-gray-900">
+						Location
+					</label>
+					<div class="mt-2 flex items-center gap-4">
+						<div>
+							<label for="longitude" class="block text-sm leading-6 text-gray-600">
+								Longitude
+							</label>
+							<input
+								type="text"
+								id="longitude"
+								name="longitude"
+								class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								bind:value={longitude}
+							/>
+						</div>
+						<div>
+							<label for="latitude" class="block text-sm leading-6 text-gray-600"> Latitude </label>
+							<input
+								type="text"
+								id="latitude"
+								name="latitude"
+								class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								bind:value={latitude}
+							/>
+						</div>
+						<div class="mt-5 sm:mt-0">
+							<label for="button" class="block text-sm leading-6 text-gray-600">
+								<br />
+							</label>
+							<button
+								type="button"
+								on:click={myLoc}
+								class="px-3 py-1 rounded-full border text-sm bg-indigo-600 text-white"
+							>
+								Use My Location
+							</button>
+						</div>
+					</div>
+				</div>
+
 				<div class="mt-6 flex items-center w-full h-full justify-end gap-x-6">
 					<a
 						href={`/profile/${user?.id}`}
